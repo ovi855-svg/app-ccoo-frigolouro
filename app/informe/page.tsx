@@ -80,17 +80,17 @@ export default function InformePage() {
             doc.setFontSize(14)
             doc.text('Resumen:', 14, yPos)
 
-            // Tabla de Resumen
-            ; (autoTable as any)(doc, {
-                startY: yPos + 5,
-                head: [['Estado', 'Cantidad']],
-                body: statsBody,
-                theme: 'striped',
-                styles: { fontSize: 10 },
-                headStyles: { fillColor: [60, 60, 60], textColor: 255 },
-                margin: { left: 14 },
-                tableWidth: 80
-            })
+                // Tabla de Resumen
+                ; (autoTable as any)(doc, {
+                    startY: yPos + 5,
+                    head: [['Estado', 'Cantidad']],
+                    body: statsBody,
+                    theme: 'striped',
+                    styles: { fontSize: 10 },
+                    headStyles: { fillColor: [60, 60, 60], textColor: 255 },
+                    margin: { left: 14 },
+                    tableWidth: 80
+                })
 
             const finalY = (doc as any).lastAutoTable?.finalY || yPos + 20
 
@@ -110,7 +110,7 @@ export default function InformePage() {
                 const descripcion = inc.descripcion || 'Sin descripción'
 
                 // Calcular altura de la descripción para ver si cabe
-                const descLines = doc.splitTextToSize(descripcion, 180) 
+                const descLines = doc.splitTextToSize(descripcion, 180)
                 const descHeight = descLines.length * 5
                 const itemHeight = 35 + descHeight // Altura estimada del bloque
 
@@ -130,7 +130,7 @@ export default function InformePage() {
                 doc.text(`Sección:`, 80, currentY)
                 doc.setFont(undefined, 'normal')
                 doc.text(seccion, 100, currentY)
-                
+
                 currentY += 7
 
                 // Fila 2: Título
@@ -138,17 +138,17 @@ export default function InformePage() {
                 doc.text(`Título:`, 14, currentY)
                 doc.setFont(undefined, 'normal')
                 doc.text(titulo, 30, currentY)
-                
+
                 currentY += 7
 
                 // Fila 3: Descripción
                 doc.setFont(undefined, 'bold')
                 doc.text(`Descripción:`, 14, currentY)
                 currentY += 5
-                
+
                 doc.setFont(undefined, 'normal')
                 doc.text(descLines, 14, currentY)
-                
+
                 currentY += descHeight + 5
 
                 // Línea separadora
@@ -169,43 +169,70 @@ export default function InformePage() {
 
     return (
         <main>
-            <h1>Informe PDF</h1>
-
             <div style={{
+                backgroundColor: 'white',
+                padding: '30px',
+                borderRadius: '16px',
+                boxShadow: '0 4px 6px rgba(0,0,0,0.04)',
                 maxWidth: '600px',
-                padding: '20px',
-                backgroundColor: '#f5f5f5',
-                borderRadius: '8px',
-                marginTop: '20px'
+                margin: '0 auto'
             }}>
+                <h1 style={{
+                    marginTop: 0,
+                    marginBottom: '25px',
+                    fontSize: '1.8rem',
+                    color: '#1e293b',
+                    fontWeight: 700
+                }}>
+                    Generar Informe PDF
+                </h1>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
                     <div>
-                        <label style={{ display: 'block', marginBottom: '5px' }}>Fecha Inicio</label>
+                        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Fecha Inicio</label>
                         <input
                             type="date"
                             value={startDate}
                             onChange={(e) => setStartDate(e.target.value)}
-                            style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+                            style={{
+                                width: '100%',
+                                padding: '10px 12px',
+                                border: '1px solid #cbd5e1',
+                                borderRadius: '8px',
+                                outline: 'none'
+                            }}
                         />
                     </div>
                     <div>
-                        <label style={{ display: 'block', marginBottom: '5px' }}>Fecha Fin</label>
+                        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Fecha Fin</label>
                         <input
                             type="date"
                             value={endDate}
                             onChange={(e) => setEndDate(e.target.value)}
-                            style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+                            style={{
+                                width: '100%',
+                                padding: '10px 12px',
+                                border: '1px solid #cbd5e1',
+                                borderRadius: '8px',
+                                outline: 'none'
+                            }}
                         />
                     </div>
                 </div>
 
-                <div style={{ marginBottom: '20px' }}>
-                    <label style={{ display: 'block', marginBottom: '5px' }}>Filtrar por Sección</label>
+                <div style={{ marginBottom: '30px' }}>
+                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Filtrar por Sección</label>
                     <select
                         value={filterSeccion}
                         onChange={(e) => setFilterSeccion(e.target.value)}
-                        style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+                        style={{
+                            width: '100%',
+                            padding: '10px 12px',
+                            border: '1px solid #cbd5e1',
+                            borderRadius: '8px',
+                            backgroundColor: 'white',
+                            outline: 'none'
+                        }}
                     >
                         <option value="TODAS">TODAS</option>
                         {SECCIONES.map(sec => (
@@ -219,17 +246,29 @@ export default function InformePage() {
                     disabled={loading}
                     style={{
                         width: '100%',
-                        padding: '12px',
-                        backgroundColor: '#0070f3',
+                        padding: '14px',
+                        backgroundColor: 'var(--ccoo-red)',
                         color: 'white',
                         border: 'none',
-                        borderRadius: '4px',
-                        fontSize: '1rem',
+                        borderRadius: '8px',
+                        fontSize: '1.05rem',
                         cursor: loading ? 'not-allowed' : 'pointer',
-                        fontWeight: 'bold'
+                        fontWeight: 'bold',
+                        boxShadow: '0 4px 6px -1px rgba(220, 38, 38, 0.2)',
+                        transition: 'all 0.2s',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '10px'
                     }}
                 >
-                    {loading ? 'Generando PDF...' : 'Descargar Informe PDF'}
+                    {loading ? (
+                        <span>Generando...</span>
+                    ) : (
+                        <>
+                            <span>Descargar Informe PDF</span>
+                        </>
+                    )}
                 </button>
 
             </div>
