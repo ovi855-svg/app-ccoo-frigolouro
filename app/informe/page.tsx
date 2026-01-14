@@ -94,31 +94,67 @@ export default function InformePage() {
 
             const finalY = (doc as any).lastAutoTable?.finalY || yPos + 20
 
-            // Tabla de Detalles
+            // Lista de Detalles
+            let currentY = finalY + 15
             doc.setFontSize(14)
-            doc.text('Detalle de Incidencias:', 14, finalY + 15)
+            doc.setTextColor(0)
+            doc.text('Detalle de Incidencias:', 14, currentY)
+            currentY += 10
 
-            const tableBody = incidencias.map((inc: any) => [
-                new Date(inc.created_at).toLocaleDateString('es-ES'),
-                inc.seccion,
-                inc.titulo,
-                inc.descripcion || '-'
-            ])
+            doc.setFontSize(10)
 
-            ; (autoTable as any)(doc, {
-                startY: finalY + 20,
-                head: [['Fecha', 'Sección', 'Título', 'Descripción']],
-                body: tableBody,
-                theme: 'grid',
-                headStyles: { fillColor: [220, 38, 38], textColor: 255 },
-                styles: { fontSize: 9, cellPadding: 3 },
-                columnStyles: {
-                    0: { cellWidth: 25 },
-                    1: { cellWidth: 35 },
-                    2: { cellWidth: 40 },
-                    3: { cellWidth: 'auto' }
-                },
-                alternateRowStyles: { fillColor: [245, 245, 245] }
+            incidencias.forEach((inc: any) => {
+                const fecha = new Date(inc.created_at).toLocaleDateString('es-ES')
+                const titulo = inc.titulo || '-'
+                const seccion = inc.seccion || '-'
+                const descripcion = inc.descripcion || 'Sin descripción'
+
+                // Calcular altura de la descripción para ver si cabe
+                const descLines = doc.splitTextToSize(descripcion, 180) 
+                const descHeight = descLines.length * 5
+                const itemHeight = 35 + descHeight // Altura estimada del bloque
+
+                // Nueva página si no cabe
+                if (currentY + itemHeight > 280) {
+                    doc.addPage()
+                    currentY = 20
+                }
+
+                // Fila 1: Fecha y Sección
+                doc.setFont(undefined, 'bold')
+                doc.text(`Fecha:`, 14, currentY)
+                doc.setFont(undefined, 'normal')
+                doc.text(fecha, 30, currentY)
+
+                doc.setFont(undefined, 'bold')
+                doc.text(`Sección:`, 80, currentY)
+                doc.setFont(undefined, 'normal')
+                doc.text(seccion, 100, currentY)
+                
+                currentY += 7
+
+                // Fila 2: Título
+                doc.setFont(undefined, 'bold')
+                doc.text(`Título:`, 14, currentY)
+                doc.setFont(undefined, 'normal')
+                doc.text(titulo, 30, currentY)
+                
+                currentY += 7
+
+                // Fila 3: Descripción
+                doc.setFont(undefined, 'bold')
+                doc.text(`Descripción:`, 14, currentY)
+                currentY += 5
+                
+                doc.setFont(undefined, 'normal')
+                doc.text(descLines, 14, currentY)
+                
+                currentY += descHeight + 5
+
+                // Línea separadora
+                doc.setDrawColor(220, 220, 220)
+                doc.line(14, currentY, 196, currentY)
+                currentY += 10
             })
 
             doc.save(`informe_incidencias_${new Date().toISOString().split('T')[0]}.pdf`)
