@@ -39,9 +39,9 @@ export default function NuevaIncidenciaPage() {
 
       router.push('/incidencias')
       router.refresh()
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error al crear incidencia:', error)
-      alert('Error al crear la incidencia. Por favor, inténtelo de nuevo.')
+      alert(`Error al crear la incidencia: ${error.message || error.toString()}`)
     } finally {
       setLoading(false)
     }
