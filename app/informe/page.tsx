@@ -121,32 +121,32 @@ export default function InformePage() {
                 }
 
                 // Fila 1: Fecha y Sección
-                doc.setFont(undefined, 'bold')
+                doc.setFont('helvetica', 'bold')
                 doc.text(`Fecha:`, 14, currentY)
-                doc.setFont(undefined, 'normal')
+                doc.setFont('helvetica', 'normal')
                 doc.text(fecha, 30, currentY)
 
-                doc.setFont(undefined, 'bold')
+                doc.setFont('helvetica', 'bold')
                 doc.text(`Sección:`, 80, currentY)
-                doc.setFont(undefined, 'normal')
+                doc.setFont('helvetica', 'normal')
                 doc.text(seccion, 100, currentY)
 
                 currentY += 7
 
                 // Fila 2: Título
-                doc.setFont(undefined, 'bold')
+                doc.setFont('helvetica', 'bold')
                 doc.text(`Título:`, 14, currentY)
-                doc.setFont(undefined, 'normal')
+                doc.setFont('helvetica', 'normal')
                 doc.text(titulo, 30, currentY)
 
                 currentY += 7
 
                 // Fila 3: Descripción
-                doc.setFont(undefined, 'bold')
+                doc.setFont('helvetica', 'bold')
                 doc.text(`Descripción:`, 14, currentY)
                 currentY += 5
 
-                doc.setFont(undefined, 'normal')
+                doc.setFont('helvetica', 'normal')
                 doc.text(descLines, 14, currentY)
 
                 currentY += descHeight + 5
