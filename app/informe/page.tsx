@@ -44,14 +44,28 @@ export default function InformePage() {
             // Generar PDF
             const doc = new jsPDF()
 
-            // Título y Cabecera
+            // Intentar cargar logo
+            try {
+                const logoUrl = '/logo.png'
+                const img = new Image()
+                img.src = logoUrl
+                await new Promise((resolve, reject) => {
+                    img.onload = resolve
+                    img.onerror = reject
+                })
+                doc.addImage(img, 'PNG', 14, 10, 15, 15)
+            } catch (e) {
+                console.warn('No se pudo cargar el logo', e)
+            }
+
+            // Título y Cabecera (ajustado para logo)
             doc.setFontSize(20)
             doc.setTextColor(220, 38, 38) // Rojo CCOO
-            doc.text('Informe de Incidencias', 14, 22)
+            doc.text('Informe de Incidencias', 35, 20) // Movido a la derecha
 
             doc.setFontSize(12)
             doc.setTextColor(0) // Negro
-            doc.text('Sección Sindical CCOO Frigolouro', 14, 30)
+            doc.text('Sección Sindical CCOO Frigolouro', 35, 28)
 
             // Separador
             doc.setLineWidth(0.5)
