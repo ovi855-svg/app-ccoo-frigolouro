@@ -29,7 +29,7 @@ export default function IncidenciasPage() {
         throw error
       }
       
-      setIncidencias(data || [])
+      setIncidencias((data as Incidencia[]) || [])
     } catch (err) {
       console.error('Error cargando incidencias:', err)
       setError('Error al cargar las incidencias')

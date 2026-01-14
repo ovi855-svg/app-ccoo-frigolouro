@@ -6,23 +6,6 @@ import { SECCIONES, ESTADOS } from '@/lib/constants'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
-// Extensión para jspdf-autotable
-interface UserOptions {
-  head: string[][];
-  body: any[][];
-  startY?: number;
-  theme?: 'striped' | 'grid' | 'plain';
-  styles?: any;
-  headStyles?: any;
-}
-
-declare module 'jspdf' {
-  interface jsPDF {
-    autoTable: (options: UserOptions) => jsPDF;
-    lastAutoTable?: { finalY: number };
-  }
-}
-
 export default function InformePage() {
   const [loading, setLoading] = useState(false)
   const [startDate, setStartDate] = useState(() => {
@@ -81,15 +64,16 @@ export default function InformePage() {
 
       const statsBody = Object.entries(stats).map(([estado, count]) => [estado, count])
       
-      doc.text('Resumen:', 14, 55)
+      doc.text('Resumen:', 14, 55);
       
-      autoTable(doc, {
+      // Uso explícito de any para evitar problemas de tipos con jspdf-autotable
+      (autoTable as any)(doc, {
         startY: 60,
         head: [['Estado', 'Cantidad']],
         body: statsBody,
         theme: 'plain',
         styles: { fontSize: 10 },
-        headStyles: { fillColor: [200, 200, 200], textColor: 0 } as any
+        headStyles: { fillColor: [200, 200, 200], textColor: 0 }
       })
 
       // Tabla detallada
@@ -103,15 +87,15 @@ export default function InformePage() {
 
       const finalY = (doc as any).lastAutoTable?.finalY || 60
 
-      doc.text('Detalle de Incidencias:', 14, finalY + 15)
+      doc.text('Detalle de Incidencias:', 14, finalY + 15);
 
-      autoTable(doc, {
+      (autoTable as any)(doc, {
         startY: finalY + 20,
         head: [['Fecha', 'Título', 'Sección', 'Estado', 'Creada por']],
         body: tableBody,
         theme: 'striped',
         styles: { fontSize: 9 },
-        headStyles: { fillColor: [37, 99, 235], textColor: 255 } as any
+        headStyles: { fillColor: [37, 99, 235], textColor: 255 } 
       })
 
       doc.save(`informe_incidencias_${new Date().toISOString().split('T')[0]}.pdf`)
