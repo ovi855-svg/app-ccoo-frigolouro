@@ -44,17 +44,39 @@ export default function InformePage() {
       // Generar PDF
       const doc = new jsPDF()
 
-      // Título
-      doc.setFontSize(18)
-      doc.text('Informe de Incidencias – Sección Sindical CCOO Frigolouro', 14, 20)
+      // Convertir imagen a Base64 para el PDF
+      const img = new Image()
+      img.src = '/logo.png'
       
+      // Esperar a que la imagen cargue si no está en caché (promesa simple)
+      await new Promise((resolve) => {
+        if (img.complete) resolve(true);
+        img.onload = () => resolve(true);
+        img.onerror = () => resolve(false);
+      });
+
+      // Añadir Logo 
+      doc.addImage(img, 'PNG', 14, 10, 25, 25)
+
+      // Título y Cabecera (ajustados a la derecha del logo)
+      doc.setFontSize(16)
+      doc.text('Informe de Incidencias', 50, 20)
+      doc.setFontSize(12)
+      doc.text('Sección Sindical CCOO Frigolouro', 50, 28)
+      
+      // Separador
+      doc.setLineWidth(0.5)
+      doc.line(14, 40, 196, 40)
+
       // Info fecha
-      doc.setFontSize(11)
-      doc.text(`Generado el: ${new Date().toLocaleDateString('es-ES')}`, 14, 30)
-      doc.text(`Rango: ${new Date(startDate).toLocaleDateString('es-ES')} a ${new Date(endDate).toLocaleDateString('es-ES')}`, 14, 36)
+      doc.setFontSize(10)
+      doc.text(`Generado el: ${new Date().toLocaleDateString('es-ES')}` , 14, 48)
+      doc.text(`Rango: ${new Date(startDate).toLocaleDateString('es-ES')} a ${new Date(endDate).toLocaleDateString('es-ES')}`, 14, 54)
       if (filterSeccion !== 'TODAS') {
-        doc.text(`Sección: ${filterSeccion}`, 14, 42)
+        doc.text(`Sección: ${filterSeccion}`, 14, 60)
       }
+
+      let yPos = filterSeccion !== 'TODAS' ? 70 : 64
 
       // Resumen por estado
       const stats = incidencias.reduce((acc: any, curr: any) => {
@@ -64,38 +86,69 @@ export default function InformePage() {
 
       const statsBody = Object.entries(stats).map(([estado, count]) => [estado, count])
       
-      doc.text('Resumen:', 14, 55);
+      doc.setFontSize(12)
+      doc.text('Resumen:', 14, yPos)
       
-      // Uso explícito de any para evitar problemas de tipos con jspdf-autotable
-      (autoTable as any)(doc, {
-        startY: 60,
+      // Tabla de Resumen (Mantenemos esta pequeña tabla)
+      ;(autoTable as any)(doc, {
+        startY: yPos + 5,
         head: [['Estado', 'Cantidad']],
         body: statsBody,
         theme: 'plain',
         styles: { fontSize: 10 },
-        headStyles: { fillColor: [200, 200, 200], textColor: 0 }
+        headStyles: { fillColor: [220, 38, 38], textColor: 255 }, // Rojo CCOO aprox
+        margin: { left: 14 }
       })
 
-      // Tabla detallada
-      const tableBody = incidencias.map((inc: any) => [
-        new Date(inc.created_at).toLocaleDateString('es-ES'),
-        inc.titulo,
-        inc.seccion,
-        inc.estado,
-        inc.creada_por || '-'
-      ])
+      const finalY = (doc as any).lastAutoTable?.finalY || yPos + 20
+      yPos = finalY + 15
 
-      const finalY = (doc as any).lastAutoTable?.finalY || 60
+      // Detalle de Incidencias (Lista customizada)
+      doc.setFontSize(14)
+      doc.text('Detalle de Incidencias:', 14, yPos)
+      yPos += 10
 
-      doc.text('Detalle de Incidencias:', 14, finalY + 15);
+      doc.setFontSize(10)
 
-      (autoTable as any)(doc, {
-        startY: finalY + 20,
-        head: [['Fecha', 'Título', 'Sección', 'Estado', 'Creada por']],
-        body: tableBody,
-        theme: 'striped',
-        styles: { fontSize: 9 },
-        headStyles: { fillColor: [37, 99, 235], textColor: 255 } 
+      incidencias.forEach((inc: any, index: number) => {
+        // Verificar si cabe en la página, si no, nueva página
+        if (yPos > 270) {
+            doc.addPage()
+            yPos = 20
+        }
+
+        const fecha = new Date(inc.created_at).toLocaleDateString('es-ES')
+        
+        // Línea 1: Fecha y Sección
+        doc.setFont(undefined, 'bold')
+        doc.text(`Fecha: ${fecha}`, 14, yPos)
+        doc.text(`Sección: ${inc.seccion}`, 100, yPos)
+        
+        yPos += 6
+        
+        // Línea 2: Título
+        doc.text(`Título:`, 14, yPos)
+        doc.setFont(undefined, 'normal')
+        doc.text(`${inc.titulo}`, 30, yPos)
+        
+        yPos += 6
+        
+        // Línea 3: Descripción (Multilínea)
+        if (inc.descripcion) {
+            doc.setFont(undefined, 'bold')
+            doc.text(`Descripción:`, 14, yPos)
+            doc.setFont(undefined, 'normal')
+            
+            const splitDesc = doc.splitTextToSize(inc.descripcion, 150)
+            doc.text(splitDesc, 40, yPos) // Indentado
+            yPos += (splitDesc.length * 5)
+        } 
+
+        // Separador visual
+        yPos += 5
+        doc.setDrawColor(200, 200, 200)
+        doc.line(14, yPos, 196, yPos)
+        yPos += 10
       })
 
       doc.save(`informe_incidencias_${new Date().toISOString().split('T')[0]}.pdf`)

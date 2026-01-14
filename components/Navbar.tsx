@@ -10,7 +10,10 @@ export default function Navbar() {
       marginBottom: '20px',
       alignItems: 'center'
     }}>
-      <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>CCOO Frigolouro</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <img src="/logo.png" alt="Logo CCOO" style={{ height: '40px' }} />
+        <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>CCOO Frigolouro</div>
+      </div>
       <div style={{ display: 'flex', gap: '15px' }}>
         <Link href="/incidencias" style={{ textDecoration: 'none', color: '#0070f3' }}>
           Incidencias
