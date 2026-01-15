@@ -1,6 +1,6 @@
-import MetodosManager from '@/components/MetodosManager'
+import MetodosInformeGenerator from '@/components/MetodosInformeGenerator'
 
-export default function MetodosPage() {
+export default function MetodosInformePage() {
     return (
         <main style={{ minHeight: '100vh', backgroundColor: '#f8fafc' }}>
             <div className="page-container" style={{ paddingTop: '100px', paddingBottom: '40px' }}>
@@ -10,14 +10,14 @@ export default function MetodosPage() {
                     color: '#1e293b',
                     marginBottom: '10px'
                 }}>
-                    Métodos y Tiempos
+                    Métodos y Tiempos - Informe
                 </h1>
                 <p style={{ color: '#64748b', marginBottom: '30px', fontSize: '1.1rem' }}>
-                    Gestión de Solicitudes
+                    Generar PDF de solicitudes de revisión
                 </p>
 
                 <div className="animate-fade-in">
-                    <MetodosManager />
+                    <MetodosInformeGenerator />
                 </div>
             </div>
         </main>

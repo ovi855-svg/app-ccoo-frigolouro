@@ -1,68 +1,24 @@
-'use client'
-
-import { useState } from 'react'
 import IncidenciasManager from '@/components/IncidenciasManager'
-import InformeGenerator from '@/components/InformeGenerator'
 
 export default function OrdenDelDiaPage() {
-    const [activeTab, setActiveTab] = useState<'gestion' | 'informe'>('gestion')
-
     return (
-        <main style={{ paddingBottom: '50px' }}>
-            <div style={{ textAlign: 'center', margin: '30px 0' }}>
-                <h1 style={{ color: '#1e293b', fontWeight: 800 }}>Orden del Día</h1>
-                <p style={{ color: '#64748b' }}>Gestión de incidencias y tareas pendientes</p>
-            </div>
-            <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                marginBottom: '30px',
-                borderBottom: '1px solid #e2e8f0'
-            }}>
-                <button
-                    onClick={() => setActiveTab('gestion')}
-                    style={{
-                        padding: '15px 30px',
-                        fontSize: '1.1rem',
-                        fontWeight: 600,
-                        backgroundColor: 'transparent',
-                        border: 'none',
-                        borderBottom: activeTab === 'gestion' ? '3px solid var(--ccoo-red)' : '3px solid transparent',
-                        color: activeTab === 'gestion' ? 'var(--ccoo-red)' : '#64748b',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s'
-                    }}
-                >
-                    Gestión de Incidencias
-                </button>
-                <button
-                    onClick={() => setActiveTab('informe')}
-                    style={{
-                        padding: '15px 30px',
-                        fontSize: '1.1rem',
-                        fontWeight: 600,
-                        backgroundColor: 'transparent',
-                        border: 'none',
-                        borderBottom: activeTab === 'informe' ? '3px solid var(--ccoo-red)' : '3px solid transparent',
-                        color: activeTab === 'informe' ? 'var(--ccoo-red)' : '#64748b',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s'
-                    }}
-                >
-                    Generar Informe PDF
-                </button>
-            </div>
+        <main style={{ minHeight: '100vh', backgroundColor: '#f8fafc' }}>
+            <div className="page-container" style={{ paddingTop: '100px', paddingBottom: '40px' }}>
+                <h1 style={{
+                    fontSize: '2rem',
+                    fontWeight: 800,
+                    color: '#1e293b',
+                    marginBottom: '10px'
+                }}>
+                    Orden del Día
+                </h1>
+                <p style={{ color: '#64748b', marginBottom: '30px', fontSize: '1.1rem' }}>
+                    Gestión de incidencias y tareas pendientes
+                </p>
 
-            <div style={{ maxWidth: activeTab === 'gestion' ? '1200px' : '800px', margin: '0 auto', padding: '0 20px' }}>
-                {activeTab === 'gestion' ? (
-                    <div className="animate-fade-in">
-                        <IncidenciasManager />
-                    </div>
-                ) : (
-                    <div className="animate-fade-in">
-                        <InformeGenerator />
-                    </div>
-                )}
+                <div className="animate-fade-in">
+                    <IncidenciasManager />
+                </div>
             </div>
         </main>
     )

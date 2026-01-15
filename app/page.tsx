@@ -3,43 +3,10 @@ import Image from 'next/image'
 
 export default function Home() {
     return (
-        <main style={{
-            minHeight: '85vh',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '20px',
-            position: 'relative'
-        }}>
-            <div className="animate-fade-in-up" style={{
-                textAlign: 'center',
-                maxWidth: '900px',
-                width: '100%',
-                padding: '50px 30px',
-                backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                backdropFilter: 'blur(20px)',
-                borderRadius: '30px',
-                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.05)',
-                border: '1px solid rgba(255, 255, 255, 0.6)'
-            }}>
-                <div style={{
-                    marginBottom: '35px',
-                    display: 'flex',
-                    justifyContent: 'center'
-                }}>
-                    <div style={{
-                        width: '130px',
-                        height: '130px',
-                        backgroundColor: 'white',
-                        borderRadius: '32px',
-                        padding: '20px',
-                        boxShadow: '0 20px 40px -10px rgba(220, 38, 38, 0.1)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        border: '1px solid rgba(255, 240, 240, 0.5)'
-                    }}>
+        <main className="home-container">
+            <div className="animate-fade-in-up glass-panel">
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    <div className="logo-container">
                         {/* @ts-ignore */}
                         <Image
                             src="/logo.png"
@@ -52,167 +19,50 @@ export default function Home() {
                     </div>
                 </div>
 
-                <h1 style={{
-                    fontSize: '3.5rem',
-                    fontWeight: 800,
-                    color: '#1e293b',
-                    marginBottom: '15px',
-                    letterSpacing: '-1.5px',
-                    lineHeight: 1
-                }}>
+                <h1 className="title-main">
                     Sección Sindical <br />
-                    <span style={{
-                        color: 'var(--ccoo-red)',
-                        background: 'linear-gradient(45deg, var(--ccoo-red) 30%, #ff4d4d 100%)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent'
-                    }}>CCOO Frigolouro</span>
+                    <span className="gradient-text-red">CCOO Frigolouro</span>
                 </h1>
 
-                <p style={{
-                    fontSize: '1.4rem',
-                    color: '#64748b',
-                    marginBottom: '50px',
-                    maxWidth: '650px',
-                    marginLeft: 'auto',
-                    marginRight: 'auto',
-                    lineHeight: 1.5,
-                    fontWeight: 500
-                }}>
+                <p className="subtitle-main">
                     Plataforma de gestión integral para la representación sindical.
                 </p>
 
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                    gap: '25px',
-                    justifyContent: 'center',
-                    maxWidth: '800px',
-                    margin: '0 auto'
-                }}>
+                <div className="grid-home">
                     {/* Tarjeta Orden del Día */}
-                    <Link href="/orden-del-dia" style={{ textDecoration: 'none' }}>
-                        <div className="hover:scale-105" style={{
-                            padding: '30px',
-                            backgroundColor: 'white',
-                            borderRadius: '20px',
-                            boxShadow: '0 10px 30px -5px rgba(0, 0, 0, 0.05)',
-                            border: '1px solid #f1f5f9',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            gap: '15px',
-                            transition: 'all 0.3s ease',
-                            height: '100%'
-                        }}>
-                            <div style={{
-                                width: '60px',
-                                height: '60px',
-                                backgroundColor: '#fef2f2',
-                                borderRadius: '16px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: 'var(--ccoo-red)',
-                                marginBottom: '5px'
-                            }}>
-                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M9 11l3 3L22 4"></path>
-                                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                                </svg>
-                            </div>
-                            <div style={{ textAlign: 'center' }}>
-                                <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0 0 8px 0', color: '#1e293b' }}>Orden del Día</h3>
-                                <p style={{ margin: 0, color: '#64748b', fontSize: '0.95rem' }}>Gestión de incidencias y temas pendientes</p>
-                            </div>
+                    <Link href="/orden-del-dia" className="card-home">
+                        <div className="icon-box" style={{ backgroundColor: '#fef2f2', color: 'var(--ccoo-red)' }}>
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M9 11l3 3L22 4"></path>
+                                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                            </svg>
+                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0 0 8px 0', color: '#1e293b' }}>Orden del Día</h3>
+                            <p style={{ margin: 0, color: '#64748b', fontSize: '0.95rem' }}>Gestión de incidencias y temas pendientes</p>
                         </div>
                     </Link>
 
                     {/* Tarjeta Métodos y Tiempos */}
-                    <Link href="/metodos-tiempos" style={{ textDecoration: 'none' }}>
-                        <div className="hover:scale-105" style={{
-                            padding: '30px',
-                            backgroundColor: 'white',
-                            borderRadius: '20px',
-                            boxShadow: '0 10px 30px -5px rgba(0, 0, 0, 0.05)',
-                            border: '1px solid #f1f5f9',
-                            height: '100%',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            textAlign: 'center',
-                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                        }}>
-                            <div style={{
-                                width: '60px',
-                                height: '60px',
-                                backgroundColor: '#fff7ed',
-                                borderRadius: '15px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                marginBottom: '20px',
-                                color: '#ea580c',
-                                fontSize: '1.8rem'
-                            }}>
-                                ⏱️
-                            </div>
-                            <h2 style={{
-                                margin: '0 0 10px 0',
-                                color: '#1e293b',
-                                fontSize: '1.4rem'
-                            }}>Métodos y Tiempos</h2>
-                            <p style={{
-                                margin: 0,
-                                color: '#64748b',
-                                lineHeight: 1.5
-                            }}>
-                                Gestión de solicitudes de revisión de ritmos.
-                            </p>
+                    <Link href="/metodos-tiempos" className="card-home">
+                        <div className="icon-box" style={{ backgroundColor: '#fff7ed', color: '#ea580c' }}>
+                            ⏱️
                         </div>
+                        <div style={{ textAlign: 'center' }}>
+                            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0 0 8px 0', color: '#1e293b' }}>Métodos y Tiempos</h3>
+                            <p style={{ margin: 0, color: '#64748b', fontSize: '0.95rem' }}>Solicitudes de revisión de ritmos</p>
+                        </div>
+
                     </Link>
 
                     {/* Tarjeta Salud Laboral */}
-                    <Link href="/salud-laboral" style={{ textDecoration: 'none' }}>
-                        <div className="hover:scale-105" style={{
-                            padding: '30px',
-                            backgroundColor: 'white',
-                            borderRadius: '20px',
-                            boxShadow: '0 10px 30px -5px rgba(0, 0, 0, 0.05)',
-                            border: '1px solid #f1f5f9',
-                            height: '100%',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            textAlign: 'center',
-                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                        }}>
-                            <div style={{
-                                width: '60px',
-                                height: '60px',
-                                backgroundColor: '#f0fdf4', // verde claro
-                                borderRadius: '15px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                marginBottom: '20px',
-                                color: '#16a34a', // verde
-                                fontSize: '1.8rem'
-                            }}>
-                                🏥
-                            </div>
-                            <h2 style={{
-                                margin: '0 0 10px 0',
-                                color: '#1e293b',
-                                fontSize: '1.4rem'
-                            }}>Salud Laboral</h2>
-                            <p style={{
-                                margin: 0,
-                                color: '#64748b',
-                                lineHeight: 1.5
-                            }}>
-                                Incidencias y deficiencias en prevención.
-                            </p>
+                    <Link href="/salud-laboral" className="card-home">
+                        <div className="icon-box" style={{ backgroundColor: '#f0fdf4', color: '#16a34a' }}>
+                            🏥
+                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0 0 8px 0', color: '#1e293b' }}>Salud Laboral</h3>
+                            <p style={{ margin: 0, color: '#64748b', fontSize: '0.95rem' }}>Incidencias y deficiencias en prevención</p>
                         </div>
                     </Link>
                 </div>
