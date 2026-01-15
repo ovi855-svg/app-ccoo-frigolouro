@@ -1,4 +1,5 @@
 export const SECCIONES = [
+    "General",
     "ALMACEN GENERAL",
     "CAMARAS",
     "CAMARAS CHINA",
