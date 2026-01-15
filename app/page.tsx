@@ -4,46 +4,48 @@ import Image from 'next/image'
 export default function Home() {
     return (
         <main style={{
-            minHeight: '80vh',
+            minHeight: '85vh',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
-            padding: '20px'
+            padding: '20px',
+            position: 'relative'
         }}>
             <div className="animate-fade-in-up" style={{
                 textAlign: 'center',
-                maxWidth: '800px',
-                padding: '40px',
-                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                maxWidth: '900px',
+                width: '100%',
+                padding: '50px 30px',
+                backgroundColor: 'rgba(255, 255, 255, 0.7)',
                 backdropFilter: 'blur(20px)',
-                borderRadius: '24px',
-                boxShadow: '0 20px 50px -12px rgba(0, 0, 0, 0.1)',
-                border: '1px solid rgba(255, 255, 255, 0.5)'
+                borderRadius: '30px',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.6)'
             }}>
                 <div style={{
-                    marginBottom: '30px',
+                    marginBottom: '35px',
                     display: 'flex',
                     justifyContent: 'center'
                 }}>
                     <div style={{
-                        width: '120px',
-                        height: '120px',
+                        width: '130px',
+                        height: '130px',
                         backgroundColor: 'white',
-                        borderRadius: '30px',
-                        padding: '15px',
-                        boxShadow: '0 10px 30px -5px rgba(220, 38, 38, 0.15)',
+                        borderRadius: '32px',
+                        padding: '20px',
+                        boxShadow: '0 20px 40px -10px rgba(220, 38, 38, 0.1)',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        border: '1px solid rgba(255, 240, 240, 0.5)'
                     }}>
-                        {/* @ts-ignore - Supresión de error de tipos en build */}
+                        {/* @ts-ignore */}
                         <Image
                             src="/logo.png"
                             alt="Logo CCOO"
-                            width={100}
-                            height={100}
+                            width={110}
+                            height={110}
                             style={{ width: 'auto', height: '100%', objectFit: 'contain' }}
                             priority
                         />
@@ -51,80 +53,124 @@ export default function Home() {
                 </div>
 
                 <h1 style={{
-                    fontSize: '3rem',
+                    fontSize: '3.5rem',
                     fontWeight: 800,
                     color: '#1e293b',
-                    marginBottom: '10px',
-                    letterSpacing: '-1px',
-                    lineHeight: 1.1
+                    marginBottom: '15px',
+                    letterSpacing: '-1.5px',
+                    lineHeight: 1
                 }}>
                     Sección Sindical <br />
-                    <span style={{ color: 'var(--ccoo-red)' }}>CCOO Frigolouro</span>
+                    <span style={{ 
+                        color: 'var(--ccoo-red)',
+                        background: 'linear-gradient(45deg, var(--ccoo-red) 30%, #ff4d4d 100%)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent'
+                    }}>CCOO Frigolouro</span>
                 </h1>
 
                 <p style={{
-                    fontSize: '1.25rem',
+                    fontSize: '1.4rem',
                     color: '#64748b',
-                    marginBottom: '40px',
-                    maxWidth: '600px',
+                    marginBottom: '50px',
+                    maxWidth: '650px',
                     marginLeft: 'auto',
                     marginRight: 'auto',
-                    lineHeight: 1.6
+                    lineHeight: 1.5,
+                    fontWeight: 500
                 }}>
-                    Plataforma de gestión para la sección sindical.
+                    Plataforma de gestión integral para la representación sindical.
                 </p>
 
                 <div style={{
-                    display: 'flex',
-                    gap: '20px',
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                    gap: '25px',
                     justifyContent: 'center',
-                    flexWrap: 'wrap'
+                    maxWidth: '800px',
+                    margin: '0 auto'
                 }}>
-                    <Link href="/orden-del-dia" style={{
-                        textDecoration: 'none',
-                        padding: '18px 36px',
-                        backgroundColor: 'var(--ccoo-red)',
-                        color: 'white',
-                        borderRadius: '12px',
-                        fontWeight: 700,
-                        fontSize: '1.1rem',
-                        boxShadow: '0 10px 20px -5px rgba(220, 38, 38, 0.3)',
-                        transition: 'transform 0.2s, box-shadow 0.2s',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '10px'
-                    }}>
-                        <span>Orden del Día</span>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
+                    {/* Tarjeta Orden del Día */}
+                    <Link href="/orden-del-dia" style={{ textDecoration: 'none' }}>
+                        <div className="hover:scale-105" style={{
+                            padding: '30px',
+                            backgroundColor: 'white',
+                            borderRadius: '20px',
+                            boxShadow: '0 10px 30px -5px rgba(0, 0, 0, 0.05)',
+                            border: '1px solid #f1f5f9',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '15px',
+                            transition: 'all 0.3s ease',
+                            height: '100%'
+                        }}>
+                            <div style={{
+                                width: '60px',
+                                height: '60px',
+                                backgroundColor: '#fef2f2',
+                                borderRadius: '16px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: 'var(--ccoo-red)',
+                                marginBottom: '5px'
+                            }}>
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M9 11l3 3L22 4"></path>
+                                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                                </svg>
+                            </div>
+                            <div style={{ textAlign: 'center' }}>
+                                <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0 0 8px 0', color: '#1e293b' }}>Orden del Día</h3>
+                                <p style={{ margin: 0, color: '#64748b', fontSize: '0.95rem' }}>Gestión de incidencias y temas pendientes</p>
+                            </div>
+                        </div>
                     </Link>
-                    <Link href="/metodos-tiempos" style={{
-                        textDecoration: 'none',
-                        padding: '18px 36px',
-                        backgroundColor: 'white',
-                        color: '#1e293b',
-                        borderRadius: '12px',
-                        fontWeight: 700,
-                        fontSize: '1.1rem',
-                        boxShadow: '0 10px 20px -5px rgba(0, 0, 0, 0.05)',
-                        border: '1px solid #e2e8f0',
-                        transition: 'transform 0.2s, box-shadow 0.2s',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '10px'
-                    }}>
-                        <span>Métodos y Tiempos</span>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 6V12L16 14M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
+
+                    {/* Tarjeta Métodos y Tiempos */}
+                    <Link href="/metodos-tiempos" style={{ textDecoration: 'none' }}>
+                        <div className="hover:scale-105" style={{
+                            padding: '30px',
+                            backgroundColor: 'white',
+                            borderRadius: '20px',
+                            boxShadow: '0 10px 30px -5px rgba(0, 0, 0, 0.05)',
+                            border: '1px solid #f1f5f9',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '15px',
+                            transition: 'all 0.3s ease',
+                            height: '100%'
+                        }}>
+                            <div style={{
+                                width: '60px',
+                                height: '60px',
+                                backgroundColor: '#f0f9ff',
+                                borderRadius: '16px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: '#0284c7',
+                                marginBottom: '5px'
+                            }}>
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                            </div>
+                            <div style={{ textAlign: 'center' }}>
+                                <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0 0 8px 0', color: '#1e293b' }}>Métodos y Tiempos</h3>
+                                <p style={{ margin: 0, color: '#64748b', fontSize: '0.95rem' }}>Control y registro de tiempos de producción</p>
+                            </div>
+                        </div>
                     </Link>
                 </div>
             </div>
 
-            {/* Decoración de fondo */}
+            {/* Decoración de fondo sutil */}
             <div style={{
-                position: 'absolute',
+                position: 'fixed',
                 top: 0,
                 left: 0,
                 right: 0,
@@ -135,21 +181,21 @@ export default function Home() {
             }}>
                 <div style={{
                     position: 'absolute',
-                    top: '-10%',
-                    left: '-10%',
-                    width: '40%',
-                    height: '40%',
-                    background: 'radial-gradient(circle, rgba(220, 38, 38, 0.05) 0%, rgba(0,0,0,0) 70%)',
-                    borderRadius: '50%'
+                    top: '-20%',
+                    right: '-10%',
+                    width: '60%',
+                    height: '60%',
+                    background: 'radial-gradient(circle, rgba(220, 38, 38, 0.03) 0%, rgba(0,0,0,0) 70%)',
+                    filter: 'blur(60px)'
                 }} />
                 <div style={{
                     position: 'absolute',
-                    bottom: '-10%',
-                    right: '-10%',
-                    width: '40%',
-                    height: '40%',
-                    background: 'radial-gradient(circle, rgba(220, 38, 38, 0.05) 0%, rgba(0,0,0,0) 70%)',
-                    borderRadius: '50%'
+                    bottom: '-20%',
+                    left: '-10%',
+                    width: '60%',
+                    height: '60%',
+                    background: 'radial-gradient(circle, rgba(14, 165, 233, 0.03) 0%, rgba(0,0,0,0) 70%)',
+                    filter: 'blur(60px)'
                 }} />
             </div>
         </main>
