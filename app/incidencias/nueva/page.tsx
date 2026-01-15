@@ -37,7 +37,7 @@ export default function NuevaIncidenciaPage() {
 
             if (error) throw error
 
-            router.push('/incidencias')
+            router.push('/orden-del-dia')
             router.refresh()
         } catch (error: any) {
             console.error('Error al crear incidencia:', error)
