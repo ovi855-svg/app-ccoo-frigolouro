@@ -52,7 +52,7 @@ export default function NuevaSaludPage() {
             router.refresh()
         } catch (error: any) {
             console.error('Error al crear registro:', error)
-            alert(`Error al crear el registro: ${error.message || error.toString()}`)
+            alert(`Error al crear la incidencia: ${error.message || error.toString()}`)
         } finally {
             setLoading(false)
         }
