@@ -128,7 +128,7 @@ export default function Home() {
                         </div>
                     </Link>
 
-                    {/* Tarjeta Métodos y Tiempos (Ahora Gestión de Solicitudes) */}
+                    {/* Tarjeta Métodos y Tiempos */}
                     <Link href="/metodos-tiempos" style={{ textDecoration: 'none' }}>
                         <div className="hover:scale-105" style={{
                             padding: '30px',
@@ -136,68 +136,118 @@ export default function Home() {
                             borderRadius: '20px',
                             boxShadow: '0 10px 30px -5px rgba(0, 0, 0, 0.05)',
                             border: '1px solid #f1f5f9',
+                            height: '100%',
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
-                            gap: '15px',
-                            transition: 'all 0.3s ease',
-                            height: '100%'
+                            textAlign: 'center',
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                         }}>
                             <div style={{
                                 width: '60px',
                                 height: '60px',
-                                backgroundColor: '#f0f9ff',
-                                borderRadius: '16px',
+                                backgroundColor: '#fff7ed',
+                                borderRadius: '15px',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                color: '#0284c7',
-                                marginBottom: '5px'
+                                marginBottom: '20px',
+                                color: '#ea580c',
+                                fontSize: '1.8rem'
                             }}>
-                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                    <polyline points="12 6 12 12 16 14"></polyline>
-                                </svg>
+                                ⏱️
                             </div>
-                            <div style={{ textAlign: 'center' }}>
-                                <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0 0 8px 0', color: '#1e293b' }}>Métodos y Tiempos</h3>
-                                <p style={{ margin: 0, color: '#64748b', fontSize: '0.95rem' }}>Gestión de Solicitudes</p>
-                            </div>
+                            <h2 style={{
+                                margin: '0 0 10px 0',
+                                color: '#1e293b',
+                                fontSize: '1.4rem'
+                            }}>Métodos y Tiempos</h2>
+                            <p style={{
+                                margin: 0,
+                                color: '#64748b',
+                                lineHeight: 1.5
+                            }}>
+                                Gestión de solicitudes de revisión de ritmos.
+                            </p>
                         </div>
                     </Link>
-                </div>
-            </div>
 
-            {/* Decoración de fondo sutil */}
-            <div style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                zIndex: -1,
-                overflow: 'hidden',
-                pointerEvents: 'none'
-            }}>
-                <div style={{
-                    position: 'absolute',
-                    top: '-20%',
-                    right: '-10%',
-                    width: '60%',
-                    height: '60%',
-                    background: 'radial-gradient(circle, rgba(220, 38, 38, 0.03) 0%, rgba(0,0,0,0) 70%)',
-                    filter: 'blur(60px)'
-                }} />
-                <div style={{
-                    position: 'absolute',
-                    bottom: '-20%',
-                    left: '-10%',
-                    width: '60%',
-                    height: '60%',
-                    background: 'radial-gradient(circle, rgba(14, 165, 233, 0.03) 0%, rgba(0,0,0,0) 70%)',
-                    filter: 'blur(60px)'
-                }} />
+                    {/* Tarjeta Salud Laboral */}
+                    <Link href="/salud-laboral" style={{ textDecoration: 'none' } >
+                        <div className="hover:scale-105" style={{
+                            padding: '30px',
+                            backgroundColor: 'white',
+                            borderRadius: '20px',
+                            boxShadow: '0 10px 30px -5px rgba(0, 0, 0, 0.05)',
+                            border: '1px solid #f1f5f9',
+                            height: '100%',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            textAlign: 'center',
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                        }}>
+                            <div style={{
+                                width: '60px',
+                                height: '60px',
+                                backgroundColor: '#f0fdf4', // verde claro
+                                borderRadius: '15px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                marginBottom: '20px',
+                                color: '#16a34a', // verde
+                                fontSize: '1.8rem'
+                            }}>
+                                🏥
+                            </div>
+                            <h2 style={{
+                                margin: '0 0 10px 0',
+                                color: '#1e293b',
+                                fontSize: '1.4rem'
+                            }}>Salud Laboral</h2>
+                            <p style={{
+                                margin: 0,
+                                color: '#64748b',
+                                lineHeight: 1.5
+                            }}>
+                                Incidencias y deficiencias en prevención.
+                            </p>
+                        </div>
+                    </Link>
             </div>
-        </main>
+        </div>
+
+            {/* Decoración de fondo sutil */ }
+    <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: -1,
+        overflow: 'hidden',
+        pointerEvents: 'none'
+    }}>
+        <div style={{
+            position: 'absolute',
+            top: '-20%',
+            right: '-10%',
+            width: '60%',
+            height: '60%',
+            background: 'radial-gradient(circle, rgba(220, 38, 38, 0.03) 0%, rgba(0,0,0,0) 70%)',
+            filter: 'blur(60px)'
+        }} />
+        <div style={{
+            position: 'absolute',
+            bottom: '-20%',
+            left: '-10%',
+            width: '60%',
+            height: '60%',
+            background: 'radial-gradient(circle, rgba(14, 165, 233, 0.03) 0%, rgba(0,0,0,0) 70%)',
+            filter: 'blur(60px)'
+        }} />
+    </div>
+        </main >
     )
 }

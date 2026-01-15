@@ -74,6 +74,9 @@ export default function Navbar() {
                 <Link href="/metodos-tiempos" className="navbar-link" style={getLinkStyle('/metodos-tiempos')}>
                     Métodos y Tiempos
                 </Link>
+                <Link href="/salud-laboral" className="navbar-link" style={getLinkStyle('/salud-laboral')}>
+                    Salud Laboral
+                </Link>
             </div>
         </nav>
     )

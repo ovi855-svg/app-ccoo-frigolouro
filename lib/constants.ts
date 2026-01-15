@@ -32,3 +32,11 @@ export const ESTADOS_SOLICITUDES = [
     "Rechazada",
     "Solucionada"
 ] as const;
+
+export const ESTADOS_SALUD = [
+    "Nueva",
+    "Revisión",
+    "Pendiente",
+    "Solucionada",
+    "Rechazada"
+] as const;
