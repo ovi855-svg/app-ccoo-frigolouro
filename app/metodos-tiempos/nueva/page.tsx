@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { SECCIONES, ESTADOS_SOLICITUDES } from '@/lib/constants'
 
+import VoiceInput from '@/components/VoiceInput'
+
 export default function NuevaMetodosPage() {
     const router = useRouter()
     const supabase = createClient()
@@ -17,6 +19,15 @@ export default function NuevaMetodosPage() {
         creada_por: '',
         estado: 'Nueva'
     })
+
+    const handleVoiceTranscript = (text: string) => {
+        setFormData(prev => ({
+            ...prev,
+            descripcion: prev.descripcion
+                ? `${prev.descripcion} ${text}`
+                : text
+        }))
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -138,7 +149,10 @@ export default function NuevaMetodosPage() {
 
                     {/* Descripción */}
                     <div>
-                        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Descripción detallada</label>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                            <label style={{ fontWeight: 600, color: '#475569' }}>Descripción detallada</label>
+                            <VoiceInput onTranscript={handleVoiceTranscript} />
+                        </div>
                         <textarea
                             name="descripcion"
                             value={formData.descripcion}
