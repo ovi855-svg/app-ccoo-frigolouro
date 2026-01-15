@@ -54,6 +54,7 @@ export default function NuevaIncidenciaPage() {
         })
     }
 
+    return (
     <main>
         <div style={{
             backgroundColor: 'white',
