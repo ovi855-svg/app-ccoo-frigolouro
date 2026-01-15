@@ -247,10 +247,18 @@ export default function IncidenciasPage() {
                                         fontWeight: '700',
                                         fontSize: '0.85rem',
                                         cursor: 'pointer',
-                                        backgroundColor: incidencia.estado === 'Nuevo' ? '#fee2e2' :
-                                            incidencia.estado === 'Solucionado' ? '#dcfce7' : '#ffedd5',
-                                        color: incidencia.estado === 'Nuevo' ? '#991b1b' :
-                                            incidencia.estado === 'Solucionado' ? '#166534' : '#9a3412',
+                                        backgroundColor: 
+                                            incidencia.estado === 'Nuevo' ? '#fee2e2' :
+                                            incidencia.estado === 'Comunicado Encargado' ? '#dbeafe' :
+                                            incidencia.estado === 'Orden del Dia' ? '#f3e8ff' :
+                                            incidencia.estado === 'Pendiente' ? '#ffedd5' :
+                                            '#dcfce7', // Solucionado
+                                        color: 
+                                            incidencia.estado === 'Nuevo' ? '#991b1b' :
+                                            incidencia.estado === 'Comunicado Encargado' ? '#1e40af' :
+                                            incidencia.estado === 'Orden del Dia' ? '#6b21a8' :
+                                            incidencia.estado === 'Pendiente' ? '#9a3412' :
+                                            '#166534', // Solucionado
                                         outline: 'none',
                                         appearance: 'none', // Remove default arrow in some browsers
                                         textAlign: 'center'
