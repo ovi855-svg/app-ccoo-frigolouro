@@ -1,6 +1,3 @@
-import Link from 'next/link'
-import Image from 'next/image'
-
 export default function Navbar() {
     return (
         <nav style={{
@@ -43,27 +40,18 @@ export default function Navbar() {
                 </div>
             </div>
             <div style={{ display: 'flex', gap: '20px' }}>
-                <Link href="/incidencias" style={{
+                <Link href="/orden-del-dia" style={{
                     textDecoration: 'none',
                     color: '#333',
-                    fontWeight: 500,
-                    fontSize: '0.95rem',
-                    padding: '8px 12px',
+                    fontWeight: 600,
+                    fontSize: '1rem',
+                    padding: '8px 16px',
                     borderRadius: '6px',
-                    transition: 'background-color 0.2s'
-                }} className="hover:bg-gray-100">
-                    Incidencias
-                </Link>
-                <Link href="/informe" style={{
-                    textDecoration: 'none',
-                    color: '#333',
-                    fontWeight: 500,
-                    fontSize: '0.95rem',
-                    padding: '8px 12px',
-                    borderRadius: '6px',
-                    transition: 'background-color 0.2s'
-                }} className="hover:bg-gray-100">
-                    Informe PDF
+                    transition: 'background-color 0.2s',
+                    backgroundColor: '#fee2e2',
+                    border: '1px solid #fecaca'
+                }} className="hover:bg-red-50">
+                    Orden del Día
                 </Link>
             </div>
         </nav>
