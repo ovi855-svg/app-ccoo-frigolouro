@@ -65,6 +65,28 @@ export default function IncidenciasPage() {
         }
     }
 
+    const handleDelete = async (id: number) => {
+        if (!confirm('¿Estás seguro de que quieres eliminar esta incidencia?')) return
+
+        try {
+            // Actualización optimista
+            setIncidencias(prev => prev.filter(inc => inc.id !== id))
+
+            const { error } = await supabase
+                .from('incidencias')
+                .delete()
+                .eq('id', id)
+
+            if (error) {
+                throw error
+            }
+        } catch (err) {
+            console.error('Error eliminando incidencia:', err)
+            alert('Error al eliminar la incidencia')
+            fetchIncidencias() // Recargar para asegurar consistencia
+        }
+    }
+
     const filteredIncidencias = incidencias.filter(inc => {
         const matchesSeccion = filterSeccion === 'TODAS' || inc.seccion === filterSeccion
         const matchesEstado = filterEstado === 'TODOS' || inc.estado === filterEstado
@@ -273,31 +295,62 @@ export default function IncidenciasPage() {
                                         {incidencia.descripcion}
                                     </p>
                                 )}
-                                {incidencia.creada_por && (
-                                    <div style={{
-                                        fontSize: '0.8rem',
-                                        color: '#94a3b8',
-                                        marginTop: '15px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '6px'
-                                    }}>
-                                        <span style={{
-                                            width: '24px',
-                                            height: '24px',
-                                            backgroundColor: '#e2e8f0',
-                                            borderRadius: '50%',
+                                
+                                {/* Footer: Creada por y Botón Eliminar */}
+                                <div style={{
+                                    marginTop: '20px',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    borderTop: '1px solid #f1f5f9',
+                                    paddingTop: '15px'
+                                }}>
+                                    {incidencia.creada_por ? (
+                                        <div style={{
+                                            fontSize: '0.8rem',
+                                            color: '#94a3b8',
                                             display: 'flex',
                                             alignItems: 'center',
-                                            justifyContent: 'center',
-                                            fontWeight: 'bold',
-                                            fontSize: '0.7rem'
+                                            gap: '6px'
                                         }}>
-                                            {incidencia.creada_por.charAt(0).toUpperCase()}
-                                        </span>
-                                        {incidencia.creada_por}
-                                    </div>
-                                )}
+                                            <span style={{
+                                                width: '24px',
+                                                height: '24px',
+                                                backgroundColor: '#e2e8f0',
+                                                borderRadius: '50%',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                fontWeight: 'bold',
+                                                fontSize: '0.7rem'
+                                            }}>
+                                                {incidencia.creada_por.charAt(0).toUpperCase()}
+                                            </span>
+                                            {incidencia.creada_por}
+                                        </div>
+                                    ) : (
+                                        <span></span> /* Spacer */
+                                    )}
+
+                                    <button
+                                        onClick={() => handleDelete(incidencia.id)}
+                                        style={{
+                                            backgroundColor: 'transparent',
+                                            color: '#ef4444',
+                                            border: '1px solid #ef4444',
+                                            borderRadius: '6px',
+                                            padding: '6px 12px',
+                                            fontSize: '0.8rem',
+                                            fontWeight: 600,
+                                            cursor: 'pointer',
+                                            transition: 'all 0.2s',
+                                        }}
+                                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#fef2f2'}
+                                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                                    >
+                                        Eliminar
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     ))}
