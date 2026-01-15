@@ -40,8 +40,8 @@ export default function NuevaMetodosPage() {
             router.push('/metodos-tiempos')
             router.refresh()
         } catch (error: any) {
-            console.error('Error al crear registro:', error)
-            alert(`Error al guardar: ${error.message || error.toString()}`)
+            console.error('Error:', error)
+            alert(`Error al crear el registro: ${error.message || 'Error desconocido'}.`)
         } finally {
             setLoading(false)
         }
