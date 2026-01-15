@@ -173,7 +173,7 @@ export default function Home() {
                     </Link>
 
                     {/* Tarjeta Salud Laboral */}
-                    <Link href="/salud-laboral" style={{ textDecoration: 'none' } >
+                    <Link href="/salud-laboral" style={{ textDecoration: 'none' }}>
                         <div className="hover:scale-105" style={{
                             padding: '30px',
                             backgroundColor: 'white',
@@ -215,39 +215,39 @@ export default function Home() {
                             </p>
                         </div>
                     </Link>
+                </div>
             </div>
-        </div>
 
-            {/* Decoración de fondo sutil */ }
-    <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        zIndex: -1,
-        overflow: 'hidden',
-        pointerEvents: 'none'
-    }}>
-        <div style={{
-            position: 'absolute',
-            top: '-20%',
-            right: '-10%',
-            width: '60%',
-            height: '60%',
-            background: 'radial-gradient(circle, rgba(220, 38, 38, 0.03) 0%, rgba(0,0,0,0) 70%)',
-            filter: 'blur(60px)'
-        }} />
-        <div style={{
-            position: 'absolute',
-            bottom: '-20%',
-            left: '-10%',
-            width: '60%',
-            height: '60%',
-            background: 'radial-gradient(circle, rgba(14, 165, 233, 0.03) 0%, rgba(0,0,0,0) 70%)',
-            filter: 'blur(60px)'
-        }} />
-    </div>
+            {/* Decoración de fondo sutil */}
+            <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                zIndex: -1,
+                overflow: 'hidden',
+                pointerEvents: 'none'
+            }}>
+                <div style={{
+                    position: 'absolute',
+                    top: '-20%',
+                    right: '-10%',
+                    width: '60%',
+                    height: '60%',
+                    background: 'radial-gradient(circle, rgba(220, 38, 38, 0.03) 0%, rgba(0,0,0,0) 70%)',
+                    filter: 'blur(60px)'
+                }} />
+                <div style={{
+                    position: 'absolute',
+                    bottom: '-20%',
+                    left: '-10%',
+                    width: '60%',
+                    height: '60%',
+                    background: 'radial-gradient(circle, rgba(14, 165, 233, 0.03) 0%, rgba(0,0,0,0) 70%)',
+                    filter: 'blur(60px)'
+                }} />
+            </div>
         </main >
     )
 }
