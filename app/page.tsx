@@ -71,7 +71,7 @@ export default function Home() {
                     marginRight: 'auto',
                     lineHeight: 1.6
                 }}>
-                    Plataforma de gestión de incidencias y generación de informes para la sección sindical.
+                    Plataforma de gestión para la sección sindical.
                 </p>
 
                 <div style={{
@@ -94,7 +94,7 @@ export default function Home() {
                         alignItems: 'center',
                         gap: '10px'
                     }}>
-                        <span>Acceder al Orden del Día</span>
+                        <span>Orden del Día</span>
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
