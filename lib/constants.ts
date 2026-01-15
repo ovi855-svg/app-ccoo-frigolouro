@@ -35,8 +35,8 @@ export const ESTADOS_SOLICITUDES = [
 
 export const ESTADOS_SALUD = [
     "Nueva",
-    "Revisión",
+    "Comunicado al Servicio de Prevencion",
     "Pendiente",
-    "Solucionada",
-    "Rechazada"
+    "Denunciado en Inspeccion de Trabajo",
+    "Solucionado"
 ] as const;

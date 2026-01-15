@@ -281,20 +281,23 @@ export default function SaludManager() {
                                         fontSize: '0.85rem',
                                         cursor: 'pointer',
                                         backgroundColor:
-                                            item.estado === 'Nueva' ? '#fee2e2' :
-                                                item.estado === 'Revisión' ? '#dbeafe' :
-                                                    item.estado === 'Pendiente' ? '#ffedd5' :
-                                                        item.estado === 'Rechazada' ? '#f3f4f6' :
-                                                            '#dcfce7', // Solucionada
+                                            item.estado === 'Nueva' ? '#fee2e2' : // Red
+                                                item.estado === 'Comunicado al Servicio de Prevencion' ? '#dbeafe' : // Blue
+                                                    item.estado === 'Pendiente' ? '#ffedd5' : // Orange
+                                                        item.estado === 'Denunciado en Inspeccion de Trabajo' ? '#f3e8ff' : // Purple
+                                                            '#dcfce7', // Solucionado (Green)
                                         color:
                                             item.estado === 'Nueva' ? '#991b1b' :
-                                                item.estado === 'Revisión' ? '#1e40af' :
+                                                item.estado === 'Comunicado al Servicio de Prevencion' ? '#1e40af' :
                                                     item.estado === 'Pendiente' ? '#9a3412' :
-                                                        item.estado === 'Rechazada' ? '#374151' :
-                                                            '#166534', // Solucionada
+                                                        item.estado === 'Denunciado en Inspeccion de Trabajo' ? '#6b21a8' :
+                                                            '#166534', // Solucionado
                                         outline: 'none',
                                         appearance: 'none',
-                                        textAlign: 'center'
+                                        textAlign: 'center',
+                                        maxWidth: '100%',
+                                        whiteSpace: 'normal',
+                                        height: 'auto'
                                     }}
                                 >
                                     {ESTADOS_SALUD.map(est => (
