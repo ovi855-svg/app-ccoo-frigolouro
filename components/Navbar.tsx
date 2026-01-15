@@ -1,84 +1,99 @@
+'use client'
+
 import Link from 'next/link'
 import Image from 'next/image'
+import { usePathname } from 'next/navigation'
 
 export default function Navbar() {
+    const pathname = usePathname()
+
+    const isActive = (path: string) => {
+        return pathname === path || pathname.startsWith(path + '/')
+    }
+
+    const getLinkStyle = (path: string) => ({
+        textDecoration: 'none',
+        color: isActive(path) ? '#dc2626' : '#333',
+        fontWeight: 600,
+        fontSize: '0.95rem',
+        padding: '10px 18px',
+        borderRadius: '12px',
+        transition: 'all 0.2s ease',
+        backgroundColor: isActive(path) ? '#fef2f2' : 'transparent',
+        border: isActive(path) ? '1px solid #fee2e2' : '1px solid transparent',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px'
+    })
+
     return (
         <nav style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            padding: '15px 20px',
-            backgroundColor: 'rgba(255, 255, 255, 0.9)',
-            backdropFilter: 'blur(10px)',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+            padding: '15px 30px',
+            backgroundColor: 'rgba(255, 255, 255, 0.85)',
+            backdropFilter: 'blur(12px)',
+            boxShadow: '0 4px 20px -5px rgba(0, 0, 0, 0.05)',
             position: 'sticky',
             top: 0,
             zIndex: 100,
-            marginBottom: '30px'
+            marginBottom: '30px',
+            borderBottom: '1px solid rgba(255,255,255,0.5)'
         }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                {/* Logo contenedor circular */}
-                <div style={{
-                    height: '80px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                }}>
-                    {/* @ts-ignore - Validación de tipos de Next.js Image a veces falla en build estricto */}
-                    <Image
-                        src="/logo.png"
-                        alt="Logo CCOO"
-                        width={80}
-                        height={80}
-                        style={{ width: 'auto', height: '100%' }}
-                        priority
-                    />
+            <Link href="/" style={{ textDecoration: 'none' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                    {/* Logo con efecto hover */}
+                    <div style={{
+                        height: '50px',
+                        width: '50px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: 'white',
+                        borderRadius: '12px',
+                        padding: '5px',
+                        boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)'
+                    }}>
+                        {/* @ts-ignore */}
+                        <Image
+                            src="/logo.png"
+                            alt="Logo CCOO"
+                            width={40}
+                            height={40}
+                            style={{ width: 'auto', height: '100%', objectFit: 'contain' }}
+                            priority
+                        />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{
+                            fontWeight: '800',
+                            fontSize: '1.2rem',
+                            color: '#1e293b',
+                            lineHeight: 1.1
+                        }}>
+                            Sección Sindical
+                        </span>
+                        <span style={{
+                            fontWeight: '600',
+                            fontSize: '1rem',
+                            color: 'var(--ccoo-red)',
+                            letterSpacing: '-0.5px'
+                        }}>
+                            CCOO Frigolouro
+                        </span>
+                    </div>
                 </div>
-                <div style={{
-                    fontWeight: '800',
-                    fontSize: '1.4rem',
-                    color: 'var(--ccoo-red)',
-                    letterSpacing: '-0.5px'
-                }}>
-                    CCOO Frigolouro
-                </div>
-            </div>
-            <div style={{ display: 'flex', gap: '20px' }}>
-                <Link href="/" style={{
-                    textDecoration: 'none',
-                    color: '#333',
-                    fontWeight: 600,
-                    fontSize: '1rem',
-                    padding: '8px 16px',
-                    borderRadius: '6px',
-                    transition: 'all 0.2s',
-                    backgroundColor: 'transparent'
-                }} className="hover:bg-gray-100">
+            </Link>
+
+            <div style={{ display: 'flex', gap: '10px' }}>
+                <Link href="/" style={getLinkStyle('/')}>
                     Inicio
                 </Link>
-                <Link href="/orden-del-dia" style={{
-                    textDecoration: 'none',
-                    color: '#333',
-                    fontWeight: 600,
-                    fontSize: '1rem',
-                    padding: '8px 16px',
-                    borderRadius: '6px',
-                    transition: 'all 0.2s',
-                    backgroundColor: '#fee2e2',
-                    border: '1px solid #fecaca'
-                }} className="hover:bg-red-50">
+                <Link href="/orden-del-dia" style={getLinkStyle('/orden-del-dia')}>
                     Orden del Día
                 </Link>
-                <Link href="/metodos-tiempos" style={{
-                    textDecoration: 'none',
-                    color: '#333',
-                    fontWeight: 600,
-                    fontSize: '1rem',
-                    padding: '8px 16px',
-                    borderRadius: '6px',
-                    transition: 'all 0.2s',
-                    backgroundColor: 'transparent'
-                }} className="hover:bg-gray-100">
+                <Link href="/metodos-tiempos" style={getLinkStyle('/metodos-tiempos')}>
                     Métodos y Tiempos
                 </Link>
             </div>

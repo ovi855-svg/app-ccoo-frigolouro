@@ -1,7 +1,9 @@
 :root {
-  --ccoo-red: #E4001B;
+  --ccoo-red: #dc2626;
+  --ccoo-red-hover: #b91c1c;
   --bg-color: #f8fafc;
   --text-main: #1e293b;
+  --text-secondary: #64748b;
   --primary-blue: #0ea5e9;
 }
 
@@ -12,25 +14,49 @@
 body {
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
   background-color: var(--bg-color);
+  background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%);
   color: var(--text-main);
   line-height: 1.6;
   margin: 0;
-  padding-bottom: 40px;
+  min-height: 100vh;
 }
 
 h1, h2, h3 {
-  color: #111;
+  color: var(--text-main);
+  margin-top: 0;
 }
 
+/* Remover restricciones globales de main para permitir layouts personalizados */
 main {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 20px;
+  width: 100%;
 }
 
 button {
-  transition: transform 0.1s ease, background-color 0.2s;
+  transition: all 0.2s ease;
 }
 button:active {
   transform: scale(0.98);
+}
+
+/* Utilidades de Animación */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+.animate-fade-in-up {
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+/* Utilidades tipo Tailwind (para soporte de clases existentes) */
+.hover\:bg-gray-100:hover {
+  background-color: #f1f5f9 !important;
+}
+
+.hover\:bg-red-50:hover {
+  background-color: #fef2f2 !important;
 }
