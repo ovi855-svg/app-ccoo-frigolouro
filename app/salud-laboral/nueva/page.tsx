@@ -13,9 +13,11 @@ export default function NuevaSaludPage() {
     const [loading, setLoading] = useState(false)
 
     const [formData, setFormData] = useState({
+        titulo: '',
         seccion: SECCIONES[0],
-        descripcion: '',
-        estado: 'Nueva'
+        estado: 'Nueva',
+        creada_por: '',
+        descripcion: ''
     })
 
     const handleVoiceTranscript = (text: string) => {
@@ -36,9 +38,11 @@ export default function NuevaSaludPage() {
                 .from('salud_laboral')
                 .insert([
                     {
+                        titulo: formData.titulo,
                         seccion: formData.seccion,
-                        descripcion: formData.descripcion,
-                        estado: formData.estado
+                        estado: formData.estado,
+                        creada_por: formData.creada_por,
+                        descripcion: formData.descripcion
                     }
                 ])
 
@@ -75,6 +79,27 @@ export default function NuevaSaludPage() {
                 </h1>
 
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+                    {/* Título */}
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Título *</label>
+                        <input
+                            type="text"
+                            name="titulo"
+                            required
+                            value={formData.titulo}
+                            onChange={handleChange}
+                            placeholder="Título breve de la incidencia"
+                            style={{
+                                width: '100%',
+                                padding: '12px',
+                                borderRadius: '8px',
+                                border: '1px solid #cbd5e1',
+                                fontSize: '1rem',
+                                backgroundColor: 'white'
+                            }}
+                        />
+                    </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                         {/* Sección */}
@@ -120,6 +145,26 @@ export default function NuevaSaludPage() {
                                 ))}
                             </select>
                         </div>
+                    </div>
+
+                    {/* Creada Por */}
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Creada por</label>
+                        <input
+                            type="text"
+                            name="creada_por"
+                            value={formData.creada_por}
+                            onChange={handleChange}
+                            placeholder="Nombre del solicitante (opcional)"
+                            style={{
+                                width: '100%',
+                                padding: '12px',
+                                borderRadius: '8px',
+                                border: '1px solid #cbd5e1',
+                                fontSize: '1rem',
+                                backgroundColor: 'white'
+                            }}
+                        />
                     </div>
 
                     {/* Descripción */}

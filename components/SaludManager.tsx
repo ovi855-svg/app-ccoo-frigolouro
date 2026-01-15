@@ -264,6 +264,9 @@ export default function SaludManager() {
                                     {new Date(item.created_at).toLocaleDateString('es-ES', {
                                         day: 'numeric', month: 'long', year: 'numeric'
                                     })}
+                                    {item.creada_por && (
+                                        <span style={{ marginLeft: '10px', color: '#94a3b8' }}>• Por: {item.creada_por}</span>
+                                    )}
                                 </div>
 
                                 {/* Selector de Estado */}
@@ -301,6 +304,14 @@ export default function SaludManager() {
                             </div>
 
                             <div style={{ marginTop: '12px' }}>
+                                <h3 style={{
+                                    fontSize: '1.25rem',
+                                    fontWeight: 700,
+                                    color: '#1e293b',
+                                    margin: '0 0 10px 0'
+                                }}>
+                                    {item.titulo}
+                                </h3>
                                 <span style={{
                                     backgroundColor: '#f1f5f9',
                                     color: '#475569',

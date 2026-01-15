@@ -140,6 +140,8 @@ export default function SaludInformeGenerator() {
             items.forEach((item: any) => {
                 const fecha = new Date(item.created_at).toLocaleDateString('es-ES')
                 const seccion = item.seccion || '-'
+                const titulo = item.titulo || 'Sin título'
+                const creadaPor = item.creada_por || 'No especificado'
                 const descripcion = item.descripcion || 'Sin descripción'
 
                 const descLines = doc.splitTextToSize(descripcion, 180)
@@ -151,7 +153,14 @@ export default function SaludInformeGenerator() {
                     currentY = 20
                 }
 
-                // Fila 1: Fecha y Sección
+                // Fila 1: Título (Destacado)
+                doc.setFont('helvetica', 'bold')
+                doc.setFontSize(11)
+                doc.text(titulo, 14, currentY)
+                currentY += 6
+                doc.setFontSize(10)
+
+                // Fila 2: Fecha, Sección y Autor
                 doc.setFont('helvetica', 'bold')
                 doc.text(`Fecha:`, 14, currentY)
                 doc.setFont('helvetica', 'normal')
@@ -161,9 +170,16 @@ export default function SaludInformeGenerator() {
                 doc.text(`Sección:`, 80, currentY)
                 doc.setFont('helvetica', 'normal')
                 doc.text(seccion, 100, currentY)
+
+                if (item.creada_por) {
+                    doc.setFont('helvetica', 'bold')
+                    doc.text(`Por:`, 140, currentY)
+                    doc.setFont('helvetica', 'normal')
+                    doc.text(creadaPor, 150, currentY)
+                }
                 currentY += 7
 
-                // Fila 2: Descripción (sin título)
+                // Fila 3: Descripción
                 doc.setFont('helvetica', 'bold')
                 doc.text(`Descripción:`, 14, currentY)
                 currentY += 5

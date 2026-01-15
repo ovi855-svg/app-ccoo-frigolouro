@@ -20,8 +20,10 @@ export interface SaludLaboral {
     id: string; // UUID
     created_at: string;
     seccion: string;
+    titulo: string;
     descripcion: string;
     estado: string;
+    creada_por?: string;
     imagen_url?: string | null;
     historial_salud?: {
         id: string; // UUID
