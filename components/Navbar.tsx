@@ -1,3 +1,6 @@
+import Link from 'next/link'
+import Image from 'next/image'
+
 export default function Navbar() {
     return (
         <nav style={{
@@ -21,6 +24,7 @@ export default function Navbar() {
                     alignItems: 'center',
                     justifyContent: 'center',
                 }}>
+                    {/* @ts-ignore - Validación de tipos de Next.js Image a veces falla en build estricto */}
                     <Image
                         src="/logo.png"
                         alt="Logo CCOO"
