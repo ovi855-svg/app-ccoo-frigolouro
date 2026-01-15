@@ -19,8 +19,8 @@ export default function Navbar() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 {/* Logo contenedor circular */}
                 <div style={{
-                    width: '45px',
-                    height: '45px',
+                    width: '60px',
+                    height: '60px',
                     borderRadius: '50%',
                     overflow: 'hidden',
                     display: 'flex',
@@ -32,8 +32,8 @@ export default function Navbar() {
                     <Image
                         src="/logo.png"
                         alt="Logo CCOO"
-                        width={40}
-                        height={40}
+                        width={50}
+                        height={50}
                         style={{ width: 'auto', height: '80%' }}
                         priority
                     />
