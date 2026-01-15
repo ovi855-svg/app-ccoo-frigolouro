@@ -48,7 +48,7 @@ export default function MetodosInformeGenerator() {
             }))
 
             if (!items || items.length === 0) {
-                alert('No hay datos para generar el informe en este rango.')
+                alert('No hay solicitudes para generar el informe en este rango.')
                 return
             }
 
@@ -116,7 +116,7 @@ export default function MetodosInformeGenerator() {
             let currentY = finalY + 15
             doc.setFontSize(14)
             doc.setTextColor(0)
-            doc.text('Detalle de Registros:', 14, currentY)
+            doc.text('Detalle de Solicitudes:', 14, currentY)
             currentY += 10
 
             doc.setFontSize(10)

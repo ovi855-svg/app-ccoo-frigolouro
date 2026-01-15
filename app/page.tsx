@@ -160,8 +160,8 @@ export default function Home() {
                                 </svg>
                             </div>
                             <div style={{ textAlign: 'center' }}>
-                                <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0 0 8px 0', color: '#1e293b' }}>Gestión de Solicitudes</h3>
-                                <p style={{ margin: 0, color: '#64748b', fontSize: '0.95rem' }}>Métodos y Tiempos</p>
+                                <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0 0 8px 0', color: '#1e293b' }}>Métodos y Tiempos</h3>
+                                <p style={{ margin: 0, color: '#64748b', fontSize: '0.95rem' }}>Gestión de Solicitudes</p>
                             </div>
                         </div>
                     </Link>
