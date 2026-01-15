@@ -22,14 +22,24 @@ export default function IncidenciasPage() {
             setLoading(true)
             const { data, error } = await supabase
                 .from('incidencias')
-                .select('*')
+                .select('*, historial_cambios(*)')
                 .order('created_at', { ascending: false })
 
             if (error) {
                 throw error
             }
 
-            setIncidencias((data as Incidencia[]) || [])
+            // Ordenar historial por fecha descendente para cada incidencia
+            const incidenciasConHistorial = (data as any[]).map(inc => ({
+                ...inc,
+                historial_cambios: inc.historial_cambios 
+                    ? inc.historial_cambios.sort((a: any, b: any) => 
+                        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+                      ) 
+                    : []
+            }))
+
+            setIncidencias(incidenciasConHistorial as Incidencia[])
         } catch (err) {
             console.error('Error cargando incidencias:', err)
             setError('Error al cargar las incidencias')
@@ -44,20 +54,49 @@ export default function IncidenciasPage() {
 
     const handleEstadoChange = async (id: number, newEstado: string) => {
         try {
+            const previousEstado = incidencias.find(i => i.id === id)?.estado
+
             // Actualización optimista
             setIncidencias(prev => prev.map(inc =>
-                inc.id === id ? { ...inc, estado: newEstado } : inc
+                inc.id === id ? { 
+                    ...inc, 
+                    estado: newEstado,
+                    // Añadir optimísticamente al historial (opcional, pero mejora UX)
+                    historial_cambios: [
+                        {
+                            id: -1, // ID temporal
+                            incidencia_id: id,
+                            nuevo_estado: newEstado,
+                            created_at: new Date().toISOString()
+                        },
+                        ...(inc.historial_cambios || [])
+                    ]
+                } : inc
             ))
 
-            const { error } = await supabase
+            // 1. Actualizar estado
+            const { error: updateError } = await supabase
                 .from('incidencias')
                 .update({ estado: newEstado })
                 .eq('id', id)
 
-            if (error) {
-                throw error
-                // Podríamos revertir el estado aquí si falla
+            if (updateError) throw updateError
+
+            // 2. Registrar en historial si el estado cambió
+            if (previousEstado !== newEstado) {
+                await supabase
+                    .from('historial_cambios')
+                    .insert([
+                        {
+                            incidencia_id: id,
+                            nuevo_estado: newEstado
+                        }
+                    ])
             }
+            
+            // Recargar para tener IDs reales y consistencia
+            fetchIncidencias()
+
         } catch (err) {
             console.error('Error actualizando estado:', err)
             alert('Error al actualizar el estado')
@@ -302,6 +341,45 @@ export default function IncidenciasPage() {
                                     }}>
                                         {incidencia.descripcion}
                                     </p>
+                                )}
+
+                                {/* Historial de Cambios */}
+                                {incidencia.historial_cambios && incidencia.historial_cambios.length > 0 && (
+                                    <div style={{
+                                        marginTop: '15px',
+                                        padding: '10px',
+                                        backgroundColor: '#f8fafc',
+                                        borderRadius: '8px',
+                                        border: '1px solid #e2e8f0'
+                                    }}>
+                                        <div style={{
+                                            fontSize: '0.75rem',
+                                            fontWeight: 700,
+                                            color: '#64748b',
+                                            marginBottom: '8px',
+                                            textTransform: 'uppercase'
+                                        }}>
+                                            Historial
+                                        </div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                            {/* Creación */}
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#94a3b8' }}>
+                                                <span>Creada</span>
+                                                <span>{new Date(incidencia.created_at).toLocaleString('es-ES')}</span>
+                                            </div>
+                                            {/* Cambios */}
+                                            {incidencia.historial_cambios.map((cambio, index) => (
+                                                <div key={index} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                                                    <span style={{ fontWeight: 500, color: '#475569' }}>
+                                                        Changed to {cambio.nuevo_estado}
+                                                    </span>
+                                                    <span style={{ color: '#94a3b8' }}>
+                                                        {new Date(cambio.created_at).toLocaleString('es-ES')}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
                                 )}
                                 
                                 {/* Footer: Creada por y Botón Eliminar */}
