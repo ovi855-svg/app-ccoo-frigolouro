@@ -284,16 +284,16 @@ export default function MetodosManager() {
                                         fontSize: '0.85rem',
                                         cursor: 'pointer',
                                         backgroundColor:
-                                            item.estado === 'Nueva' ? '#fee2e2' :
+                                            item.estado === 'Nueva' ? '#f3f4f6' :
                                                 item.estado === 'Solicitada' ? '#dbeafe' :
                                                     item.estado === 'Pendiente de respuesta' ? '#ffedd5' :
-                                                        item.estado === 'Rechazada' ? '#f1f5f9' :
+                                                        item.estado === 'Rechazada' ? '#fee2e2' :
                                                             '#dcfce7',
                                         color:
-                                            item.estado === 'Nueva' ? '#991b1b' :
+                                            item.estado === 'Nueva' ? '#4b5563' :
                                                 item.estado === 'Solicitada' ? '#1e40af' :
                                                     item.estado === 'Pendiente de respuesta' ? '#9a3412' :
-                                                        item.estado === 'Rechazada' ? '#475569' :
+                                                        item.estado === 'Rechazada' ? '#991b1b' :
                                                             '#166534',
                                         outline: 'none',
                                         appearance: 'none',
