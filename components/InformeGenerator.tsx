@@ -34,18 +34,18 @@ export default function InformeGenerator() {
             }
 
             const { data: rawData, error } = await query
-            
-             if (error) throw error
 
-             // Procesar datos para ordenar historial
-             const incidencias = (rawData as any[] || []).map(inc => ({
-                 ...inc,
-                 historial_cambios: inc.historial_cambios 
-                     ? inc.historial_cambios.sort((a: any, b: any) => 
-                         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-                       ) 
-                     : []
-             }))
+            if (error) throw error
+
+            // Procesar datos para ordenar historial
+            const incidencias = (rawData as any[] || []).map(inc => ({
+                ...inc,
+                historial_cambios: inc.historial_cambios
+                    ? inc.historial_cambios.sort((a: any, b: any) =>
+                        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+                    )
+                    : []
+            }))
 
             if (error) throw error
             if (!incidencias || incidencias.length === 0) {
@@ -179,11 +179,11 @@ export default function InformeGenerator() {
                 currentY += 7
 
                 // Fila 5: Historial
-                 if (inc.historial_cambios && inc.historial_cambios.length > 0) {
+                if (inc.historial_cambios && inc.historial_cambios.length > 0) {
                     doc.setFont('helvetica', 'bold')
                     doc.text(`Historial de Cambios:`, 14, currentY)
                     currentY += 5
-                    
+
                     doc.setFont('helvetica', 'normal')
                     inc.historial_cambios.forEach((cambio: any) => {
                         if (currentY + 5 > 280) {

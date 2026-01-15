@@ -32,10 +32,10 @@ export default function IncidenciasManager() {
             // Ordenar historial por fecha descendente para cada incidencia
             const incidenciasConHistorial = (data as any[]).map(inc => ({
                 ...inc,
-                historial_cambios: inc.historial_cambios 
-                    ? inc.historial_cambios.sort((a: any, b: any) => 
+                historial_cambios: inc.historial_cambios
+                    ? inc.historial_cambios.sort((a: any, b: any) =>
                         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-                      ) 
+                    )
                     : []
             }))
 
@@ -58,8 +58,8 @@ export default function IncidenciasManager() {
 
             // Actualización optimista
             setIncidencias(prev => prev.map(inc =>
-                inc.id === id ? { 
-                    ...inc, 
+                inc.id === id ? {
+                    ...inc,
                     estado: newEstado,
                     // Añadir optimísticamente al historial (opcional, pero mejora UX)
                     historial_cambios: [
@@ -93,7 +93,7 @@ export default function IncidenciasManager() {
                         }
                     ])
             }
-            
+
             // Recargar para tener IDs reales y consistencia
             fetchIncidencias()
 
@@ -285,18 +285,18 @@ export default function IncidenciasManager() {
                                         fontWeight: '700',
                                         fontSize: '0.85rem',
                                         cursor: 'pointer',
-                                        backgroundColor: 
+                                        backgroundColor:
                                             incidencia.estado === 'Nuevo' ? '#fee2e2' :
-                                            incidencia.estado === 'Comunicado Encargado' ? '#dbeafe' :
-                                            incidencia.estado === 'Orden del Dia' ? '#f3e8ff' :
-                                            incidencia.estado === 'Pendiente' ? '#ffedd5' :
-                                            '#dcfce7', // Solucionado
-                                        color: 
+                                                incidencia.estado === 'Comunicado Encargado' ? '#dbeafe' :
+                                                    incidencia.estado === 'Orden del Dia' ? '#f3e8ff' :
+                                                        incidencia.estado === 'Pendiente' ? '#ffedd5' :
+                                                            '#dcfce7', // Solucionado
+                                        color:
                                             incidencia.estado === 'Nuevo' ? '#991b1b' :
-                                            incidencia.estado === 'Comunicado Encargado' ? '#1e40af' :
-                                            incidencia.estado === 'Orden del Dia' ? '#6b21a8' :
-                                            incidencia.estado === 'Pendiente' ? '#9a3412' :
-                                            '#166534', // Solucionado
+                                                incidencia.estado === 'Comunicado Encargado' ? '#1e40af' :
+                                                    incidencia.estado === 'Orden del Dia' ? '#6b21a8' :
+                                                        incidencia.estado === 'Pendiente' ? '#9a3412' :
+                                                            '#166534', // Solucionado
                                         outline: 'none',
                                         appearance: 'none',
                                         textAlign: 'center'
@@ -380,7 +380,7 @@ export default function IncidenciasManager() {
                                         </div>
                                     </div>
                                 )}
-                                
+
                                 {/* Footer: Creada por y Botón Eliminar */}
                                 <div style={{
                                     marginTop: '20px',
