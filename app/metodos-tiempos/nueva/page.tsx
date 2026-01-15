@@ -41,7 +41,7 @@ export default function NuevaMetodosPage() {
             router.refresh()
         } catch (error: any) {
             console.error('Error:', error)
-            alert(`Error al crear el registro: ${error.message || 'Error desconocido'}.`)
+            alert(`Error al crear la solicitud: ${error.message || 'Error desconocido'}.`)
         } finally {
             setLoading(false)
         }
@@ -71,7 +71,7 @@ export default function NuevaMetodosPage() {
                     color: '#1e293b',
                     fontWeight: 700
                 }}>
-                    Nuevo registro Métodos
+                    Nueva Solicitud
                 </h1>
 
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -217,7 +217,7 @@ export default function NuevaMetodosPage() {
                                 boxShadow: '0 4px 6px -1px rgba(220, 38, 38, 0.2)'
                             }}
                         >
-                            {loading ? 'Guardando...' : 'Guardar Registro'}
+                            {loading ? 'Guardando...' : 'Guardar Solicitud'}
                         </button>
                     </div>
                 </form>

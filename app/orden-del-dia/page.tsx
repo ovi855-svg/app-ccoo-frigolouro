@@ -9,6 +9,10 @@ export default function OrdenDelDiaPage() {
 
     return (
         <main style={{ paddingBottom: '50px' }}>
+            <div style={{ textAlign: 'center', margin: '30px 0' }}>
+                <h1 style={{ color: '#1e293b', fontWeight: 800 }}>Orden del Día</h1>
+                <p style={{ color: '#64748b' }}>Gestión de incidencias y tareas pendientes</p>
+            </div>
             <div style={{
                 display: 'flex',
                 justifyContent: 'center',

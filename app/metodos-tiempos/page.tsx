@@ -11,7 +11,7 @@ export default function MetodosPage() {
         <main style={{ paddingBottom: '50px' }}>
             <div style={{ textAlign: 'center', margin: '30px 0' }}>
                 <h1 style={{ color: '#1e293b', fontWeight: 800 }}>Métodos y Tiempos</h1>
-                <p style={{ color: '#64748b' }}>Gestión de registros y tiempos</p>
+                <p style={{ color: '#64748b' }}>Gestión de Solicitudes</p>
             </div>
 
             <div style={{

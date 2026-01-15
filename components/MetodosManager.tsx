@@ -106,7 +106,7 @@ export default function MetodosManager() {
     }
 
     const handleDelete = async (id: number) => {
-        if (!confirm('¿Estás seguro de que quieres eliminar este registro?')) return
+        if (!confirm('¿Estás seguro de que quieres eliminar esta solicitud?')) return
 
         try {
             setItems(prev => prev.filter(item => item.id !== id))
@@ -153,7 +153,7 @@ export default function MetodosManager() {
                     fontWeight: 600,
                     boxShadow: '0 4px 6px -1px rgba(220, 38, 38, 0.2)'
                 }}>
-                    + Nuevo Registro
+                    + Nueva Solicitud
                 </a>
             </div>
 
@@ -244,7 +244,7 @@ export default function MetodosManager() {
             {/* Listado */}
             {filteredItems.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '60px', color: '#94a3b8' }}>
-                    <div style={{ fontSize: '1.2rem', marginBottom: '10px' }}>No se encontraron registros</div>
+                    <div style={{ fontSize: '1.2rem', marginBottom: '10px' }}>No se encontraron solicitudes</div>
                 </div>
             ) : (
                 <div style={{ display: 'grid', gap: '20px' }}>
