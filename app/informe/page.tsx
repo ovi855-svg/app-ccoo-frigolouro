@@ -24,7 +24,7 @@ export default function InformePage() {
             // Query a Supabase
             let query = supabase
                 .from('incidencias')
-                .select('*')
+                .select('*, historial_cambios(*)')
                 .gte('created_at', `${startDate}T00:00:00`)
                 .lte('created_at', `${endDate}T23:59:59`)
                 .order('created_at', { ascending: true })
@@ -33,7 +33,19 @@ export default function InformePage() {
                 query = query.eq('seccion', filterSeccion)
             }
 
-            const { data: incidencias, error } = await query
+            const { data: rawData, error } = await query
+            
+             if (error) throw error
+
+             // Procesar datos para ordenar historial
+             const incidencias = (rawData as any[] || []).map(inc => ({
+                 ...inc,
+                 historial_cambios: inc.historial_cambios 
+                     ? inc.historial_cambios.sort((a: any, b: any) => 
+                         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+                       ) 
+                     : []
+             }))
 
             if (error) throw error
             if (!incidencias || incidencias.length === 0) {
@@ -165,6 +177,33 @@ export default function InformePage() {
 
                 currentY += descHeight + 5
 
+                // Fila 4: Estado Actual
+                doc.setFont('helvetica', 'bold')
+                doc.text(`Estado Actual:`, 14, currentY)
+                doc.setFont('helvetica', 'normal')
+                doc.text(inc.estado, 45, currentY)
+                currentY += 7
+
+                // Fila 5: Historial
+                 if (inc.historial_cambios && inc.historial_cambios.length > 0) {
+                    doc.setFont('helvetica', 'bold')
+                    doc.text(`Historial de Cambios:`, 14, currentY)
+                    currentY += 5
+                    
+                    doc.setFont('helvetica', 'normal')
+                    inc.historial_cambios.forEach((cambio: any) => {
+                        // Verificar espacio antes de escribir cada línea del historial
+                        if (currentY + 5 > 280) {
+                            doc.addPage()
+                            currentY = 20
+                        }
+                        const fechaCambio = new Date(cambio.created_at).toLocaleString('es-ES')
+                        doc.text(`- ${fechaCambio}: ${cambio.nuevo_estado}`, 20, currentY)
+                        currentY += 5
+                    })
+                    currentY += 2
+                }
+
                 // Línea separadora
                 doc.setDrawColor(220, 220, 220)
                 doc.line(14, currentY, 196, currentY)
@@ -248,45 +287,43 @@ export default function InformePage() {
                             outline: 'none'
                         }}
                     >
-                        <option value="TODAS">Todas las secciones</option>
+                        <option value="TODAS">TODAS</option>
                         {SECCIONES.map(sec => (
                             <option key={sec} value={sec}>{sec}</option>
                         ))}
                     </select>
                 </div>
 
-                <div style={{ display: 'flex', gap: '15px' }}>
-                    <a href="/incidencias" style={{
-                        flex: 1,
-                        padding: '12px',
-                        backgroundColor: 'white',
-                        color: '#64748b',
-                        border: '1px solid #cbd5e1',
+                <button
+                    onClick={generatePDF}
+                    disabled={loading}
+                    style={{
+                        width: '100%',
+                        padding: '14px',
+                        backgroundColor: 'var(--ccoo-red)',
+                        color: 'white',
+                        border: 'none',
                         borderRadius: '8px',
-                        textAlign: 'center',
-                        textDecoration: 'none',
-                        fontWeight: 600
-                    }}>
-                        Volver
-                    </a>
-                    <button
-                        onClick={generatePDF}
-                        disabled={loading}
-                        style={{
-                            flex: 2,
-                            padding: '12px',
-                            backgroundColor: 'var(--ccoo-red)',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '8px',
-                            fontWeight: 600,
-                            cursor: loading ? 'not-allowed' : 'pointer',
-                            opacity: loading ? 0.7 : 1
-                        }}
-                    >
-                        {loading ? 'Generando PDF...' : 'Descargar PDF'}
-                    </button>
-                </div>
+                        fontSize: '1.05rem',
+                        cursor: loading ? 'not-allowed' : 'pointer',
+                        fontWeight: 'bold',
+                        boxShadow: '0 4px 6px -1px rgba(220, 38, 38, 0.2)',
+                        transition: 'all 0.2s',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '10px'
+                    }}
+                >
+                    {loading ? (
+                        <span>Generando...</span>
+                    ) : (
+                        <>
+                            <span>Descargar Informe PDF</span>
+                        </>
+                    )}
+                </button>
+
             </div>
         </main>
     )
