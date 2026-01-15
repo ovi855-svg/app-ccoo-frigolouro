@@ -158,16 +158,8 @@ export default function MetodosManager() {
             </div>
 
             {/* Filtros */}
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                gap: '15px',
-                marginBottom: '30px',
-                padding: '25px',
-                backgroundColor: 'white',
-                borderRadius: '16px',
-                boxShadow: '0 4px 20px -8px rgba(0,0,0,0.1)'
-            }}>
+            {/* Filtros */}
+            <div className="filters-container">
                 {/* Filtro Sección */}
                 <div>
                     <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600, color: '#64748b' }}>SECCIÓN</label>
@@ -251,14 +243,7 @@ export default function MetodosManager() {
                     {filteredItems.map((item) => (
                         <div
                             key={item.id}
-                            style={{
-                                border: '1px solid #f1f5f9',
-                                padding: '24px',
-                                borderRadius: '16px',
-                                backgroundColor: 'white',
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-                                transition: 'transform 0.2s ease, box-shadow 0.2s ease'
-                            }}
+                            className="card-item"
                         >
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '15px' }}>
                                 <div style={{

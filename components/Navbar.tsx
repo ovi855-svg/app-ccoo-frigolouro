@@ -12,35 +12,13 @@ export default function Navbar() {
     }
 
     const getLinkStyle = (path: string) => ({
-        textDecoration: 'none',
         color: isActive(path) ? '#dc2626' : '#333',
-        fontWeight: 600,
-        fontSize: '0.95rem',
-        padding: '10px 18px',
-        borderRadius: '12px',
-        transition: 'all 0.2s ease',
         backgroundColor: isActive(path) ? '#fef2f2' : 'transparent',
         border: isActive(path) ? '1px solid #fee2e2' : '1px solid transparent',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px'
     })
 
     return (
-        <nav style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '15px 30px',
-            backgroundColor: 'rgba(255, 255, 255, 0.85)',
-            backdropFilter: 'blur(12px)',
-            boxShadow: '0 4px 20px -5px rgba(0, 0, 0, 0.05)',
-            position: 'sticky',
-            top: 0,
-            zIndex: 100,
-            marginBottom: '30px',
-            borderBottom: '1px solid rgba(255,255,255,0.5)'
-        }}>
+        <nav className="navbar-responsive">
             <Link href="/" style={{ textDecoration: 'none' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                     {/* Logo con efecto hover */}
@@ -86,14 +64,14 @@ export default function Navbar() {
                 </div>
             </Link>
 
-            <div style={{ display: 'flex', gap: '10px' }}>
-                <Link href="/" style={getLinkStyle('/')}>
+            <div className="navbar-links">
+                <Link href="/" className="navbar-link" style={getLinkStyle('/')}>
                     Inicio
                 </Link>
-                <Link href="/orden-del-dia" style={getLinkStyle('/orden-del-dia')}>
+                <Link href="/orden-del-dia" className="navbar-link" style={getLinkStyle('/orden-del-dia')}>
                     Orden del Día
                 </Link>
-                <Link href="/metodos-tiempos" style={getLinkStyle('/metodos-tiempos')}>
+                <Link href="/metodos-tiempos" className="navbar-link" style={getLinkStyle('/metodos-tiempos')}>
                     Métodos y Tiempos
                 </Link>
             </div>

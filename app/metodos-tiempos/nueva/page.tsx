@@ -56,14 +56,7 @@ export default function NuevaMetodosPage() {
 
     return (
         <main>
-            <div style={{
-                backgroundColor: 'white',
-                padding: '30px',
-                borderRadius: '16px',
-                boxShadow: '0 4px 6px rgba(0,0,0,0.04)',
-                maxWidth: '700px',
-                margin: '0 auto'
-            }}>
+            <div className="form-container">
                 <h1 style={{
                     marginTop: 0,
                     marginBottom: '25px',

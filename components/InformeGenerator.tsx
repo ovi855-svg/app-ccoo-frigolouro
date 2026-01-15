@@ -214,14 +214,7 @@ export default function InformeGenerator() {
     }
 
     return (
-        <div style={{
-            backgroundColor: 'white',
-            padding: '30px',
-            borderRadius: '16px',
-            boxShadow: '0 4px 6px rgba(0,0,0,0.04)',
-            maxWidth: '600px',
-            margin: '20px auto'
-        }}>
+        <div className="form-container" style={{ maxWidth: '600px', margin: '20px auto' }}>
             <h2 style={{
                 marginTop: 0,
                 marginBottom: '25px',
@@ -232,7 +225,7 @@ export default function InformeGenerator() {
                 Generar Informe de Incidencias
             </h2>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+            <div className="grid-two-columns">
                 <div>
                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Fecha Inicio</label>
                     <input
