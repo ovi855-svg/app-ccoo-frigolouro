@@ -19,7 +19,8 @@ export const SECCIONES = [
 
 export const ESTADOS = [
     "Nuevo",
-    "Comunicado",
-    "Seguimiento",
+    "Comunicado Encargado",
+    "Orden del Dia",
+    "Pendiente",
     "Solucionado"
 ] as const;

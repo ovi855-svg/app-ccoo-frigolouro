@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase'
 import { Incidencia } from '@/lib/types'
 import { SECCIONES, ESTADOS } from '@/lib/constants'
 
-export default function IncidenciasPage() {
+export default function IncidenciasManager() {
     const [incidencias, setIncidencias] = useState<Incidencia[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -22,14 +22,24 @@ export default function IncidenciasPage() {
             setLoading(true)
             const { data, error } = await supabase
                 .from('incidencias')
-                .select('*')
+                .select('*, historial_cambios(*)')
                 .order('created_at', { ascending: false })
 
             if (error) {
                 throw error
             }
 
-            setIncidencias((data as Incidencia[]) || [])
+            // Ordenar historial por fecha descendente para cada incidencia
+            const incidenciasConHistorial = (data as any[]).map(inc => ({
+                ...inc,
+                historial_cambios: inc.historial_cambios
+                    ? inc.historial_cambios.sort((a: any, b: any) =>
+                        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+                    )
+                    : []
+            }))
+
+            setIncidencias(incidenciasConHistorial as Incidencia[])
         } catch (err) {
             console.error('Error cargando incidencias:', err)
             setError('Error al cargar las incidencias')
@@ -44,23 +54,74 @@ export default function IncidenciasPage() {
 
     const handleEstadoChange = async (id: number, newEstado: string) => {
         try {
+            const previousEstado = incidencias.find(i => i.id === id)?.estado
+
             // Actualización optimista
             setIncidencias(prev => prev.map(inc =>
-                inc.id === id ? { ...inc, estado: newEstado } : inc
+                inc.id === id ? {
+                    ...inc,
+                    estado: newEstado,
+                    // Añadir optimísticamente al historial (opcional, pero mejora UX)
+                    historial_cambios: [
+                        {
+                            id: -1, // ID temporal
+                            incidencia_id: id,
+                            nuevo_estado: newEstado,
+                            created_at: new Date().toISOString()
+                        },
+                        ...(inc.historial_cambios || [])
+                    ]
+                } : inc
             ))
 
-            const { error } = await supabase
+            // 1. Actualizar estado
+            const { error: updateError } = await supabase
                 .from('incidencias')
                 .update({ estado: newEstado })
                 .eq('id', id)
 
-            if (error) {
-                throw error
-                // Podríamos revertir el estado aquí si falla
+            if (updateError) throw updateError
+
+            // 2. Registrar en historial si el estado cambió
+            if (previousEstado !== newEstado) {
+                await supabase
+                    .from('historial_cambios')
+                    .insert([
+                        {
+                            incidencia_id: id,
+                            nuevo_estado: newEstado
+                        }
+                    ])
             }
+
+            // Recargar para tener IDs reales y consistencia
+            fetchIncidencias()
+
         } catch (err) {
             console.error('Error actualizando estado:', err)
             alert('Error al actualizar el estado')
+            fetchIncidencias() // Recargar para asegurar consistencia
+        }
+    }
+
+    const handleDelete = async (id: number) => {
+        if (!confirm('¿Estás seguro de que quieres eliminar esta incidencia?')) return
+
+        try {
+            // Actualización optimista
+            setIncidencias(prev => prev.filter(inc => inc.id !== id))
+
+            const { error } = await supabase
+                .from('incidencias')
+                .delete()
+                .eq('id', id)
+
+            if (error) {
+                throw error
+            }
+        } catch (err) {
+            console.error('Error eliminando incidencia:', err)
+            alert('Error al eliminar la incidencia')
             fetchIncidencias() // Recargar para asegurar consistencia
         }
     }
@@ -76,21 +137,21 @@ export default function IncidenciasPage() {
         return matchesSeccion && matchesEstado && matchesTexto
     })
 
-    if (loading) return <main><h1>Listado de incidencias</h1><p>Cargando...</p></main>
-    if (error) return <main><h1>Listado de incidencias</h1><p style={{ color: 'red' }}>{error}</p></main>
+    if (loading) return <div><p>Cargando incidencias...</p></div>
+    if (error) return <div><p style={{ color: 'red' }}>{error}</p></div>
 
     return (
-        <main>
-            <h1>Listado de incidencias</h1>
-
+        <div style={{ marginTop: '20px' }}>
             {/* Botones de acción */}
             <div style={{ marginBottom: '20px', display: 'flex', gap: '10px' }}>
                 <a href="/incidencias/nueva" style={{
-                    padding: '8px 16px',
-                    backgroundColor: '#0070f3',
+                    padding: '10px 20px',
+                    backgroundColor: 'var(--ccoo-red)',
                     color: 'white',
                     textDecoration: 'none',
-                    borderRadius: '4px'
+                    borderRadius: '8px',
+                    fontWeight: 600,
+                    boxShadow: '0 4px 6px -1px rgba(220, 38, 38, 0.2)'
                 }}>
                     + Nueva Incidencia
                 </a>
@@ -199,7 +260,6 @@ export default function IncidenciasPage() {
                                 boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
                                 transition: 'transform 0.2s ease, box-shadow 0.2s ease'
                             }}
-                            className="incident-card" // Class for potential global CSS hover effects
                         >
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '15px' }}>
                                 <div style={{
@@ -225,12 +285,20 @@ export default function IncidenciasPage() {
                                         fontWeight: '700',
                                         fontSize: '0.85rem',
                                         cursor: 'pointer',
-                                        backgroundColor: incidencia.estado === 'Nuevo' ? '#fee2e2' :
-                                            incidencia.estado === 'Solucionado' ? '#dcfce7' : '#ffedd5',
-                                        color: incidencia.estado === 'Nuevo' ? '#991b1b' :
-                                            incidencia.estado === 'Solucionado' ? '#166534' : '#9a3412',
+                                        backgroundColor:
+                                            incidencia.estado === 'Nuevo' ? '#fee2e2' :
+                                                incidencia.estado === 'Comunicado Encargado' ? '#dbeafe' :
+                                                    incidencia.estado === 'Orden del Dia' ? '#f3e8ff' :
+                                                        incidencia.estado === 'Pendiente' ? '#ffedd5' :
+                                                            '#dcfce7', // Solucionado
+                                        color:
+                                            incidencia.estado === 'Nuevo' ? '#991b1b' :
+                                                incidencia.estado === 'Comunicado Encargado' ? '#1e40af' :
+                                                    incidencia.estado === 'Orden del Dia' ? '#6b21a8' :
+                                                        incidencia.estado === 'Pendiente' ? '#9a3412' :
+                                                            '#166534', // Solucionado
                                         outline: 'none',
-                                        appearance: 'none', // Remove default arrow in some browsers
+                                        appearance: 'none',
                                         textAlign: 'center'
                                     }}
                                 >
@@ -273,36 +341,106 @@ export default function IncidenciasPage() {
                                         {incidencia.descripcion}
                                     </p>
                                 )}
-                                {incidencia.creada_por && (
+
+                                {/* Historial de Cambios */}
+                                {incidencia.historial_cambios && incidencia.historial_cambios.length > 0 && (
                                     <div style={{
-                                        fontSize: '0.8rem',
-                                        color: '#94a3b8',
                                         marginTop: '15px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '6px'
+                                        padding: '10px',
+                                        backgroundColor: '#f8fafc',
+                                        borderRadius: '8px',
+                                        border: '1px solid #e2e8f0'
                                     }}>
-                                        <span style={{
-                                            width: '24px',
-                                            height: '24px',
-                                            backgroundColor: '#e2e8f0',
-                                            borderRadius: '50%',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            fontWeight: 'bold',
-                                            fontSize: '0.7rem'
+                                        <div style={{
+                                            fontSize: '0.75rem',
+                                            fontWeight: 700,
+                                            color: '#64748b',
+                                            marginBottom: '8px',
+                                            textTransform: 'uppercase'
                                         }}>
-                                            {incidencia.creada_por.charAt(0).toUpperCase()}
-                                        </span>
-                                        {incidencia.creada_por}
+                                            Historial
+                                        </div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                            {/* Creación */}
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#94a3b8' }}>
+                                                <span>Creada</span>
+                                                <span>{new Date(incidencia.created_at).toLocaleString('es-ES')}</span>
+                                            </div>
+                                            {/* Cambios */}
+                                            {incidencia.historial_cambios.map((cambio, index) => (
+                                                <div key={index} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                                                    <span style={{ fontWeight: 500, color: '#475569' }}>
+                                                        Changed to {cambio.nuevo_estado}
+                                                    </span>
+                                                    <span style={{ color: '#94a3b8' }}>
+                                                        {new Date(cambio.created_at).toLocaleString('es-ES')}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
                                 )}
+
+                                {/* Footer: Creada por y Botón Eliminar */}
+                                <div style={{
+                                    marginTop: '20px',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    borderTop: '1px solid #f1f5f9',
+                                    paddingTop: '15px'
+                                }}>
+                                    {incidencia.creada_por ? (
+                                        <div style={{
+                                            fontSize: '0.8rem',
+                                            color: '#94a3b8',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '6px'
+                                        }}>
+                                            <span style={{
+                                                width: '24px',
+                                                height: '24px',
+                                                backgroundColor: '#e2e8f0',
+                                                borderRadius: '50%',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                fontWeight: 'bold',
+                                                fontSize: '0.7rem'
+                                            }}>
+                                                {incidencia.creada_por.charAt(0).toUpperCase()}
+                                            </span>
+                                            {incidencia.creada_por}
+                                        </div>
+                                    ) : (
+                                        <span></span>
+                                    )}
+
+                                    <button
+                                        onClick={() => handleDelete(incidencia.id)}
+                                        style={{
+                                            backgroundColor: 'transparent',
+                                            color: '#ef4444',
+                                            border: '1px solid #ef4444',
+                                            borderRadius: '6px',
+                                            padding: '6px 12px',
+                                            fontSize: '0.8rem',
+                                            fontWeight: 600,
+                                            cursor: 'pointer',
+                                            transition: 'all 0.2s',
+                                        }}
+                                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#fef2f2'}
+                                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                                    >
+                                        Eliminar
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     ))}
                 </div>
             )}
-        </main>
+        </div>
     )
 }

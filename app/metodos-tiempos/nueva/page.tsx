@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { SECCIONES, ESTADOS } from '@/lib/constants'
 
-export default function NuevaIncidenciaPage() {
+export default function NuevaMetodosPage() {
     const router = useRouter()
     const supabase = createClient()
     const [loading, setLoading] = useState(false)
@@ -24,7 +24,7 @@ export default function NuevaIncidenciaPage() {
 
         try {
             const { error } = await supabase
-                .from('incidencias')
+                .from('metodos_items')
                 .insert([
                     {
                         titulo: formData.titulo,
@@ -37,11 +37,11 @@ export default function NuevaIncidenciaPage() {
 
             if (error) throw error
 
-            router.push('/incidencias')
+            router.push('/metodos-tiempos')
             router.refresh()
         } catch (error: any) {
-            console.error('Error al crear incidencia:', error)
-            alert(`Error al crear la incidencia: ${error.message || error.toString()}`)
+            console.error('Error al crear registro:', error)
+            alert(`Error al guardar: ${error.message || error.toString()}`)
         } finally {
             setLoading(false)
         }
@@ -71,19 +71,18 @@ export default function NuevaIncidenciaPage() {
                     color: '#1e293b',
                     fontWeight: 700
                 }}>
-                    Nueva incidencia
+                    Nuevo registro Métodos
                 </h1>
 
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                    {/* ... form content ... */}
                     {/* Título */}
                     <div>
-                        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Título de la incidencia *</label>
+                        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Título / Identificador *</label>
                         <input
                             type="text"
                             name="titulo"
                             required
-                            placeholder="Ej: Luz fundida en pasillo"
+                            placeholder="Ej: Análisis línea 1"
                             value={formData.titulo}
                             onChange={handleChange}
                             style={{
@@ -152,7 +151,7 @@ export default function NuevaIncidenciaPage() {
                             value={formData.descripcion}
                             onChange={handleChange}
                             rows={5}
-                            placeholder="Describe el problema con más detalle..."
+                            placeholder="Detalles sobre el estudio o método..."
                             style={{
                                 width: '100%',
                                 padding: '12px',
@@ -188,7 +187,7 @@ export default function NuevaIncidenciaPage() {
                     <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
                         <button
                             type="button"
-                            onClick={() => router.push('/incidencias')}
+                            onClick={() => router.push('/metodos-tiempos')}
                             style={{
                                 padding: '12px 24px',
                                 backgroundColor: 'white',
@@ -218,7 +217,7 @@ export default function NuevaIncidenciaPage() {
                                 boxShadow: '0 4px 6px -1px rgba(220, 38, 38, 0.2)'
                             }}
                         >
-                            {loading ? 'Guardando...' : 'Guardar Incidencia'}
+                            {loading ? 'Guardando...' : 'Guardar Registro'}
                         </button>
                     </div>
                 </form>

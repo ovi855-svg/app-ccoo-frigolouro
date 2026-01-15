@@ -19,22 +19,18 @@ export default function Navbar() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 {/* Logo contenedor circular */}
                 <div style={{
-                    width: '45px',
-                    height: '45px',
-                    borderRadius: '50%',
-                    overflow: 'hidden',
+                    height: '80px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    backgroundColor: 'white',
-                    border: '1px solid #eee'
                 }}>
+                    {/* @ts-ignore - Validación de tipos de Next.js Image a veces falla en build estricto */}
                     <Image
                         src="/logo.png"
                         alt="Logo CCOO"
-                        width={40}
-                        height={40}
-                        style={{ width: 'auto', height: '80%' }}
+                        width={80}
+                        height={80}
+                        style={{ width: 'auto', height: '100%' }}
                         priority
                     />
                 </div>
@@ -48,27 +44,42 @@ export default function Navbar() {
                 </div>
             </div>
             <div style={{ display: 'flex', gap: '20px' }}>
-                <Link href="/incidencias" style={{
+                <Link href="/" style={{
                     textDecoration: 'none',
                     color: '#333',
-                    fontWeight: 500,
-                    fontSize: '0.95rem',
-                    padding: '8px 12px',
+                    fontWeight: 600,
+                    fontSize: '1rem',
+                    padding: '8px 16px',
                     borderRadius: '6px',
-                    transition: 'background-color 0.2s'
+                    transition: 'all 0.2s',
+                    backgroundColor: 'transparent'
                 }} className="hover:bg-gray-100">
-                    Incidencias
+                    Inicio
                 </Link>
-                <Link href="/informe" style={{
+                <Link href="/orden-del-dia" style={{
                     textDecoration: 'none',
                     color: '#333',
-                    fontWeight: 500,
-                    fontSize: '0.95rem',
-                    padding: '8px 12px',
+                    fontWeight: 600,
+                    fontSize: '1rem',
+                    padding: '8px 16px',
                     borderRadius: '6px',
-                    transition: 'background-color 0.2s'
+                    transition: 'all 0.2s',
+                    backgroundColor: '#fee2e2',
+                    border: '1px solid #fecaca'
+                }} className="hover:bg-red-50">
+                    Orden del Día
+                </Link>
+                <Link href="/metodos-tiempos" style={{
+                    textDecoration: 'none',
+                    color: '#333',
+                    fontWeight: 600,
+                    fontSize: '1rem',
+                    padding: '8px 16px',
+                    borderRadius: '6px',
+                    transition: 'all 0.2s',
+                    backgroundColor: 'transparent'
                 }} className="hover:bg-gray-100">
-                    Informe PDF
+                    Métodos y Tiempos
                 </Link>
             </div>
         </nav>

@@ -2,11 +2,11 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase'
-import { SECCIONES, ESTADOS } from '@/lib/constants'
+import { SECCIONES } from '@/lib/constants'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
-export default function InformePage() {
+export default function InformeGenerator() {
     const [loading, setLoading] = useState(false)
     const [startDate, setStartDate] = useState(() => {
         const d = new Date()
@@ -24,7 +24,7 @@ export default function InformePage() {
             // Query a Supabase
             let query = supabase
                 .from('incidencias')
-                .select('*')
+                .select('*, historial_cambios(*)')
                 .gte('created_at', `${startDate}T00:00:00`)
                 .lte('created_at', `${endDate}T23:59:59`)
                 .order('created_at', { ascending: true })
@@ -33,7 +33,19 @@ export default function InformePage() {
                 query = query.eq('seccion', filterSeccion)
             }
 
-            const { data: incidencias, error } = await query
+            const { data: rawData, error } = await query
+
+            if (error) throw error
+
+            // Procesar datos para ordenar historial
+            const incidencias = (rawData as any[] || []).map(inc => ({
+                ...inc,
+                historial_cambios: inc.historial_cambios
+                    ? inc.historial_cambios.sort((a: any, b: any) =>
+                        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+                    )
+                    : []
+            }))
 
             if (error) throw error
             if (!incidencias || incidencias.length === 0) {
@@ -53,34 +65,34 @@ export default function InformePage() {
                     img.onload = resolve
                     img.onerror = reject
                 })
-                doc.addImage(img, 'PNG', 14, 10, 15, 15)
+                doc.addImage(img, 'PNG', 14, 10, 30, 30)
             } catch (e) {
                 console.warn('No se pudo cargar el logo', e)
             }
 
-            // Título y Cabecera (ajustado para logo)
+            // Título y Cabecera
             doc.setFontSize(20)
             doc.setTextColor(220, 38, 38) // Rojo CCOO
-            doc.text('Informe de Incidencias', 35, 20) // Movido a la derecha
+            doc.text('Informe de Incidencias', 50, 22)
 
             doc.setFontSize(12)
             doc.setTextColor(0) // Negro
-            doc.text('Sección Sindical CCOO Frigolouro', 35, 28)
+            doc.text('Sección Sindical CCOO Frigolouro', 50, 30)
 
             // Separador
             doc.setLineWidth(0.5)
             doc.setDrawColor(200, 200, 200)
-            doc.line(14, 36, 196, 36)
+            doc.line(14, 45, 196, 45)
 
             // Info fecha
             doc.setFontSize(10)
-            doc.text(`Generado el: ${new Date().toLocaleDateString('es-ES')}`, 14, 46)
-            doc.text(`Rango: ${new Date(startDate).toLocaleDateString('es-ES')} a ${new Date(endDate).toLocaleDateString('es-ES')}`, 14, 52)
+            doc.text(`Generado el: ${new Date().toLocaleDateString('es-ES')}`, 14, 55)
+            doc.text(`Rango: ${new Date(startDate).toLocaleDateString('es-ES')} a ${new Date(endDate).toLocaleDateString('es-ES')}`, 14, 61)
 
-            let yPos = 62
+            let yPos = 71
             if (filterSeccion !== 'TODAS') {
-                doc.text(`Sección filtrada: ${filterSeccion}`, 14, 58)
-                yPos = 68
+                doc.text(`Sección filtrada: ${filterSeccion}`, 14, 67)
+                yPos = 77
             }
 
             // Resumen por estado
@@ -123,12 +135,10 @@ export default function InformePage() {
                 const seccion = inc.seccion || '-'
                 const descripcion = inc.descripcion || 'Sin descripción'
 
-                // Calcular altura de la descripción para ver si cabe
                 const descLines = doc.splitTextToSize(descripcion, 180)
                 const descHeight = descLines.length * 5
-                const itemHeight = 35 + descHeight // Altura estimada del bloque
+                const itemHeight = 35 + descHeight
 
-                // Nueva página si no cabe
                 if (currentY + itemHeight > 280) {
                     doc.addPage()
                     currentY = 20
@@ -144,7 +154,6 @@ export default function InformePage() {
                 doc.text(`Sección:`, 80, currentY)
                 doc.setFont('helvetica', 'normal')
                 doc.text(seccion, 100, currentY)
-
                 currentY += 7
 
                 // Fila 2: Título
@@ -152,18 +161,41 @@ export default function InformePage() {
                 doc.text(`Título:`, 14, currentY)
                 doc.setFont('helvetica', 'normal')
                 doc.text(titulo, 30, currentY)
-
                 currentY += 7
 
                 // Fila 3: Descripción
                 doc.setFont('helvetica', 'bold')
                 doc.text(`Descripción:`, 14, currentY)
                 currentY += 5
-
                 doc.setFont('helvetica', 'normal')
                 doc.text(descLines, 14, currentY)
-
                 currentY += descHeight + 5
+
+                // Fila 4: Estado Actual
+                doc.setFont('helvetica', 'bold')
+                doc.text(`Estado Actual:`, 14, currentY)
+                doc.setFont('helvetica', 'normal')
+                doc.text(inc.estado, 45, currentY)
+                currentY += 7
+
+                // Fila 5: Historial
+                if (inc.historial_cambios && inc.historial_cambios.length > 0) {
+                    doc.setFont('helvetica', 'bold')
+                    doc.text(`Historial de Cambios:`, 14, currentY)
+                    currentY += 5
+
+                    doc.setFont('helvetica', 'normal')
+                    inc.historial_cambios.forEach((cambio: any) => {
+                        if (currentY + 5 > 280) {
+                            doc.addPage()
+                            currentY = 20
+                        }
+                        const fechaCambio = new Date(cambio.created_at).toLocaleString('es-ES')
+                        doc.text(`- ${fechaCambio}: ${cambio.nuevo_estado}`, 20, currentY)
+                        currentY += 5
+                    })
+                    currentY += 2
+                }
 
                 // Línea separadora
                 doc.setDrawColor(220, 220, 220)
@@ -182,110 +214,107 @@ export default function InformePage() {
     }
 
     return (
-        <main>
-            <div style={{
-                backgroundColor: 'white',
-                padding: '30px',
-                borderRadius: '16px',
-                boxShadow: '0 4px 6px rgba(0,0,0,0.04)',
-                maxWidth: '600px',
-                margin: '0 auto'
+        <div style={{
+            backgroundColor: 'white',
+            padding: '30px',
+            borderRadius: '16px',
+            boxShadow: '0 4px 6px rgba(0,0,0,0.04)',
+            maxWidth: '600px',
+            margin: '20px auto'
+        }}>
+            <h2 style={{
+                marginTop: 0,
+                marginBottom: '25px',
+                fontSize: '1.5rem',
+                color: '#1e293b',
+                fontWeight: 700
             }}>
-                <h1 style={{
-                    marginTop: 0,
-                    marginBottom: '25px',
-                    fontSize: '1.8rem',
-                    color: '#1e293b',
-                    fontWeight: 700
-                }}>
-                    Generar Informe PDF
-                </h1>
+                Generar Informe de Incidencias
+            </h2>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Fecha Inicio</label>
-                        <input
-                            type="date"
-                            value={startDate}
-                            onChange={(e) => setStartDate(e.target.value)}
-                            style={{
-                                width: '100%',
-                                padding: '10px 12px',
-                                border: '1px solid #cbd5e1',
-                                borderRadius: '8px',
-                                outline: 'none'
-                            }}
-                        />
-                    </div>
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Fecha Fin</label>
-                        <input
-                            type="date"
-                            value={endDate}
-                            onChange={(e) => setEndDate(e.target.value)}
-                            style={{
-                                width: '100%',
-                                padding: '10px 12px',
-                                border: '1px solid #cbd5e1',
-                                borderRadius: '8px',
-                                outline: 'none'
-                            }}
-                        />
-                    </div>
-                </div>
-
-                <div style={{ marginBottom: '30px' }}>
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Filtrar por Sección</label>
-                    <select
-                        value={filterSeccion}
-                        onChange={(e) => setFilterSeccion(e.target.value)}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                <div>
+                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Fecha Inicio</label>
+                    <input
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
                         style={{
                             width: '100%',
                             padding: '10px 12px',
                             border: '1px solid #cbd5e1',
                             borderRadius: '8px',
-                            backgroundColor: 'white',
                             outline: 'none'
                         }}
-                    >
-                        <option value="TODAS">TODAS</option>
-                        {SECCIONES.map(sec => (
-                            <option key={sec} value={sec}>{sec}</option>
-                        ))}
-                    </select>
+                    />
                 </div>
+                <div>
+                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Fecha Fin</label>
+                    <input
+                        type="date"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        style={{
+                            width: '100%',
+                            padding: '10px 12px',
+                            border: '1px solid #cbd5e1',
+                            borderRadius: '8px',
+                            outline: 'none'
+                        }}
+                    />
+                </div>
+            </div>
 
-                <button
-                    onClick={generatePDF}
-                    disabled={loading}
+            <div style={{ marginBottom: '30px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Filtrar por Sección</label>
+                <select
+                    value={filterSeccion}
+                    onChange={(e) => setFilterSeccion(e.target.value)}
                     style={{
                         width: '100%',
-                        padding: '14px',
-                        backgroundColor: 'var(--ccoo-red)',
-                        color: 'white',
-                        border: 'none',
+                        padding: '10px 12px',
+                        border: '1px solid #cbd5e1',
                         borderRadius: '8px',
-                        fontSize: '1.05rem',
-                        cursor: loading ? 'not-allowed' : 'pointer',
-                        fontWeight: 'bold',
-                        boxShadow: '0 4px 6px -1px rgba(220, 38, 38, 0.2)',
-                        transition: 'all 0.2s',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '10px'
+                        backgroundColor: 'white',
+                        outline: 'none'
                     }}
                 >
-                    {loading ? (
-                        <span>Generando...</span>
-                    ) : (
-                        <>
-                            <span>Descargar Informe PDF</span>
-                        </>
-                    )}
-                </button>
-
+                    <option value="TODAS">TODAS</option>
+                    {SECCIONES.map(sec => (
+                        <option key={sec} value={sec}>{sec}</option>
+                    ))}
+                </select>
             </div>
-        </main>
+
+            <button
+                onClick={generatePDF}
+                disabled={loading}
+                style={{
+                    width: '100%',
+                    padding: '14px',
+                    backgroundColor: 'var(--ccoo-red)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '1.05rem',
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                    fontWeight: 'bold',
+                    boxShadow: '0 4px 6px -1px rgba(220, 38, 38, 0.2)',
+                    transition: 'all 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '10px'
+                }}
+            >
+                {loading ? (
+                    <span>Generando...</span>
+                ) : (
+                    <>
+                        <span>Descargar Informe PDF</span>
+                    </>
+                )}
+            </button>
+        </div>
     )
 }
