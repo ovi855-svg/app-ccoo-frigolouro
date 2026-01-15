@@ -152,6 +152,17 @@ export default function SaludManager() {
                 }}>
                     + Nueva Incidencia
                 </a>
+                <a href="/salud-laboral/informe" style={{
+                    padding: '10px 20px',
+                    backgroundColor: 'white',
+                    color: '#64748b',
+                    border: '1px solid #cbd5e1',
+                    textDecoration: 'none',
+                    borderRadius: '8px',
+                    fontWeight: 600
+                }}>
+                    📄 Generar Informe
+                </a>
             </div>
 
             {/* Filtros */}
