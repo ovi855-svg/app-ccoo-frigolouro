@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase'
-import { SECCIONES } from '@/lib/constants'
+import { SECCIONES, ESTADOS_SOLICITUDES } from '@/lib/constants'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
@@ -15,6 +15,7 @@ export default function MetodosInformeGenerator() {
     })
     const [endDate, setEndDate] = useState(() => new Date().toISOString().split('T')[0])
     const [filterSeccion, setFilterSeccion] = useState('TODAS')
+    const [filterEstado, setFilterEstado] = useState('TODAS')
     const supabase = createClient()
 
     const generatePDF = async () => {
@@ -31,6 +32,9 @@ export default function MetodosInformeGenerator() {
 
             if (filterSeccion !== 'TODAS') {
                 query = query.eq('seccion', filterSeccion)
+            }
+            if (filterEstado !== 'TODAS') {
+                query = query.eq('estado', filterEstado)
             }
 
             const { data: rawData, error } = await query
@@ -86,9 +90,14 @@ export default function MetodosInformeGenerator() {
 
             let yPos = 71
             if (filterSeccion !== 'TODAS') {
-                doc.text(`Sección filtrada: ${filterSeccion}`, 14, 67)
-                yPos = 77
+                doc.text(`Sección filtrada: ${filterSeccion}`, 14, yPos)
+                yPos += 6
             }
+            if (filterEstado !== 'TODAS') {
+                doc.text(`Estado filtrado: ${filterEstado}`, 14, yPos)
+                yPos += 6
+            }
+            yPos += 6
 
             const stats = items.reduce((acc: any, curr: any) => {
                 acc[curr.estado] = (acc[curr.estado] || 0) + 1
@@ -244,25 +253,47 @@ export default function MetodosInformeGenerator() {
                 </div>
             </div>
 
-            <div style={{ marginBottom: '30px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Filtrar por Sección</label>
-                <select
-                    value={filterSeccion}
-                    onChange={(e) => setFilterSeccion(e.target.value)}
-                    style={{
-                        width: '100%',
-                        padding: '10px 12px',
-                        border: '1px solid #cbd5e1',
-                        borderRadius: '8px',
-                        backgroundColor: 'white',
-                        outline: 'none'
-                    }}
-                >
-                    <option value="TODAS">TODAS</option>
-                    {SECCIONES.map(sec => (
-                        <option key={sec} value={sec}>{sec}</option>
-                    ))}
-                </select>
+            <div className="grid-two-columns">
+                <div>
+                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Filtrar por Sección</label>
+                    <select
+                        value={filterSeccion}
+                        onChange={(e) => setFilterSeccion(e.target.value)}
+                        style={{
+                            width: '100%',
+                            padding: '10px 12px',
+                            border: '1px solid #cbd5e1',
+                            borderRadius: '8px',
+                            backgroundColor: 'white',
+                            outline: 'none'
+                        }}
+                    >
+                        <option value="TODAS">TODAS</option>
+                        {SECCIONES.map(sec => (
+                            <option key={sec} value={sec}>{sec}</option>
+                        ))}
+                    </select>
+                </div>
+                <div>
+                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Filtrar por Estado</label>
+                    <select
+                        value={filterEstado}
+                        onChange={(e) => setFilterEstado(e.target.value)}
+                        style={{
+                            width: '100%',
+                            padding: '10px 12px',
+                            border: '1px solid #cbd5e1',
+                            borderRadius: '8px',
+                            backgroundColor: 'white',
+                            outline: 'none'
+                        }}
+                    >
+                        <option value="TODAS">TODAS</option>
+                        {ESTADOS_SOLICITUDES.map(est => (
+                            <option key={est} value={est}>{est}</option>
+                        ))}
+                    </select>
+                </div>
             </div>
 
             <button
