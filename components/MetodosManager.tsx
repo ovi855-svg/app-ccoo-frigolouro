@@ -284,16 +284,16 @@ export default function MetodosManager() {
                                         fontSize: '0.85rem',
                                         cursor: 'pointer',
                                         backgroundColor:
-                                            item.estado === 'Nuevo' ? '#fee2e2' :
-                                                item.estado === 'Comunicado Encargado' ? '#dbeafe' :
-                                                    item.estado === 'Orden del Dia' ? '#f3e8ff' :
-                                                        item.estado === 'Pendiente' ? '#ffedd5' :
+                                            item.estado === 'Nueva' ? '#fee2e2' :
+                                                item.estado === 'Solicitada' ? '#dbeafe' :
+                                                    item.estado === 'Pendiente de respuesta' ? '#ffedd5' :
+                                                        item.estado === 'Rechazada' ? '#f1f5f9' :
                                                             '#dcfce7',
                                         color:
-                                            item.estado === 'Nuevo' ? '#991b1b' :
-                                                item.estado === 'Comunicado Encargado' ? '#1e40af' :
-                                                    item.estado === 'Orden del Dia' ? '#6b21a8' :
-                                                        item.estado === 'Pendiente' ? '#9a3412' :
+                                            item.estado === 'Nueva' ? '#991b1b' :
+                                                item.estado === 'Solicitada' ? '#1e40af' :
+                                                    item.estado === 'Pendiente de respuesta' ? '#9a3412' :
+                                                        item.estado === 'Rechazada' ? '#475569' :
                                                             '#166534',
                                         outline: 'none',
                                         appearance: 'none',

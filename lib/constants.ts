@@ -18,9 +18,9 @@ export const SECCIONES = [
 ] as const;
 
 export const ESTADOS = [
-    "Nuevo",
-    "Comunicado Encargado",
-    "Orden del Dia",
-    "Pendiente",
-    "Solucionado"
+    "Nueva",
+    "Solicitada",
+    "Pendiente de respuesta",
+    "Rechazada",
+    "Solucionada"
 ] as const;

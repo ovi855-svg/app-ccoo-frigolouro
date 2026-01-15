@@ -15,7 +15,7 @@ export default function NuevaMetodosPage() {
         seccion: SECCIONES[0],
         descripcion: '',
         creada_por: '',
-        estado: 'Nuevo'
+        estado: 'Nueva'
     })
 
     const handleSubmit = async (e: React.FormEvent) => {
