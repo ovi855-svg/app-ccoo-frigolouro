@@ -200,7 +200,6 @@ export default function MetodosInformeGenerator() {
     }
 
     return (
-    return (
         <div className="form-container" style={{ maxWidth: '600px', margin: '20px auto' }}>
             <h2 style={{
                 marginTop: 0,
