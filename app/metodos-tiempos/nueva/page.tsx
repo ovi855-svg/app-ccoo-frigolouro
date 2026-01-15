@@ -48,7 +48,7 @@ export default function NuevaIncidenciaMetodos() {
             router.refresh()
         } catch (error: any) {
             console.error('Error:', error)
-            alert('Error al crear el registro. Por favor, inténtelo de nuevo.')
+            alert(`Error al crear el registro: ${error.message || 'Error desconocido'}.`)
         } finally {
             setLoading(false)
         }
