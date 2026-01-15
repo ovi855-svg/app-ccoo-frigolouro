@@ -17,7 +17,15 @@ export const SECCIONES = [
     "SALAZON MENUDOS"
 ] as const;
 
-export const ESTADOS = [
+export const ESTADOS_INCIDENCIAS = [
+    "Nuevo",
+    "Comunicado Encargado",
+    "Orden del Dia",
+    "Pendiente",
+    "Solucionado"
+] as const;
+
+export const ESTADOS_SOLICITUDES = [
     "Nueva",
     "Solicitada",
     "Pendiente de respuesta",

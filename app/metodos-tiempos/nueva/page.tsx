@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
-import { SECCIONES, ESTADOS } from '@/lib/constants'
+import { SECCIONES, ESTADOS_SOLICITUDES } from '@/lib/constants'
 
 export default function NuevaMetodosPage() {
     const router = useRouter()
@@ -136,7 +136,7 @@ export default function NuevaMetodosPage() {
                                     backgroundColor: 'white'
                                 }}
                             >
-                                {ESTADOS.map(est => (
+                                {ESTADOS_SOLICITUDES.map(est => (
                                     <option key={est} value={est}>{est}</option>
                                 ))}
                             </select>

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { Incidencia } from '@/lib/types'
-import { SECCIONES, ESTADOS } from '@/lib/constants'
+import { SECCIONES, ESTADOS_INCIDENCIAS } from '@/lib/constants'
 
 export default function IncidenciasManager() {
     const [incidencias, setIncidencias] = useState<Incidencia[]>([])
@@ -214,7 +214,7 @@ export default function IncidenciasManager() {
                         }}
                     >
                         <option value="TODOS">Todos los estados</option>
-                        {ESTADOS.map(est => (
+                        {ESTADOS_INCIDENCIAS.map(est => (
                             <option key={est} value={est}>{est}</option>
                         ))}
                     </select>
@@ -302,7 +302,7 @@ export default function IncidenciasManager() {
                                         textAlign: 'center'
                                     }}
                                 >
-                                    {ESTADOS.map(est => (
+                                    {ESTADOS_INCIDENCIAS.map(est => (
                                         <option key={est} value={est}>{est}</option>
                                     ))}
                                 </select>

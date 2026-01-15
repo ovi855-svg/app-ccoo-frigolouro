@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
-import { SECCIONES, ESTADOS } from '@/lib/constants'
+import { SECCIONES, ESTADOS_INCIDENCIAS } from '@/lib/constants'
 
 export default function NuevaIncidenciaPage() {
     const router = useRouter()
@@ -137,7 +137,7 @@ export default function NuevaIncidenciaPage() {
                                     backgroundColor: 'white'
                                 }}
                             >
-                                {ESTADOS.map(est => (
+                                {ESTADOS_INCIDENCIAS.map(est => (
                                     <option key={est} value={est}>{est}</option>
                                 ))}
                             </select>

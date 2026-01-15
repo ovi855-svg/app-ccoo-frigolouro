@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { Incidencia } from '@/lib/types'
-import { SECCIONES, ESTADOS } from '@/lib/constants'
+import { SECCIONES, ESTADOS_SOLICITUDES } from '@/lib/constants'
 
 // Usamos la misma interfaz Incidencia por ahora ya que la estructura es idéntica
 // Solo cambiaremos las tablas de origen
@@ -214,7 +214,7 @@ export default function MetodosManager() {
                         }}
                     >
                         <option value="TODOS">Todos los estados</option>
-                        {ESTADOS.map(est => (
+                        {ESTADOS_SOLICITUDES.map(est => (
                             <option key={est} value={est}>{est}</option>
                         ))}
                     </select>
@@ -300,7 +300,7 @@ export default function MetodosManager() {
                                         textAlign: 'center'
                                     }}
                                 >
-                                    {ESTADOS.map(est => (
+                                    {ESTADOS_SOLICITUDES.map(est => (
                                         <option key={est} value={est}>{est}</option>
                                     ))}
                                 </select>
