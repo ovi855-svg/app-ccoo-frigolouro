@@ -53,34 +53,34 @@ export default function InformePage() {
                     img.onload = resolve
                     img.onerror = reject
                 })
-                doc.addImage(img, 'PNG', 14, 10, 15, 15)
+                doc.addImage(img, 'PNG', 14, 10, 30, 30) // Más grande (30x30)
             } catch (e) {
                 console.warn('No se pudo cargar el logo', e)
             }
 
-            // Título y Cabecera (ajustado para logo)
+            // Título y Cabecera (ajustado para logo más grande)
             doc.setFontSize(20)
             doc.setTextColor(220, 38, 38) // Rojo CCOO
-            doc.text('Informe de Incidencias', 35, 20) // Movido a la derecha
+            doc.text('Informe de Incidencias', 50, 22) // Movido más a la derecha (X=50)
 
             doc.setFontSize(12)
             doc.setTextColor(0) // Negro
-            doc.text('Sección Sindical CCOO Frigolouro', 35, 28)
+            doc.text('Sección Sindical CCOO Frigolouro', 50, 30)
 
-            // Separador
+            // Separador (bajado a Y=45 para no cortar el logo)
             doc.setLineWidth(0.5)
             doc.setDrawColor(200, 200, 200)
-            doc.line(14, 36, 196, 36)
+            doc.line(14, 45, 196, 45)
 
-            // Info fecha
+            // Info fecha (bajada acorde al separador)
             doc.setFontSize(10)
-            doc.text(`Generado el: ${new Date().toLocaleDateString('es-ES')}`, 14, 46)
-            doc.text(`Rango: ${new Date(startDate).toLocaleDateString('es-ES')} a ${new Date(endDate).toLocaleDateString('es-ES')}`, 14, 52)
+            doc.text(`Generado el: ${new Date().toLocaleDateString('es-ES')}`, 14, 55)
+            doc.text(`Rango: ${new Date(startDate).toLocaleDateString('es-ES')} a ${new Date(endDate).toLocaleDateString('es-ES')}`, 14, 61)
 
-            let yPos = 62
+            let yPos = 71
             if (filterSeccion !== 'TODAS') {
-                doc.text(`Sección filtrada: ${filterSeccion}`, 14, 58)
-                yPos = 68
+                doc.text(`Sección filtrada: ${filterSeccion}`, 14, 67)
+                yPos = 77
             }
 
             // Resumen por estado
@@ -248,43 +248,45 @@ export default function InformePage() {
                             outline: 'none'
                         }}
                     >
-                        <option value="TODAS">TODAS</option>
+                        <option value="TODAS">Todas las secciones</option>
                         {SECCIONES.map(sec => (
                             <option key={sec} value={sec}>{sec}</option>
                         ))}
                     </select>
                 </div>
 
-                <button
-                    onClick={generatePDF}
-                    disabled={loading}
-                    style={{
-                        width: '100%',
-                        padding: '14px',
-                        backgroundColor: 'var(--ccoo-red)',
-                        color: 'white',
-                        border: 'none',
+                <div style={{ display: 'flex', gap: '15px' }}>
+                    <a href="/incidencias" style={{
+                        flex: 1,
+                        padding: '12px',
+                        backgroundColor: 'white',
+                        color: '#64748b',
+                        border: '1px solid #cbd5e1',
                         borderRadius: '8px',
-                        fontSize: '1.05rem',
-                        cursor: loading ? 'not-allowed' : 'pointer',
-                        fontWeight: 'bold',
-                        boxShadow: '0 4px 6px -1px rgba(220, 38, 38, 0.2)',
-                        transition: 'all 0.2s',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '10px'
-                    }}
-                >
-                    {loading ? (
-                        <span>Generando...</span>
-                    ) : (
-                        <>
-                            <span>Descargar Informe PDF</span>
-                        </>
-                    )}
-                </button>
-
+                        textAlign: 'center',
+                        textDecoration: 'none',
+                        fontWeight: 600
+                    }}>
+                        Volver
+                    </a>
+                    <button
+                        onClick={generatePDF}
+                        disabled={loading}
+                        style={{
+                            flex: 2,
+                            padding: '12px',
+                            backgroundColor: 'var(--ccoo-red)',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '8px',
+                            fontWeight: 600,
+                            cursor: loading ? 'not-allowed' : 'pointer',
+                            opacity: loading ? 0.7 : 1
+                        }}
+                    >
+                        {loading ? 'Generando PDF...' : 'Descargar PDF'}
+                    </button>
+                </div>
             </div>
         </main>
     )
