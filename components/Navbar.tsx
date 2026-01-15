@@ -44,6 +44,18 @@ export default function Navbar() {
                 </div>
             </div>
             <div style={{ display: 'flex', gap: '20px' }}>
+                <Link href="/" style={{
+                    textDecoration: 'none',
+                    color: '#333',
+                    fontWeight: 600,
+                    fontSize: '1rem',
+                    padding: '8px 16px',
+                    borderRadius: '6px',
+                    transition: 'all 0.2s',
+                    backgroundColor: 'transparent'
+                }} className="hover:bg-gray-100">
+                    Inicio
+                </Link>
                 <Link href="/orden-del-dia" style={{
                     textDecoration: 'none',
                     color: '#333',
@@ -51,7 +63,7 @@ export default function Navbar() {
                     fontSize: '1rem',
                     padding: '8px 16px',
                     borderRadius: '6px',
-                    transition: 'background-color 0.2s',
+                    transition: 'all 0.2s',
                     backgroundColor: '#fee2e2',
                     border: '1px solid #fecaca'
                 }} className="hover:bg-red-50">
