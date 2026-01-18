@@ -11,6 +11,7 @@ export interface Incidencia {
     seccion: string;
     titulo: string;
     descripcion?: string | null;
+    contestacion?: string | null;
     estado: string;
     creada_por?: string | null;
     historial_cambios?: HistorialCambio[];
@@ -22,6 +23,7 @@ export interface SaludLaboral {
     seccion: string;
     titulo: string;
     descripcion: string;
+    contestacion?: string | null;
     estado: string;
     creada_por?: string;
     imagen_url?: string | null;

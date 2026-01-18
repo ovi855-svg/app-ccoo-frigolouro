@@ -187,6 +187,20 @@ export default function SaludInformeGenerator() {
                 doc.text(descLines, 14, currentY)
                 currentY += descHeight + 5
 
+                // Fila New: Contestación
+                if (item.contestacion) {
+                    doc.setFont('helvetica', 'bold')
+                    doc.setTextColor(30, 58, 138)
+                    doc.text(`Contestación de la Empresa:`, 14, currentY)
+                    currentY += 5
+
+                    doc.setFont('helvetica', 'italic')
+                    const contLines = doc.splitTextToSize(item.contestacion, 180)
+                    doc.text(contLines, 14, currentY)
+                    doc.setTextColor(0)
+                    currentY += (contLines.length * 5) + 5
+                }
+
                 // Fila 3: Estado Actual
                 doc.setFont('helvetica', 'bold')
                 doc.text(`Estado Actual:`, 14, currentY)

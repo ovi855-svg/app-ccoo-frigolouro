@@ -104,7 +104,7 @@ export default function SaludManager() {
         }
     }
 
-    const handleUpdateField = async (id: string, field: 'titulo' | 'descripcion', value: string) => {
+    const handleUpdateField = async (id: string, field: 'titulo' | 'descripcion' | 'contestacion', value: string) => {
         try {
             setItems(prev => prev.map(item =>
                 item.id === id ? { ...item, [field]: value } : item
@@ -367,6 +367,36 @@ export default function SaludManager() {
                                             whiteSpace: 'pre-wrap'
                                         }}
                                         placeholder="Añadir descripción detallada..."
+                                    />
+                                </div>
+
+                                <div style={{
+                                    marginBottom: '15px',
+                                    backgroundColor: '#eff6ff',
+                                    padding: '12px',
+                                    borderRadius: '6px',
+                                    border: '1px solid #bfdbfe'
+                                }}>
+                                    <h4 style={{
+                                        margin: '0 0 8px 0',
+                                        fontSize: '0.9rem',
+                                        color: '#1e40af',
+                                        fontWeight: 600
+                                    }}>
+                                        Contestación de la Empresa
+                                    </h4>
+                                    <EditableText
+                                        initialValue={item.contestacion || ''}
+                                        onSave={(val) => handleUpdateField(item.id, 'contestacion', val)}
+                                        isTextArea={true}
+                                        style={{
+                                            fontSize: '0.95rem',
+                                            color: '#1e3a8a',
+                                            lineHeight: '1.6',
+                                            whiteSpace: 'pre-wrap',
+                                            fontStyle: 'italic'
+                                        }}
+                                        placeholder="Añadir contestación de la empresa..."
                                     />
                                 </div>
 
