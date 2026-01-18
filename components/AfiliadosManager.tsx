@@ -120,6 +120,52 @@ export default function AfiliadosManager() {
         }
     }
 
+    const handleUpdateGestion = async (gestionId: string, newValue: string) => {
+        try {
+            const { error } = await supabase
+                .from('gestiones_afiliados')
+                .update({ gestion: newValue })
+                .eq('id', gestionId)
+
+            if (error) throw error
+
+            // Actualización optimista
+            setAfiliados(prev => prev.map(a => ({
+                ...a,
+                gestiones_afiliados: a.gestiones_afiliados?.map(g =>
+                    g.id === gestionId ? { ...g, gestion: newValue } : g
+                )
+            })))
+        } catch (err) {
+            console.error('Error actualizando gestión:', err)
+            alert('Error al actualizar gestión')
+            fetchAfiliados()
+        }
+    }
+
+    const handleDeleteGestion = async (gestionId: string) => {
+        if (!confirm('¿Seguro que quieres borrar esta gestión?')) return
+
+        try {
+            const { error } = await supabase
+                .from('gestiones_afiliados')
+                .delete()
+                .eq('id', gestionId)
+
+            if (error) throw error
+
+            // Actualización optimista
+            setAfiliados(prev => prev.map(a => ({
+                ...a,
+                gestiones_afiliados: a.gestiones_afiliados?.filter(g => g.id !== gestionId)
+            })))
+        } catch (err) {
+            console.error('Error borrando gestión:', err)
+            alert('Error al borrar gestión')
+            fetchAfiliados()
+        }
+    }
+
     const filteredAfiliados = afiliados.filter(a => {
         const matchesSeccion = filterSeccion === 'TODAS' || a.seccion === filterSeccion
         const searchLower = searchTerm.toLowerCase()
@@ -403,22 +449,48 @@ export default function AfiliadosManager() {
                                         .map(gestion => (
                                             <div key={gestion.id} style={{
                                                 display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'flex-start',
                                                 gap: '10px',
                                                 fontSize: '0.9rem',
                                                 backgroundColor: '#f8fafc',
                                                 padding: '8px',
                                                 borderRadius: '6px'
                                             }}>
-                                                <span style={{
-                                                    fontWeight: 600,
-                                                    color: '#64748b',
-                                                    minWidth: '85px',
-                                                    fontSize: '0.8rem',
-                                                    paddingTop: '2px'
-                                                }}>
-                                                    {new Date(gestion.created_at).toLocaleDateString('es-ES')}
-                                                </span>
-                                                <span style={{ color: '#334155' }}>{gestion.gestion}</span>
+                                                <div style={{ display: 'flex', gap: '10px', flex: 1 }}>
+                                                    <span style={{
+                                                        fontWeight: 600,
+                                                        color: '#64748b',
+                                                        minWidth: '85px',
+                                                        fontSize: '0.8rem',
+                                                        paddingTop: '3px'
+                                                    }}>
+                                                        {new Date(gestion.created_at).toLocaleDateString('es-ES')}
+                                                    </span>
+                                                    <div style={{ flex: 1, color: '#334155' }}>
+                                                        <EditableText
+                                                            initialValue={gestion.gestion}
+                                                            onSave={(val) => handleUpdateGestion(gestion.id, val)}
+                                                            isTextArea={true}
+                                                            style={{ backgroundColor: 'transparent', padding: 0, border: 'none' }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    onClick={() => handleDeleteGestion(gestion.id)}
+                                                    style={{
+                                                        color: '#94a3b8',
+                                                        backgroundColor: 'transparent',
+                                                        border: 'none',
+                                                        cursor: 'pointer',
+                                                        fontSize: '1rem',
+                                                        padding: '0 4px',
+                                                        lineHeight: 1
+                                                    }}
+                                                    title="Borrar gestión"
+                                                >
+                                                    ×
+                                                </button>
                                             </div>
                                         ))}
                                 </div>
