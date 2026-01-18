@@ -65,6 +65,17 @@ export default function Home() {
                             <p style={{ margin: 0, color: '#64748b', fontSize: '0.95rem' }}>Incidencias y deficiencias en prevención</p>
                         </div>
                     </Link>
+
+                    {/* Tarjeta Afiliados */}
+                    <Link href="/afiliados" className="card-home">
+                        <div className="icon-box" style={{ backgroundColor: '#eff6ff', color: '#2563eb' }}>
+                            👥
+                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0 0 8px 0', color: '#1e293b' }}>Afiliados</h3>
+                            <p style={{ margin: 0, color: '#64748b', fontSize: '0.95rem' }}>Gestión de base de datos de afiliados</p>
+                        </div>
+                    </Link>
                 </div>
             </div>
 
