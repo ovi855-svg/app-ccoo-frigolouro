@@ -402,7 +402,29 @@ export default function AfiliadosManager() {
                                 />
                             </div>
                             <div>
-                                <span style={{ fontWeight: 600, color: '#64748b', fontSize: '0.8rem', display: 'block' }}>Teléfono:</span>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
+                                    <span style={{ fontWeight: 600, color: '#64748b', fontSize: '0.8rem' }}>Teléfono:</span>
+                                    {afiliado.telefono && (
+                                        <a
+                                            href={`tel:${afiliado.telefono}`}
+                                            style={{
+                                                backgroundColor: '#dcfce7',
+                                                color: '#16a34a',
+                                                padding: '2px 8px',
+                                                borderRadius: '12px',
+                                                fontSize: '0.75rem',
+                                                textDecoration: 'none',
+                                                fontWeight: 600,
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '4px',
+                                                border: '1px solid #86efac'
+                                            }}
+                                        >
+                                            📞 Llamar
+                                        </a>
+                                    )}
+                                </div>
                                 <EditableText
                                     initialValue={afiliado.telefono || ''}
                                     onSave={(val) => handleUpdateField(afiliado.id, 'telefono', val)}
