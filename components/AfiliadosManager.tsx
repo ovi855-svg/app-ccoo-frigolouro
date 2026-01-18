@@ -48,8 +48,8 @@ export default function AfiliadosManager() {
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault()
         try {
-            if (!newAfiliado.nombre_completo || !newAfiliado.seccion) {
-                alert('Nombre y Sección son obligatorios')
+            if (!newAfiliado.nombre_completo) {
+                alert('El Nombre Completo es obligatorio')
                 return
             }
 
@@ -183,31 +183,48 @@ export default function AfiliadosManager() {
                     console.log('CSV Parsed:', results.data)
 
                     const filas = results.data as any[]
-                    const nuevosAfiliados: Partial<Afiliado>[] = filas.map(fila => {
-                        // Mapeo flexible de columnas
-                        const nombre = fila['Nombre'] || fila['nombre'] || fila['nombre_completo'] || fila['Nombre Completo']
-                        const seccion = fila['Seccion'] || fila['seccion'] || fila['Sección'] || 'General'
-                        const dni = fila['DNI'] || fila['dni'] || fila['Dni']
-                        const telefono = fila['Telefono'] || fila['telefono'] || fila['Teléfono']
-                        const direccion = fila['Direccion'] || fila['direccion'] || fila['Dirección']
-                        const cp = fila['CP'] || fila['cp'] || fila['Codigo Postal'] || fila['codigo_postal']
-                        const localidad = fila['Localidad'] || fila['localidad']
+                    // Normalización de claves para búsqueda insensible a mayúsculas/acentos
+                    const normalizeKey = (key: string) => key.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim()
 
-                        if (!nombre) return null
+                    const nuevosAfiliados: Partial<Afiliado>[] = filas.map(fila => {
+                        // Crear un mapa de claves normalizadas a valores
+                        const rowMap: Record<string, any> = {}
+                        Object.keys(fila).forEach(key => {
+                            rowMap[normalizeKey(key)] = fila[key]
+                        })
+
+                        // Búsqueda más robusta de columnas
+                        const nombre = rowMap['nombre'] ||
+                            rowMap['nombre completo'] ||
+                            rowMap['apellidos y nombre'] ||
+                            rowMap['trabajador'] ||
+                            rowMap['afiliado'] ||
+                            Object.values(fila)[0] // Último recurso: primera columna
+
+                        const seccion = rowMap['seccion'] || rowMap['departamento'] || 'General'
+                        const dni = rowMap['dni'] || rowMap['nif'] || rowMap['documento']
+                        const telefono = rowMap['telefono'] || rowMap['movil'] || rowMap['celular']
+                        const direccion = rowMap['direccion'] || rowMap['domicilio']
+                        const cp = rowMap['cp'] || rowMap['codigo postal'] || rowMap['cod postal']
+                        const localidad = rowMap['localidad'] || rowMap['poblacion'] || rowMap['municipio']
+
+                        // Validación básica: Si el nombre es muy corto (<3 chars), lo ignoramos
+                        if (!nombre || typeof nombre !== 'string' || nombre.length < 3) return null
 
                         return {
-                            nombre_completo: nombre,
-                            seccion: seccion,
-                            dni: dni,
-                            telefono: telefono,
-                            direccion: direccion,
-                            codigo_postal: cp,
-                            localidad: localidad
+                            nombre_completo: nombre.trim(),
+                            seccion: seccion.trim(),
+                            dni: dni ? String(dni).trim() : null,
+                            telefono: telefono ? String(telefono).trim() : null,
+                            direccion: direccion ? String(direccion).trim() : null,
+                            codigo_postal: cp ? String(cp).trim() : null,
+                            localidad: localidad ? String(localidad).trim() : null
                         }
                     }).filter(Boolean) as Partial<Afiliado>[]
 
                     if (nuevosAfiliados.length === 0) {
-                        alert('No se encontraron datos válidos en el CSV. Asegúrate de tener al menos una columna "Nombre".')
+                        const columnasDetectadas = results.meta.fields?.join(', ') || 'Ninguna'
+                        alert(`No se encontraron datos válidos. \nColumnas detectadas: ${columnasDetectadas}.\nPor favor, asegura que el archivo tenga una columna con el nombre del afiliado (ej: 'Nombre', 'Apellidos y Nombre').`)
                         return
                     }
 
@@ -374,9 +391,8 @@ export default function AfiliadosManager() {
                         </div>
 
                         <div>
-                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, marginBottom: '5px' }}>Sección *</label>
+                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, marginBottom: '5px' }}>Sección</label>
                             <select
-                                required
                                 value={newAfiliado.seccion}
                                 onChange={e => setNewAfiliado({ ...newAfiliado, seccion: e.target.value })}
                                 style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
