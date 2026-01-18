@@ -180,7 +180,25 @@ export default function MetodosInformeGenerator() {
                     const contLines = doc.splitTextToSize(item.contestacion, 180)
                     doc.text(contLines, 14, currentY)
                     doc.setTextColor(0)
-                    currentY += (contLines.length * 5) + 5
+                    currentY += (contLines.length * 5) + 2
+
+                    // Historial de contestación
+                    if (item.historial_cambios) {
+                        const historialCont = item.historial_cambios.filter((h: any) => h.nuevo_estado === 'Contestación Actualizada')
+                        if (historialCont.length > 0) {
+                            doc.setFontSize(8)
+                            doc.setTextColor(100, 116, 139) // Gris
+                            doc.text('Modificado el:', 14, currentY)
+                            currentY += 4
+                            historialCont.forEach((h: any) => {
+                                doc.text(`- ${new Date(h.created_at).toLocaleString('es-ES')}`, 20, currentY)
+                                currentY += 4
+                            })
+                            doc.setFontSize(10)
+                            doc.setTextColor(0)
+                        }
+                    }
+                    currentY += 5
                 }
 
                 doc.setFont('helvetica', 'bold')

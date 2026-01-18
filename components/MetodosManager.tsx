@@ -118,6 +118,21 @@ export default function MetodosManager() {
                 .eq('id', id)
 
             if (error) throw error
+
+            if (field === 'contestacion') {
+                const { error: historyError } = await supabase
+                    .from('metodos_historial')
+                    .insert([
+                        {
+                            item_id: id,
+                            nuevo_estado: 'Contestación Actualizada'
+                        }
+                    ])
+
+                if (historyError) console.error('Error guardando historial de contestación:', historyError)
+
+                fetchItems()
+            }
         } catch (err) {
             console.error(`Error actualizando ${field}:`, err)
             alert(`Error al actualizar ${field}`)
@@ -394,6 +409,23 @@ export default function MetodosManager() {
                                         }}
                                         placeholder="Añadir contestación de la empresa..."
                                     />
+
+                                    {/* Historial de Contestación */}
+                                    {item.historial_cambios && item.historial_cambios.filter(h => h.nuevo_estado === 'Contestación Actualizada').length > 0 && (
+                                        <div style={{ marginTop: '8px', borderTop: '1px dashed #bfdbfe', paddingTop: '6px' }}>
+                                            <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>
+                                                Historial de modificaciones:
+                                            </div>
+                                            {item.historial_cambios
+                                                .filter(h => h.nuevo_estado === 'Contestación Actualizada')
+                                                .map((h, i) => (
+                                                    <div key={i} style={{ fontSize: '0.7rem', color: '#94a3b8' }}>
+                                                        {new Date(h.created_at).toLocaleString('es-ES')}
+                                                    </div>
+                                                ))
+                                            }
+                                        </div>
+                                    )}
                                 </div>
 
                                 {item.historial_cambios && item.historial_cambios.length > 0 && (
@@ -418,16 +450,18 @@ export default function MetodosManager() {
                                                 <span>Creada</span>
                                                 <span>{new Date(item.created_at).toLocaleString('es-ES')}</span>
                                             </div>
-                                            {item.historial_cambios.map((cambio, index) => (
-                                                <div key={index} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
-                                                    <span style={{ fontWeight: 500, color: '#475569' }}>
-                                                        Changed to {cambio.nuevo_estado}
-                                                    </span>
-                                                    <span style={{ color: '#94a3b8' }}>
-                                                        {new Date(cambio.created_at).toLocaleString('es-ES')}
-                                                    </span>
-                                                </div>
-                                            ))}
+                                            {item.historial_cambios
+                                                .filter(cambio => cambio.nuevo_estado !== 'Contestación Actualizada')
+                                                .map((cambio, index) => (
+                                                    <div key={index} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                                                        <span style={{ fontWeight: 500, color: '#475569' }}>
+                                                            Changed to {cambio.nuevo_estado}
+                                                        </span>
+                                                        <span style={{ color: '#94a3b8' }}>
+                                                            {new Date(cambio.created_at).toLocaleString('es-ES')}
+                                                        </span>
+                                                    </div>
+                                                ))}
                                         </div>
                                     </div>
                                 )}
