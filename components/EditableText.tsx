@@ -10,6 +10,7 @@ interface EditableTextProps {
     style?: React.CSSProperties
     placeholder?: string
     label?: string
+    options?: readonly string[]
 }
 
 export default function EditableText({
@@ -19,7 +20,8 @@ export default function EditableText({
     className = '',
     style = {},
     placeholder = 'Haga clic para editar',
-    label
+    label,
+    options
 }: EditableTextProps) {
     const [isEditing, setIsEditing] = useState(false)
     const [value, setValue] = useState(initialValue)
@@ -73,7 +75,40 @@ export default function EditableText({
     if (isEditing) {
         return (
             <div className="editable-text-container" style={{ width: '100%' }}>
-                {isTextArea ? (
+                {options ? (
+                    <select
+                        ref={inputRef as any}
+                        value={value}
+                        onChange={(e) => {
+                            setValue(e.target.value)
+                            // Auto save for select
+                            // But we need to update state first, so maybe better keep manual save
+                            // or utilize the fact that change is instant.
+                            // Let's keep manual save consistent with other inputs for now 
+                            // OR user explicitly requested "editable select", usually implies picking and it's done. 
+                            // However, base component has Save/Cancel buttons. 
+                            // Let's keep consistency: User selects, then clicks Save.
+                        }}
+                        onKeyDown={handleKeyDown}
+                        className={className}
+                        style={{
+                            width: '100%',
+                            padding: '8px',
+                            borderRadius: '4px',
+                            border: '1px solid #3b82f6',
+                            outline: 'none',
+                            fontFamily: 'inherit',
+                            fontSize: 'inherit',
+                            backgroundColor: 'white',
+                            cursor: 'pointer',
+                            ...style
+                        }}
+                    >
+                        {options.map(opt => (
+                            <option key={opt} value={opt}>{opt}</option>
+                        ))}
+                    </select>
+                ) : isTextArea ? (
                     <textarea
                         ref={inputRef as React.RefObject<HTMLTextAreaElement>}
                         value={value}

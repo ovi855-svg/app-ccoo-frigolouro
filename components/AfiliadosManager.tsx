@@ -304,8 +304,13 @@ export default function AfiliadosManager() {
                     }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #f1f5f9', paddingBottom: '10px' }}>
                             <div style={{ flex: 1 }}>
-                                <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                    {afiliado.seccion}
+                                <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
+                                    <EditableText
+                                        initialValue={afiliado.seccion}
+                                        onSave={(val) => handleUpdateField(afiliado.id, 'seccion', val)}
+                                        options={SECCIONES}
+                                        style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b' }}
+                                    />
                                 </div>
                                 <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1e293b' }}>
                                     <EditableText
