@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { Incidencia } from '@/lib/types'
 import { SECCIONES, ESTADOS_SOLICITUDES } from '@/lib/constants'
+import EditableText from './EditableText'
 
 // Usamos la misma interfaz Incidencia por ahora ya que la estructura es idéntica
 // Solo cambiaremos las tablas de origen
@@ -101,6 +102,25 @@ export default function MetodosManager() {
         } catch (err) {
             console.error('Error actualizando estado:', err)
             alert('Error al actualizar el estado')
+            fetchItems()
+        }
+    }
+
+    const handleUpdateField = async (id: number, field: 'titulo' | 'descripcion', value: string) => {
+        try {
+            setItems(prev => prev.map(item =>
+                item.id === id ? { ...item, [field]: value } : item
+            ))
+
+            const { error } = await supabase
+                .from('metodos_items')
+                .update({ [field]: value })
+                .eq('id', id)
+
+            if (error) throw error
+        } catch (err) {
+            console.error(`Error actualizando ${field}:`, err)
+            alert(`Error al actualizar ${field}`)
             fetchItems()
         }
     }
@@ -315,26 +335,36 @@ export default function MetodosManager() {
                                     marginBottom: '10px'
                                 }}>
                                     {item.seccion}
+                                    {item.seccion}
                                 </span>
-                                <h3 style={{
-                                    margin: '0 0 10px 0',
-                                    fontSize: '1.25rem',
-                                    color: '#1e293b',
-                                    fontWeight: 700
-                                }}>
-                                    {item.titulo}
-                                </h3>
-                                {item.descripcion && (
-                                    <p style={{
-                                        margin: '0',
-                                        fontSize: '0.95rem',
-                                        color: '#475569',
-                                        lineHeight: '1.6',
-                                        whiteSpace: 'pre-wrap'
-                                    }}>
-                                        {item.descripcion}
-                                    </p>
-                                )}
+                                <div style={{ marginBottom: '10px' }}>
+                                    <EditableText
+                                        initialValue={item.titulo}
+                                        onSave={(val) => handleUpdateField(item.id, 'titulo', val)}
+                                        className="h3-editable"
+                                        style={{
+                                            fontSize: '1.25rem',
+                                            fontWeight: 700,
+                                            color: '#1e293b',
+                                            margin: 0
+                                        }}
+                                        placeholder="Sin título"
+                                    />
+                                </div>
+                                <div style={{ marginBottom: '15px' }}>
+                                    <EditableText
+                                        initialValue={item.descripcion || ''}
+                                        onSave={(val) => handleUpdateField(item.id, 'descripcion', val)}
+                                        isTextArea={true}
+                                        style={{
+                                            fontSize: '0.95rem',
+                                            color: '#475569',
+                                            lineHeight: '1.6',
+                                            whiteSpace: 'pre-wrap'
+                                        }}
+                                        placeholder="Añadir descripción detallada..."
+                                    />
+                                </div>
 
                                 {item.historial_cambios && item.historial_cambios.length > 0 && (
                                     <div style={{

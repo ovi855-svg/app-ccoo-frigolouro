@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { Incidencia } from '@/lib/types'
 import { SECCIONES, ESTADOS_INCIDENCIAS } from '@/lib/constants'
+import EditableText from './EditableText'
 
 export default function IncidenciasManager() {
     const [incidencias, setIncidencias] = useState<Incidencia[]>([])
@@ -101,6 +102,26 @@ export default function IncidenciasManager() {
             console.error('Error actualizando estado:', err)
             alert('Error al actualizar el estado')
             fetchIncidencias() // Recargar para asegurar consistencia
+        }
+    }
+
+    const handleUpdateField = async (id: number, field: 'titulo' | 'descripcion', value: string) => {
+        try {
+            // Actualización optimista
+            setIncidencias(prev => prev.map(inc =>
+                inc.id === id ? { ...inc, [field]: value } : inc
+            ))
+
+            const { error } = await supabase
+                .from('incidencias')
+                .update({ [field]: value })
+                .eq('id', id)
+
+            if (error) throw error
+        } catch (err) {
+            console.error(`Error actualizando ${field}:`, err)
+            alert(`Error al actualizar ${field}`)
+            fetchIncidencias() // Revertir cambios
         }
     }
 
@@ -318,25 +339,34 @@ export default function IncidenciasManager() {
                                 }}>
                                     {incidencia.seccion}
                                 </span>
-                                <h3 style={{
-                                    margin: '0 0 10px 0',
-                                    fontSize: '1.25rem',
-                                    color: '#1e293b',
-                                    fontWeight: 700
-                                }}>
-                                    {incidencia.titulo}
-                                </h3>
-                                {incidencia.descripcion && (
-                                    <p style={{
-                                        margin: '0',
-                                        fontSize: '0.95rem',
-                                        color: '#475569',
-                                        lineHeight: '1.6',
-                                        whiteSpace: 'pre-wrap'
-                                    }}>
-                                        {incidencia.descripcion}
-                                    </p>
-                                )}
+                                <div style={{ marginBottom: '10px' }}>
+                                    <EditableText
+                                        initialValue={incidencia.titulo}
+                                        onSave={(val) => handleUpdateField(incidencia.id, 'titulo', val)}
+                                        className="h3-editable"
+                                        style={{
+                                            fontSize: '1.25rem',
+                                            fontWeight: 700,
+                                            color: '#1e293b',
+                                            margin: 0
+                                        }}
+                                        placeholder="Sin título"
+                                    />
+                                </div>
+                                <div style={{ marginBottom: '15px' }}>
+                                    <EditableText
+                                        initialValue={incidencia.descripcion || ''}
+                                        onSave={(val) => handleUpdateField(incidencia.id, 'descripcion', val)}
+                                        isTextArea={true}
+                                        style={{
+                                            fontSize: '0.95rem',
+                                            color: '#475569',
+                                            lineHeight: '1.6',
+                                            whiteSpace: 'pre-wrap'
+                                        }}
+                                        placeholder="Añadir descripción detallada..."
+                                    />
+                                </div>
 
                                 {/* Historial de Cambios */}
                                 {incidencia.historial_cambios && incidencia.historial_cambios.length > 0 && (

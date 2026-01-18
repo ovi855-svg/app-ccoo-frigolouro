@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { SaludLaboral } from '@/lib/types'
 import { SECCIONES, ESTADOS_SALUD } from '@/lib/constants'
+import EditableText from './EditableText'
 
 export default function SaludManager() {
     const [items, setItems] = useState<SaludLaboral[]>([])
@@ -99,6 +100,25 @@ export default function SaludManager() {
         } catch (err) {
             console.error('Error actualizando estado:', err)
             alert('Error al actualizar el estado')
+            fetchItems()
+        }
+    }
+
+    const handleUpdateField = async (id: string, field: 'titulo' | 'descripcion', value: string) => {
+        try {
+            setItems(prev => prev.map(item =>
+                item.id === id ? { ...item, [field]: value } : item
+            ))
+
+            const { error } = await supabase
+                .from('salud_laboral')
+                .update({ [field]: value })
+                .eq('id', id)
+
+            if (error) throw error
+        } catch (err) {
+            console.error(`Error actualizando ${field}:`, err)
+            alert(`Error al actualizar ${field}`)
             fetchItems()
         }
     }
@@ -307,14 +327,20 @@ export default function SaludManager() {
                             </div>
 
                             <div style={{ marginTop: '12px' }}>
-                                <h3 style={{
-                                    fontSize: '1.25rem',
-                                    fontWeight: 700,
-                                    color: '#1e293b',
-                                    margin: '0 0 10px 0'
-                                }}>
-                                    {item.titulo}
-                                </h3>
+                                <div style={{ marginBottom: '10px' }}>
+                                    <EditableText
+                                        initialValue={item.titulo}
+                                        onSave={(val) => handleUpdateField(item.id, 'titulo', val)}
+                                        className="h3-editable"
+                                        style={{
+                                            fontSize: '1.25rem',
+                                            fontWeight: 700,
+                                            color: '#1e293b',
+                                            margin: 0
+                                        }}
+                                        placeholder="Sin título"
+                                    />
+                                </div>
                                 <span style={{
                                     backgroundColor: '#f1f5f9',
                                     color: '#475569',
@@ -329,15 +355,20 @@ export default function SaludManager() {
                                     {item.seccion}
                                 </span>
 
-                                <p style={{
-                                    margin: '0',
-                                    fontSize: '0.95rem',
-                                    color: '#475569',
-                                    lineHeight: '1.6',
-                                    whiteSpace: 'pre-wrap'
-                                }}>
-                                    {item.descripcion}
-                                </p>
+                                <div style={{ marginBottom: '15px' }}>
+                                    <EditableText
+                                        initialValue={item.descripcion || ''}
+                                        onSave={(val) => handleUpdateField(item.id, 'descripcion', val)}
+                                        isTextArea={true}
+                                        style={{
+                                            fontSize: '0.95rem',
+                                            color: '#475569',
+                                            lineHeight: '1.6',
+                                            whiteSpace: 'pre-wrap'
+                                        }}
+                                        placeholder="Añadir descripción detallada..."
+                                    />
+                                </div>
 
                                 {/* Historial de Cambios */}
                                 {item.historial_salud && item.historial_salud.length > 0 && (
