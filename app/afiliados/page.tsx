@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import AfiliadosManager from '@/components/AfiliadosManager'
-import Navbar from '@/components/Navbar'
+
 
 export default function AfiliadosPage() {
     return (
@@ -20,8 +20,6 @@ export default function AfiliadosPage() {
             }}>
                 Gestión de Afiliados
             </h1>
-
-            <Navbar />
 
             <div style={{ marginTop: '30px' }}>
                 <Suspense fallback={<div style={{ textAlign: 'center', padding: '20px' }}>Cargando sistema de afiliados...</div>}>
