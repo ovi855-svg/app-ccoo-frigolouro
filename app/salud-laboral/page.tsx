@@ -1,5 +1,8 @@
 import SaludManager from '@/components/SaludManager'
 
+
+export const dynamic = 'force-dynamic'
+
 export default function SaludLaboralPage() {
     return (
         <main style={{ minHeight: '100vh', backgroundColor: '#f8fafc' }}>

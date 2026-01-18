@@ -1,6 +1,8 @@
 import MetodosManager from '@/components/MetodosManager'
 
-export default function MetodosPage() {
+export const dynamic = 'force-dynamic'
+
+export default function MetodosTiemposPage() {
     return (
         <main style={{ minHeight: '100vh', backgroundColor: '#f8fafc' }}>
             <div className="page-container" style={{ paddingTop: '100px', paddingBottom: '40px' }}>

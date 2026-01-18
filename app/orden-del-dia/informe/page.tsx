@@ -1,6 +1,8 @@
 import InformeGenerator from '@/components/InformeGenerator'
 
-export default function OrdenDelDiaInformePage() {
+export const dynamic = 'force-dynamic'
+
+export default function InformeOrdenDiaPage() {
     return (
         <main style={{ minHeight: '100vh', backgroundColor: '#f8fafc' }}>
             <div className="page-container" style={{ paddingTop: '100px', paddingBottom: '40px' }}>

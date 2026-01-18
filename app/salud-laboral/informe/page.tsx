@@ -1,5 +1,8 @@
 import SaludInformeGenerator from '@/components/SaludInformeGenerator'
 
+
+export const dynamic = 'force-dynamic'
+
 export default function InformeSaludPage() {
     return (
         <main style={{ minHeight: '100vh', backgroundColor: '#f8fafc' }}>

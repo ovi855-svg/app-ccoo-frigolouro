@@ -1,6 +1,8 @@
 import IncidenciasManager from '@/components/IncidenciasManager'
 
-export default function OrdenDelDiaPage() {
+export const dynamic = 'force-dynamic'
+
+export default function OrdenDiaPage() {
     return (
         <main style={{ minHeight: '100vh', backgroundColor: '#f8fafc' }}>
             <div className="page-container" style={{ paddingTop: '100px', paddingBottom: '40px' }}>

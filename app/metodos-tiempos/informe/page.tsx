@@ -1,6 +1,8 @@
 import MetodosInformeGenerator from '@/components/MetodosInformeGenerator'
 
-export default function MetodosInformePage() {
+export const dynamic = 'force-dynamic'
+
+export default function InformeMetodosPage() {
     return (
         <main style={{ minHeight: '100vh', backgroundColor: '#f8fafc' }}>
             <div className="page-container" style={{ paddingTop: '100px', paddingBottom: '40px' }}>

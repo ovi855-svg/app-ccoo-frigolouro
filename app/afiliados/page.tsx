@@ -2,6 +2,9 @@ import { Suspense } from 'react'
 import AfiliadosManager from '@/components/AfiliadosManager'
 
 
+
+export const dynamic = 'force-dynamic'
+
 export default function AfiliadosPage() {
     return (
         <main style={{
