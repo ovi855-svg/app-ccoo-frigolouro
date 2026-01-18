@@ -184,7 +184,7 @@ export default function MetodosInformeGenerator() {
 
                     // Historial de contestación
                     if (item.historial_cambios) {
-                        const historialCont = item.historial_cambios.filter((h: any) => h.nuevo_estado === 'Contestación Actualizada')
+                        const historialCont = item.historial_cambios.filter((h: any) => ['Contestación Actualizada', 'Contestación de la Empresa'].includes(h.nuevo_estado))
                         if (historialCont.length > 0) {
                             doc.setFontSize(8)
                             doc.setTextColor(100, 116, 139) // Gris
@@ -208,21 +208,25 @@ export default function MetodosInformeGenerator() {
                 currentY += 7
 
                 if (item.historial_cambios && item.historial_cambios.length > 0) {
-                    doc.setFont('helvetica', 'bold')
-                    doc.text(`Historial de Cambios:`, 14, currentY)
-                    currentY += 5
+                    const cambiosFiltrados = item.historial_cambios.filter((h: any) => !['Contestación Actualizada', 'Contestación de la Empresa'].includes(h.nuevo_estado))
 
-                    doc.setFont('helvetica', 'normal')
-                    item.historial_cambios.forEach((cambio: any) => {
-                        if (currentY + 5 > 280) {
-                            doc.addPage()
-                            currentY = 20
-                        }
-                        const fechaCambio = new Date(cambio.created_at).toLocaleString('es-ES')
-                        doc.text(`- ${fechaCambio}: ${cambio.nuevo_estado}`, 20, currentY)
+                    if (cambiosFiltrados.length > 0) {
+                        doc.setFont('helvetica', 'bold')
+                        doc.text(`Historial de Cambios:`, 14, currentY)
                         currentY += 5
-                    })
-                    currentY += 2
+
+                        doc.setFont('helvetica', 'normal')
+                        cambiosFiltrados.forEach((cambio: any) => {
+                            if (currentY + 5 > 280) {
+                                doc.addPage()
+                                currentY = 20
+                            }
+                            const fechaCambio = new Date(cambio.created_at).toLocaleString('es-ES')
+                            doc.text(`- ${fechaCambio}: ${cambio.nuevo_estado}`, 20, currentY)
+                            currentY += 5
+                        })
+                        currentY += 2
+                    }
                 }
 
                 doc.setDrawColor(220, 220, 220)

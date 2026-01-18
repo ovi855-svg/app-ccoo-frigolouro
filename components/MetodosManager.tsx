@@ -125,7 +125,7 @@ export default function MetodosManager() {
                     .insert([
                         {
                             item_id: id,
-                            nuevo_estado: 'Contestación Actualizada'
+                            nuevo_estado: 'Contestación de la Empresa'
                         }
                     ])
 
@@ -411,13 +411,13 @@ export default function MetodosManager() {
                                     />
 
                                     {/* Historial de Contestación */}
-                                    {item.historial_cambios && item.historial_cambios.filter(h => h.nuevo_estado === 'Contestación Actualizada').length > 0 && (
+                                    {item.historial_cambios && item.historial_cambios.filter(h => ['Contestación Actualizada', 'Contestación de la Empresa'].includes(h.nuevo_estado)).length > 0 && (
                                         <div style={{ marginTop: '8px', borderTop: '1px dashed #bfdbfe', paddingTop: '6px' }}>
                                             <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>
                                                 Historial de modificaciones:
                                             </div>
                                             {item.historial_cambios
-                                                .filter(h => h.nuevo_estado === 'Contestación Actualizada')
+                                                .filter(h => ['Contestación Actualizada', 'Contestación de la Empresa'].includes(h.nuevo_estado))
                                                 .map((h, i) => (
                                                     <div key={i} style={{ fontSize: '0.7rem', color: '#94a3b8' }}>
                                                         {new Date(h.created_at).toLocaleString('es-ES')}
@@ -451,7 +451,7 @@ export default function MetodosManager() {
                                                 <span>{new Date(item.created_at).toLocaleString('es-ES')}</span>
                                             </div>
                                             {item.historial_cambios
-                                                .filter(cambio => cambio.nuevo_estado !== 'Contestación Actualizada')
+                                                .filter(cambio => !['Contestación Actualizada', 'Contestación de la Empresa'].includes(cambio.nuevo_estado))
                                                 .map((cambio, index) => (
                                                     <div key={index} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
                                                         <span style={{ fontWeight: 500, color: '#475569' }}>

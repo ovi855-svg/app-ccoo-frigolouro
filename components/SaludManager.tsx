@@ -123,7 +123,7 @@ export default function SaludManager() {
                     .insert([
                         {
                             salud_id: id,
-                            cambio: 'Contestación Actualizada'
+                            cambio: 'Contestación de la Empresa'
                         }
                     ])
 
@@ -415,13 +415,13 @@ export default function SaludManager() {
                                     />
 
                                     {/* Historial de Contestación */}
-                                    {item.historial_salud && item.historial_salud.filter((h: any) => h.cambio === 'Contestación Actualizada').length > 0 && (
+                                    {item.historial_salud && item.historial_salud.filter((h: any) => ['Contestación Actualizada', 'Contestación de la Empresa'].includes(h.cambio)).length > 0 && (
                                         <div style={{ marginTop: '8px', borderTop: '1px dashed #bfdbfe', paddingTop: '6px' }}>
                                             <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 600, marginBottom: '4px' }}>
                                                 Historial de modificaciones:
                                             </div>
                                             {item.historial_salud
-                                                .filter((h: any) => h.cambio === 'Contestación Actualizada')
+                                                .filter((h: any) => ['Contestación Actualizada', 'Contestación de la Empresa'].includes(h.cambio))
                                                 .map((h: any, i: number) => (
                                                     <div key={i} style={{ fontSize: '0.7rem', color: '#94a3b8' }}>
                                                         {new Date(h.created_at).toLocaleString('es-ES')}
@@ -458,7 +458,7 @@ export default function SaludManager() {
                                             </div>
                                             {/* Cambios */}
                                             {item.historial_salud
-                                                .filter(cambio => cambio.cambio !== 'Contestación Actualizada')
+                                                .filter(cambio => !['Contestación Actualizada', 'Contestación de la Empresa'].includes(cambio.cambio))
                                                 .map((cambio, index) => (
                                                     <div key={index} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
                                                         <span style={{ fontWeight: 500, color: '#475569' }}>

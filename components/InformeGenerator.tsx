@@ -195,7 +195,7 @@ export default function InformeGenerator() {
 
                     // Historial de contestación
                     if (inc.historial_cambios) {
-                        const historialCont = inc.historial_cambios.filter((h: any) => h.nuevo_estado === 'Contestación Actualizada')
+                        const historialCont = inc.historial_cambios.filter((h: any) => ['Contestación Actualizada', 'Contestación de la Empresa'].includes(h.nuevo_estado))
                         if (historialCont.length > 0) {
                             doc.setFontSize(8)
                             doc.setTextColor(100, 116, 139) // Gris
@@ -221,21 +221,25 @@ export default function InformeGenerator() {
 
                 // Fila 5: Historial
                 if (inc.historial_cambios && inc.historial_cambios.length > 0) {
-                    doc.setFont('helvetica', 'bold')
-                    doc.text(`Historial de Cambios:`, 14, currentY)
-                    currentY += 5
+                    const cambiosFiltrados = inc.historial_cambios.filter((h: any) => !['Contestación Actualizada', 'Contestación de la Empresa'].includes(h.nuevo_estado))
 
-                    doc.setFont('helvetica', 'normal')
-                    inc.historial_cambios.forEach((cambio: any) => {
-                        if (currentY + 5 > 280) {
-                            doc.addPage()
-                            currentY = 20
-                        }
-                        const fechaCambio = new Date(cambio.created_at).toLocaleString('es-ES')
-                        doc.text(`- ${fechaCambio}: ${cambio.nuevo_estado}`, 20, currentY)
+                    if (cambiosFiltrados.length > 0) {
+                        doc.setFont('helvetica', 'bold')
+                        doc.text(`Historial de Cambios:`, 14, currentY)
                         currentY += 5
-                    })
-                    currentY += 2
+
+                        doc.setFont('helvetica', 'normal')
+                        cambiosFiltrados.forEach((cambio: any) => {
+                            if (currentY + 5 > 280) {
+                                doc.addPage()
+                                currentY = 20
+                            }
+                            const fechaCambio = new Date(cambio.created_at).toLocaleString('es-ES')
+                            doc.text(`- ${fechaCambio}: ${cambio.nuevo_estado}`, 20, currentY)
+                            currentY += 5
+                        })
+                        currentY += 2
+                    }
                 }
 
                 // Línea separadora
