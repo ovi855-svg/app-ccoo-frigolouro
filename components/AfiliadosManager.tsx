@@ -25,7 +25,7 @@ export default function AfiliadosManager() {
             setLoading(true)
             const { data, error } = await supabase
                 .from('afiliados')
-                .select('*')
+                .select('*, gestiones_afiliados(*)')
                 .order('nombre_completo', { ascending: true })
 
             if (error) throw error
@@ -99,6 +99,24 @@ export default function AfiliadosManager() {
         } catch (err) {
             console.error('Error eliminando afiliado:', err)
             alert('Error al eliminar afiliado')
+        }
+    }
+
+    const handleAddGestion = async (afiliadoId: string, gestion: string) => {
+        if (!gestion.trim()) return
+
+        try {
+            const { error } = await supabase
+                .from('gestiones_afiliados')
+                .insert([{ afiliado_id: afiliadoId, gestion: gestion.trim() }])
+
+            if (error) throw error
+
+            // Recargar para obtener la nueva gestión con su fecha
+            fetchAfiliados()
+        } catch (err) {
+            console.error('Error añadiendo gestión:', err)
+            alert('Error al añadir gestión')
         }
     }
 
@@ -369,6 +387,85 @@ export default function AfiliadosManager() {
                                     placeholder="-"
                                 />
                             </div>
+                        </div>
+
+                        {/* Sección de Gestiones */}
+                        <div style={{ marginTop: '15px', borderTop: '1px solid #f1f5f9', paddingTop: '15px' }}>
+                            <h4 style={{ margin: '0 0 10px 0', fontSize: '0.9rem', color: '#334155', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                Historial de Gestiones
+                            </h4>
+
+                            {/* Lista de Gestiones */}
+                            {afiliado.gestiones_afiliados && afiliado.gestiones_afiliados.length > 0 ? (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '15px' }}>
+                                    {[...afiliado.gestiones_afiliados]
+                                        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                                        .map(gestion => (
+                                            <div key={gestion.id} style={{
+                                                display: 'flex',
+                                                gap: '10px',
+                                                fontSize: '0.9rem',
+                                                backgroundColor: '#f8fafc',
+                                                padding: '8px',
+                                                borderRadius: '6px'
+                                            }}>
+                                                <span style={{
+                                                    fontWeight: 600,
+                                                    color: '#64748b',
+                                                    minWidth: '85px',
+                                                    fontSize: '0.8rem',
+                                                    paddingTop: '2px'
+                                                }}>
+                                                    {new Date(gestion.created_at).toLocaleDateString('es-ES')}
+                                                </span>
+                                                <span style={{ color: '#334155' }}>{gestion.gestion}</span>
+                                            </div>
+                                        ))}
+                                </div>
+                            ) : (
+                                <p style={{ fontSize: '0.85rem', color: '#94a3b8', fontStyle: 'italic', marginBottom: '15px' }}>
+                                    No hay gestiones registradas.
+                                </p>
+                            )}
+
+                            {/* Formulario para añadir gestión */}
+                            <form
+                                onSubmit={(e) => {
+                                    e.preventDefault()
+                                    const input = e.currentTarget.elements.namedItem('nuevaGestion') as HTMLInputElement
+                                    handleAddGestion(afiliado.id, input.value)
+                                    input.value = ''
+                                }}
+                                style={{ display: 'flex', gap: '10px' }}
+                            >
+                                <input
+                                    name="nuevaGestion"
+                                    type="text"
+                                    placeholder="Añadir nueva gestión..."
+                                    style={{
+                                        flex: 1,
+                                        padding: '8px',
+                                        borderRadius: '4px',
+                                        border: '1px solid #cbd5e1',
+                                        fontSize: '0.9rem'
+                                    }}
+                                />
+                                <button
+                                    type="submit"
+                                    style={{
+                                        backgroundColor: '#3b82f6',
+                                        color: 'white',
+                                        border: 'none',
+                                        padding: '8px 15px',
+                                        borderRadius: '4px',
+                                        fontWeight: 600,
+                                        fontSize: '0.9rem',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    Añadir
+                                </button>
+                            </form>
                         </div>
                     </div>
                 ))}

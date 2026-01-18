@@ -35,6 +35,13 @@ export interface SaludLaboral {
     }[];
 }
 
+export interface GestionAfiliado {
+    id: string;
+    created_at: string;
+    afiliado_id: string;
+    gestion: string;
+}
+
 export interface Afiliado {
     id: string; // UUID
     created_at: string;
@@ -45,4 +52,5 @@ export interface Afiliado {
     codigo_postal?: string;
     localidad?: string;
     telefono?: string;
+    gestiones_afiliados?: GestionAfiliado[];
 }
