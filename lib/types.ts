@@ -34,3 +34,15 @@ export interface SaludLaboral {
         created_at: string;
     }[];
 }
+
+export interface Afiliado {
+    id: string; // UUID
+    created_at: string;
+    nombre_completo: string;
+    seccion: string;
+    dni?: string;
+    direccion?: string;
+    codigo_postal?: string;
+    localidad?: string;
+    telefono?: string;
+}

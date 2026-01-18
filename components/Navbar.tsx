@@ -77,6 +77,9 @@ export default function Navbar() {
                 <Link href="/salud-laboral" className="navbar-link" style={getLinkStyle('/salud-laboral')}>
                     Salud Laboral
                 </Link>
+                <Link href="/afiliados" className="navbar-link" style={getLinkStyle('/afiliados')}>
+                    Afiliados
+                </Link>
             </div>
         </nav>
     )
