@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 import { Afiliado } from '@/lib/types'
 import { SECCIONES } from '@/lib/constants'
 import EditableText from './EditableText'
+import Papa from 'papaparse'
 
 export default function AfiliadosManager() {
     const [afiliados, setAfiliados] = useState<Afiliado[]>([])
@@ -17,6 +18,8 @@ export default function AfiliadosManager() {
         seccion: 'General',
         nombre_completo: ''
     })
+    const fileInputRef = useRef<HTMLInputElement>(null)
+    const [importing, setImporting] = useState(false)
 
     const supabase = createClient()
 
@@ -166,6 +169,74 @@ export default function AfiliadosManager() {
         }
     }
 
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        setImporting(true)
+
+        Papa.parse(file, {
+            header: true,
+            skipEmptyLines: true,
+            complete: async (results) => {
+                try {
+                    console.log('CSV Parsed:', results.data)
+
+                    const filas = results.data as any[]
+                    const nuevosAfiliados: Partial<Afiliado>[] = filas.map(fila => {
+                        // Mapeo flexible de columnas
+                        const nombre = fila['Nombre'] || fila['nombre'] || fila['nombre_completo'] || fila['Nombre Completo']
+                        const seccion = fila['Seccion'] || fila['seccion'] || fila['Sección'] || 'General'
+                        const dni = fila['DNI'] || fila['dni'] || fila['Dni']
+                        const telefono = fila['Telefono'] || fila['telefono'] || fila['Teléfono']
+                        const direccion = fila['Direccion'] || fila['direccion'] || fila['Dirección']
+                        const cp = fila['CP'] || fila['cp'] || fila['Codigo Postal'] || fila['codigo_postal']
+                        const localidad = fila['Localidad'] || fila['localidad']
+
+                        if (!nombre) return null
+
+                        return {
+                            nombre_completo: nombre,
+                            seccion: seccion,
+                            dni: dni,
+                            telefono: telefono,
+                            direccion: direccion,
+                            codigo_postal: cp,
+                            localidad: localidad
+                        }
+                    }).filter(Boolean) as Partial<Afiliado>[]
+
+                    if (nuevosAfiliados.length === 0) {
+                        alert('No se encontraron datos válidos en el CSV. Asegúrate de tener al menos una columna "Nombre".')
+                        return
+                    }
+
+                    const { error } = await supabase
+                        .from('afiliados')
+                        .insert(nuevosAfiliados)
+
+                    if (error) throw error
+
+                    alert(`Importados ${nuevosAfiliados.length} afiliados correctamente.`)
+                    fetchAfiliados()
+                    // Limpiar input
+                    if (fileInputRef.current) fileInputRef.current.value = ''
+
+                } catch (err) {
+                    console.error('Error importando CSV:', err)
+                    alert('Error al importar los datos.')
+                } finally {
+                    setImporting(false)
+                }
+            },
+            error: (error) => {
+                console.error('Error parsing CSV:', error)
+                alert('Error al leer el archivo CSV')
+                setImporting(false)
+            }
+        })
+    }
+
     const filteredAfiliados = afiliados.filter(a => {
         const matchesSeccion = filterSeccion === 'TODAS' || a.seccion === filterSeccion
         const searchLower = searchTerm.toLowerCase()
@@ -208,6 +279,40 @@ export default function AfiliadosManager() {
                 >
                     {showNewForm ? 'Cancelar' : '+ Nuevo Afiliado'}
                 </button>
+
+                <div style={{ position: 'relative' }}>
+                    <input
+                        type="file"
+                        accept=".csv"
+                        ref={fileInputRef}
+                        onChange={handleFileUpload}
+                        style={{ display: 'none' }}
+                    />
+                    <button
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={importing}
+                        style={{
+                            backgroundColor: '#0ea5e9',
+                            color: 'white',
+                            border: 'none',
+                            padding: '10px 20px',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontWeight: 600,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            opacity: importing ? 0.7 : 1
+                        }}
+                    >
+                        {importing ? 'Importando...' : (
+                            <>
+                                <span style={{ fontSize: '1.2rem', lineHeight: 0.5 }}>⫯</span>
+                                Añadir mediante CSV
+                            </>
+                        )}
+                    </button>
+                </div>
 
                 <div style={{ flex: 1, minWidth: '200px' }}>
                     <input
