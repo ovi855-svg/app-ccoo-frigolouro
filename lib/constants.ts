@@ -15,7 +15,9 @@ export const SECCIONES = [
     "P.E.P.A",
     "SACRIFICIO",
     "SALA FIL. JAPON",
-    "SALAZON MENUDOS"
+    "SALAZON MENUDOS",
+    "JUBILACION PARCIAL",
+    "FUERA DE LA EMPRESA"
 ] as const;
 
 export const ESTADOS_INCIDENCIAS = [
