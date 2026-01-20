@@ -331,6 +331,22 @@ export default function AfiliadosManager() {
                     </button>
                 </div>
 
+                <a href="/afiliados/informe" style={{
+                    backgroundColor: 'white',
+                    color: '#64748b',
+                    border: '1px solid #cbd5e1',
+                    padding: '10px 20px',
+                    borderRadius: '6px',
+                    fontWeight: 600,
+                    textDecoration: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    cursor: 'pointer'
+                }}>
+                    📄 Informe PDF
+                </a>
+
                 <div style={{ flex: 1, minWidth: '200px' }}>
                     <input
                         type="text"
