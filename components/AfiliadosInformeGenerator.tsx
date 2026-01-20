@@ -109,17 +109,17 @@ export default function AfiliadosInformeGenerator() {
             doc.setFontSize(14)
             doc.text('Distribución por Sección:', 14, yPos + 6)
 
-            // Tabla de Resumen
-            ; (autoTable as any)(doc, {
-                startY: yPos + 10,
-                head: [['Sección', 'Cantidad']],
-                body: statsBody,
-                theme: 'striped',
-                styles: { fontSize: 10 },
-                headStyles: { fillColor: [60, 60, 60], textColor: 255 },
-                margin: { left: 14 },
-                tableWidth: 80
-            })
+                // Tabla de Resumen
+                ; (autoTable as any)(doc, {
+                    startY: yPos + 10,
+                    head: [['Sección', 'Cantidad']],
+                    body: statsBody,
+                    theme: 'striped',
+                    styles: { fontSize: 10 },
+                    headStyles: { fillColor: [60, 60, 60], textColor: 255 },
+                    margin: { left: 14 },
+                    tableWidth: 80
+                })
 
             const finalY = (doc as any).lastAutoTable?.finalY || yPos + 30
 
@@ -139,12 +139,9 @@ export default function AfiliadosInformeGenerator() {
                     currentY = 20
                 }
 
-                const fechaReg = new Date(af.created_at).toLocaleDateString('es-ES')
                 const nombre = af.nombre_completo || 'Sin nombre'
                 const seccion = af.seccion || '-'
-                const dni = af.dni || '-'
                 const telefono = af.telefono || '-'
-                const direccion = `${af.direccion || ''} ${af.codigo_postal || ''} ${af.localidad || ''}`.trim() || '-'
 
                 // Cabecera del Afiliado
                 doc.setFont('helvetica', 'bold')
@@ -152,69 +149,18 @@ export default function AfiliadosInformeGenerator() {
                 doc.setFillColor(241, 245, 249) // Gris muy claro
                 doc.rect(14, currentY - 4, 182, 8, 'F') // Fondo titulo
                 doc.text(nombre, 16, currentY + 1)
-                
+
                 doc.setFontSize(10)
                 doc.setFont('helvetica', 'normal')
-                doc.text(seccion, 150, currentY + 1)
+                doc.text(seccion, 100, currentY + 1)
+
+                doc.text(telefono, 150, currentY + 1)
                 currentY += 8
-
-                // Datos contacto
-                doc.setFont('helvetica', 'bold')
-                doc.text('Fecha Reg:', 14, currentY)
-                doc.setFont('helvetica', 'normal')
-                doc.text(fechaReg, 35, currentY)
-
-                doc.setFont('helvetica', 'bold')
-                doc.text('DNI:', 80, currentY)
-                doc.setFont('helvetica', 'normal')
-                doc.text(dni, 90, currentY)
-                
-                doc.setFont('helvetica', 'bold')
-                doc.text('Teléfono:', 140, currentY)
-                doc.setFont('helvetica', 'normal')
-                doc.text(telefono, 160, currentY)
-                currentY += 6
-
-                // Dirección
-                doc.setFont('helvetica', 'bold')
-                doc.text('Dirección:', 14, currentY)
-                doc.setFont('helvetica', 'normal')
-                doc.text(direccion, 35, currentY)
-                currentY += 8
-
-                // Gestiones
-                 if (af.gestiones_afiliados && af.gestiones_afiliados.length > 0) {
-                    if (currentY + 10 > 280) {
-                        doc.addPage()
-                        currentY = 20
-                    }
-                    doc.setFont('helvetica', 'bold')
-                    doc.setFontSize(9)
-                    doc.setTextColor(100, 116, 139)
-                    doc.text('Historial de Gestiones:', 14, currentY)
-                    currentY += 5
-                    doc.setFont('helvetica', 'normal')
-                    doc.setTextColor(0)
-
-                    af.gestiones_afiliados.forEach(g => {
-                        const dateG = new Date(g.created_at).toLocaleDateString('es-ES')
-                        const lines = doc.splitTextToSize(`[${dateG}] ${g.gestion}`, 170)
-                        
-                        if (currentY + (lines.length * 4) > 280) {
-                             doc.addPage()
-                             currentY = 20
-                        }
-                        
-                        doc.text(lines, 20, currentY)
-                        currentY += (lines.length * 4) + 2
-                    })
-                    currentY += 2
-                 }
-
 
                 // Línea separadora
                 doc.setDrawColor(220, 220, 220)
                 doc.line(14, currentY, 196, currentY)
+                currentY += 4
                 currentY += 10
             })
 
