@@ -28,6 +28,7 @@ export default function AfiliadosInformeGenerator() {
                 .select('*, gestiones_afiliados(*)')
                 .gte('created_at', `${startDate}T00:00:00`)
                 .lte('created_at', `${endDate}T23:59:59`)
+                .order('seccion', { ascending: true })
                 .order('nombre_completo', { ascending: true })
 
             if (filterSeccion !== 'TODAS') {
