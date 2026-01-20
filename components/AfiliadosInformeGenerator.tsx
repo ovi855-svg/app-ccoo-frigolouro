@@ -132,37 +132,26 @@ export default function AfiliadosInformeGenerator() {
 
             doc.setFontSize(10)
 
-            afiliados.forEach((af: Afiliado) => {
-                // Verificar espacio para nuevo bloque
-                if (currentY + 40 > 280) { // Un bloque básico necesita al menos 40 de altura
-                    doc.addPage()
-                    currentY = 20
-                }
+            const tableBody = afiliados.map(af => [
+                af.nombre_completo || 'Sin nombre',
+                af.seccion || '-',
+                af.telefono || '-'
+            ])
 
-                const nombre = af.nombre_completo || 'Sin nombre'
-                const seccion = af.seccion || '-'
-                const telefono = af.telefono || '-'
-
-                // Cabecera del Afiliado
-                doc.setFont('helvetica', 'bold')
-                doc.setFontSize(12)
-                doc.setFillColor(241, 245, 249) // Gris muy claro
-                doc.rect(14, currentY - 4, 182, 8, 'F') // Fondo titulo
-                doc.text(nombre, 16, currentY + 1)
-
-                doc.setFontSize(10)
-                doc.setFont('helvetica', 'normal')
-                doc.text(seccion, 100, currentY + 1)
-
-                doc.text(telefono, 150, currentY + 1)
-                currentY += 8
-
-                // Línea separadora
-                doc.setDrawColor(220, 220, 220)
-                doc.line(14, currentY, 196, currentY)
-                currentY += 4
-                currentY += 10
-            })
+                ; (autoTable as any)(doc, {
+                    startY: currentY,
+                    head: [['Nombre Completo', 'Sección', 'Teléfono']],
+                    body: tableBody,
+                    theme: 'striped',
+                    styles: { fontSize: 9, cellPadding: 3 },
+                    headStyles: { fillColor: [60, 60, 60], textColor: 255 },
+                    columnStyles: {
+                        0: { cellWidth: 90 }, // Nombre
+                        1: { cellWidth: 50 }, // Sección
+                        2: { cellWidth: 40 }  // Teléfono
+                    },
+                    margin: { left: 14, right: 14 }
+                })
 
             doc.save(`informe_afiliados_${new Date().toISOString().split('T')[0]}.pdf`)
 
