@@ -6,6 +6,8 @@ import { Afiliado } from '@/lib/types'
 import { SECCIONES } from '@/lib/constants'
 import EditableText from './EditableText'
 import Papa from 'papaparse'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 
 export default function AfiliadosManager() {
     const [afiliados, setAfiliados] = useState<Afiliado[]>([])
@@ -252,6 +254,90 @@ export default function AfiliadosManager() {
                 setImporting(false)
             }
         })
+    }
+
+    const generateAfiliadoPDF = (afiliado: Afiliado) => {
+        try {
+            const doc = new jsPDF()
+
+            // Header
+            doc.setFontSize(18)
+            doc.setTextColor(220, 38, 38)
+            doc.text('Ficha de Afiliado', 14, 20)
+            doc.setFontSize(12)
+            doc.setTextColor(0)
+            doc.text('Sección Sindical CCOO Frigolouro', 14, 28)
+
+            doc.setLineWidth(0.5)
+            doc.setDrawColor(200, 200, 200)
+            doc.line(14, 32, 196, 32)
+
+            let yPos = 45
+
+            // Datos Personales
+            doc.setFontSize(14)
+            doc.setFont('helvetica', 'bold')
+            doc.text('Datos Personales', 14, yPos)
+            yPos += 10
+
+            doc.setFontSize(10)
+
+            const data = [
+                ['Nombre Completo:', afiliado.nombre_completo || '-'],
+                ['Sección:', afiliado.seccion || '-'],
+                ['DNI:', afiliado.dni || '-'],
+                ['Teléfono:', afiliado.telefono || '-'],
+                ['Dirección:', afiliado.direccion || '-'],
+                ['Código Postal:', afiliado.codigo_postal || '-'],
+                ['Localidad:', afiliado.localidad || '-'],
+                ['Fecha Registro:', new Date(afiliado.created_at).toLocaleDateString('es-ES')]
+            ]
+
+            data.forEach(([label, value]) => {
+                doc.setFont('helvetica', 'bold')
+                doc.text(label, 14, yPos)
+                doc.setFont('helvetica', 'normal')
+                doc.text(String(value), 60, yPos)
+                yPos += 7
+            })
+
+            yPos += 10
+
+            // Historial Gestiones
+            if (afiliado.gestiones_afiliados && afiliado.gestiones_afiliados.length > 0) {
+                doc.setFontSize(14)
+                doc.setFont('helvetica', 'bold')
+                doc.text('Historial de Gestiones', 14, yPos)
+                yPos += 5
+
+                const gestionesBody = [...afiliado.gestiones_afiliados]
+                    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                    .map(g => [
+                        new Date(g.created_at).toLocaleDateString('es-ES'),
+                        g.gestion
+                    ])
+
+                    ; (autoTable as any)(doc, {
+                        startY: yPos,
+                        head: [['Fecha', 'Gestión']],
+                        body: gestionesBody,
+                        theme: 'striped',
+                        styles: { fontSize: 10, cellPadding: 3 },
+                        headStyles: { fillColor: [60, 60, 60], textColor: 255 },
+                        columnStyles: { 0: { cellWidth: 30 } }, // Fecha width
+                    })
+            } else {
+                doc.setFontSize(10)
+                doc.setTextColor(100)
+                doc.text('No hay gestiones registradas.', 14, yPos)
+            }
+
+            doc.save(`ficha_${afiliado.nombre_completo.replace(/\s+/g, '_')}.pdf`)
+
+        } catch (err) {
+            console.error('Error generando PDF individual:', err)
+            alert('Error al generar el PDF del afiliado')
+        }
     }
 
     const filteredAfiliados = afiliados.filter(a => {
@@ -520,13 +606,32 @@ export default function AfiliadosManager() {
                                     />
                                 </div>
                             </div>
-                            <button
-                                onClick={() => handleDelete(afiliado.id)}
-                                style={{ color: '#ef4444', backgroundColor: 'transparent', border: 'none', cursor: 'pointer', fontSize: '1.2rem' }}
-                                title="Eliminar"
-                            >
-                                ×
-                            </button>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                <button
+                                    onClick={() => generateAfiliadoPDF(afiliado)}
+                                    style={{
+                                        color: '#3b82f6',
+                                        backgroundColor: '#eff6ff',
+                                        border: '1px solid #bfdbfe',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                        fontSize: '0.9rem',
+                                        padding: '4px 8px',
+                                        fontWeight: 600
+                                    }}
+                                    title="Descargar Ficha PDF"
+                                >
+                                    📄 PDF
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(afiliado.id)}
+                                    style={{ color: '#ef4444', backgroundColor: 'transparent', border: 'none', cursor: 'pointer', fontSize: '1.2rem' }}
+                                    title="Eliminar"
+                                >
+                                    ×
+                                </button>
+                            </div>
+
                         </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', fontSize: '0.95rem' }}>
