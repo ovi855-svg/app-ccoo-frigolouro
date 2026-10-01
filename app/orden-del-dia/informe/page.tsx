@@ -1,8 +1,10 @@
+import { requireMember } from '@/lib/require-member'
 import InformeGenerator from '@/components/InformeGenerator'
 
 export const dynamic = 'force-dynamic'
 
-export default function InformeOrdenDiaPage() {
+export default async function InformeOrdenDiaPage() {
+    await requireMember()
     return (
         <main style={{ minHeight: '100vh', backgroundColor: '#f8fafc' }}>
             <div className="page-container" style={{ paddingTop: '100px', paddingBottom: '40px' }}>

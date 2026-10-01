@@ -1,7 +1,9 @@
+import { requireMember } from '@/lib/require-member'
 import Link from 'next/link'
 import Image from 'next/image'
 
-export default function Home() {
+export default async function Home() {
+    await requireMember()
     return (
         <main className="home-container">
             <div className="animate-fade-in-up glass-panel">

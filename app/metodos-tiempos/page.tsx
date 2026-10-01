@@ -1,8 +1,10 @@
+import { requireMember } from '@/lib/require-member'
 import MetodosManager from '@/components/MetodosManager'
 
 export const dynamic = 'force-dynamic'
 
-export default function MetodosTiemposPage() {
+export default async function MetodosTiemposPage() {
+    await requireMember()
     return (
         <main style={{ minHeight: '100vh', backgroundColor: '#f8fafc' }}>
             <div className="page-container" style={{ paddingTop: '100px', paddingBottom: '40px' }}>

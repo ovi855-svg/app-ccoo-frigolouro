@@ -1,8 +1,10 @@
+import { requireMember } from '@/lib/require-member'
 import AfiliadosInformeGenerator from '@/components/AfiliadosInformeGenerator'
 
 export const dynamic = 'force-dynamic'
 
-export default function InformeAfiliadosPage() {
+export default async function InformeAfiliadosPage() {
+    await requireMember()
     return (
         <main style={{ minHeight: '100vh', backgroundColor: '#f8fafc' }}>
             {/* Navbar global */}

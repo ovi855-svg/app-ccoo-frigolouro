@@ -1,3 +1,4 @@
+import { requireMember } from '@/lib/require-member'
 import { Suspense } from 'react'
 import AfiliadosManager from '@/components/AfiliadosManager'
 
@@ -5,7 +6,8 @@ import AfiliadosManager from '@/components/AfiliadosManager'
 
 export const dynamic = 'force-dynamic'
 
-export default function AfiliadosPage() {
+export default async function AfiliadosPage() {
+    await requireMember()
     return (
         <main style={{
             padding: '20px',

@@ -1,9 +1,11 @@
+import { requireMember } from '@/lib/require-member'
 import SaludManager from '@/components/SaludManager'
 
 
 export const dynamic = 'force-dynamic'
 
-export default function SaludLaboralPage() {
+export default async function SaludLaboralPage() {
+    await requireMember()
     return (
         <main style={{ minHeight: '100vh', backgroundColor: '#f8fafc' }}>
             {/* Navbar global en layout */}

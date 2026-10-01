@@ -3,9 +3,11 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
+import AccountMenu from './AccountMenu'
 
 export default function Navbar() {
     const pathname = usePathname()
+    if (pathname === '/login' || pathname.startsWith('/auth/')) return null
 
     const isActive = (path: string) => {
         return pathname === path || pathname.startsWith(path + '/')
@@ -81,6 +83,7 @@ export default function Navbar() {
                     Afiliados
                 </Link>
             </div>
+            <AccountMenu />
         </nav>
     )
 }

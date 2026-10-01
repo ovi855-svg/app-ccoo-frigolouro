@@ -1,9 +1,11 @@
+import { requireMember } from '@/lib/require-member'
 import SaludInformeGenerator from '@/components/SaludInformeGenerator'
 
 
 export const dynamic = 'force-dynamic'
 
-export default function InformeSaludPage() {
+export default async function InformeSaludPage() {
+    await requireMember()
     return (
         <main style={{ minHeight: '100vh', backgroundColor: '#f8fafc' }}>
             {/* Navbar global */}

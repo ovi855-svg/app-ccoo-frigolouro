@@ -1,8 +1,10 @@
+import { requireMember } from '@/lib/require-member'
 import IncidenciasManager from '@/components/IncidenciasManager'
 
 export const dynamic = 'force-dynamic'
 
-export default function OrdenDiaPage() {
+export default async function OrdenDiaPage() {
+    await requireMember()
     return (
         <main style={{ minHeight: '100vh', backgroundColor: '#f8fafc' }}>
             <div className="page-container" style={{ paddingTop: '100px', paddingBottom: '40px' }}>
