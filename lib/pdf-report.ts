@@ -2,6 +2,7 @@ import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import {AFFILIATION_FIELDS,displayField} from './affiliation'
 import {creationAuthor} from './authorship'
+import {SECCIONES} from './constants'
 import type {Afiliado,AuthorStamp} from './types'
 
 export type ReportBrand = {data: string; width: number; height: number}
@@ -131,20 +132,34 @@ class InternalReport {
 export function managementReport(records: ReportRecord[],options: ReportOptions,brand: ReportBrand) {
   const report=new InternalReport(options,brand,true)
   report.introduction(records.length)
-  const counts=new Map<string,number>()
-  records.forEach(record=>counts.set(record.seccion,(counts.get(record.seccion)||0)+1))
-  report.text(`Resumen por sección: ${[...counts].map(([section,count])=>`${section} (${count})`).join('; ')}`,8.5,false,false,GREY)
-  for(const [index,record] of records.entries()) {
-    report.heading(`${index+1}. ${record.titulo}`,11,25)
-    report.text(`${date(record.created_at)} · ${record.seccion} · Estado: ${record.estado}`,9,true,false)
-    report.authorship(record)
-    report.heading('Descripción',9.5);report.text(record.descripcion||'Sin descripción registrada.')
-    report.heading('Contestación de la empresa',9.5);report.text(record.contestacion||'Sin contestación registrada.')
-    if(record.history?.length){
-      report.heading('Historial de cambios',9.5)
-      report.table(['Fecha','Cambio','Autoría'],record.history.map(h=>[new Date(h.created_at).toLocaleString('es-ES'),h.label,h.created_by_name||'No registrada']),35)
+  const groups=new Map<string,ReportRecord[]>()
+  records.forEach(record=>{
+    const group=groups.get(record.seccion)||[]
+    group.push(record);groups.set(record.seccion,group)
+  })
+  const sectionOrder=new Map<string,number>(SECCIONES.map((section,index)=>[section,index]))
+  const collator=new Intl.Collator('es',{numeric:true,sensitivity:'base'})
+  const sections=[...groups].sort(([a],[b])=>(sectionOrder.get(a)??SECCIONES.length)-(sectionOrder.get(b)??SECCIONES.length)||collator.compare(a,b))
+  report.text(`Resumen por sección: ${sections.map(([section,group])=>`${section} (${group.length})`).join('; ')}`,8.5,false,false,GREY)
+  let index=0
+  for(const [section,group] of sections) {
+    group.sort((a,b)=>new Date(a.created_at).getTime()-new Date(b.created_at).getTime())
+    // Keep the section heading with the first record, including wrapped titles.
+    report.doc.setFont('helvetica','bold');report.doc.setFontSize(11)
+    const firstTitleLines=report.doc.splitTextToSize(clean(`${index+1}. ${group[0].titulo}`),WIDTH).length
+    report.heading(`Sección: ${section} · ${group.length} ${group.length===1?'registro':'registros'}`,11,firstTitleLines*11*.45+27)
+    for(const record of group) {
+      report.heading(`${++index}. ${record.titulo}`,11,25)
+      report.text(`${date(record.created_at)} · ${record.seccion} · Estado: ${record.estado}`,9,true,false)
+      report.authorship(record)
+      report.heading('Descripción',9.5);report.text(record.descripcion||'Sin descripción registrada.')
+      report.heading('Contestación de la empresa',9.5);report.text(record.contestacion||'Sin contestación registrada.')
+      if(record.history?.length){
+        report.heading('Historial de cambios',9.5)
+        report.table(['Fecha','Cambio','Autoría'],record.history.map(h=>[new Date(h.created_at).toLocaleString('es-ES'),h.label,h.created_by_name||'No registrada']),35)
+      }
+      report.y+=1
     }
-    report.y+=1
   }
   return report.finish()
 }

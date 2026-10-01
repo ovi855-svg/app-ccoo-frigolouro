@@ -60,7 +60,11 @@ mantienen los filtros y la autoría verificada cuando existe. La carga del logo
 es obligatoria antes de exportar.
 
 Incidencias, métodos y salud utilizan maquetación compacta, conservando todos
-sus datos, contestaciones e historiales. Si el informe de afiliación contiene
+sus datos, contestaciones e historiales. Agrupan los registros por sección,
+con encabezado y total de cada grupo, siguiendo el orden de secciones de la
+aplicación y, dentro de cada sección, la fecha de creación de antigua a reciente.
+Las secciones adicionales se sitúan al final por orden alfabético.
+Si el informe de afiliación contiene
 más de una persona, exporta una tabla breve con nombre y apellidos, sección y
 teléfono (móvil, fijo o teléfono anterior, por ese orden), con cabecera repetida
 en cada página. Un único resultado y la ficha individual conservan el formato
