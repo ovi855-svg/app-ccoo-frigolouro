@@ -32,57 +32,76 @@ function date(value: string) {return new Date(value.includes('T')?value:value+'T
 
 class InternalReport {
   doc=new jsPDF({format:'a4',unit:'mm'})
-  y=TOP
-  constructor(private options: ReportOptions,private brand: ReportBrand) {
+  y: number
+  private top: number
+  private bottom: number
+  constructor(private options: ReportOptions,private brand: ReportBrand,private compact=false) {
+    this.top=compact?40:TOP;this.bottom=compact?273:BOTTOM;this.y=this.top
     this.doc.setProperties({title:options.title,author:'Sección Sindical de CCOO en Frigolouro',subject:'Documento interno de gestión sindical'})
   }
-  room(height: number) {if(this.y+height>BOTTOM){this.doc.addPage();this.y=TOP}}
-  heading(text: string,size=13) {
+  room(height: number) {if(this.y+height>this.bottom){this.doc.addPage();this.y=this.top}}
+  heading(text: string,size=this.compact?11:13,followingContent=this.compact?8:13) {
     this.doc.setFont('helvetica','bold');this.doc.setFontSize(size)
     const lines=this.doc.splitTextToSize(clean(text),WIDTH) as string[]
     // Keep headings with at least two lines of the following content.
-    this.room(Math.min(lines.length*size*.45+13,BOTTOM-TOP))
-    this.text(text,size,true,false,BLACK);this.y+=3
+    this.room(Math.min(lines.length*size*.45+followingContent,this.bottom-this.top))
+    this.text(text,size,true,false,BLACK);this.y+=this.compact?.5:3
   }
-  text(text: string,size=10.5,bold=false,justify=true,color: [number,number,number]=BLACK) {
+  text(text: string,size=this.compact?9.5:10.5,bold=false,justify=true,color: [number,number,number]=BLACK) {
     this.doc.setFont('helvetica',bold?'bold':'normal');this.doc.setFontSize(size);this.doc.setTextColor(...color)
-    const lineHeight=size*.352778*1.35
+    const factor=this.compact?1.16:1.35
+    const lineHeight=size*.352778*factor
     for(const paragraph of clean(text || 'Sin dato').split(/\n/)) {
       if(!paragraph.trim()){this.y+=lineHeight;continue}
       let lines=this.doc.splitTextToSize(paragraph,WIDTH) as string[]
       while(lines.length){
         this.room(lineHeight)
-        const fit=Math.max(1,Math.floor((BOTTOM-this.y)/lineHeight))
+        const fit=Math.max(1,Math.floor((this.bottom-this.y)/lineHeight))
         const chunk=lines.slice(0,fit)
-        this.doc.text(chunk,MARGIN,this.y,{maxWidth:WIDTH,align:justify?'justify':'left',lineHeightFactor:1.35})
+        this.doc.text(chunk,MARGIN,this.y,{maxWidth:WIDTH,align:justify?'justify':'left',lineHeightFactor:factor})
         this.y+=chunk.length*lineHeight;lines=lines.slice(fit)
-        if(lines.length){this.doc.addPage();this.y=TOP}
+        if(lines.length){this.doc.addPage();this.y=this.top}
       }
     }
-    this.y+=3
+    this.y+=this.compact?1:3
   }
-  table(head: string[],body: (string|number)[][],firstWidth?: number) {
-    this.room(22)
+  table(head: string[],body: (string|number)[][],firstWidth?: number,widths?: number[]) {
+    this.room(this.compact?12:22)
+    const columnStyles: Record<number,{cellWidth?:number; fontStyle?:'bold'}>={}
+    if(firstWidth)columnStyles[0]={cellWidth:firstWidth,fontStyle:'bold'}
+    if(this.compact&&head.length===3)columnStyles[2]={cellWidth:40}
+    widths?.forEach((width,index)=>{columnStyles[index]={...columnStyles[index],cellWidth:width}})
     autoTable(this.doc,{
       startY:this.y,head:head.length?[head]:undefined,body,theme:'grid',
-      margin:{left:MARGIN,right:MARGIN,top:TOP,bottom:28},
-      styles:{font:'helvetica',fontSize:10,cellPadding:3,overflow:'linebreak',textColor:BLACK,lineColor:[225,225,225],lineWidth:.15},
+      margin:{left:MARGIN,right:MARGIN,top:this.top,bottom:this.compact?24:28},
+      styles:{font:'helvetica',fontSize:this.compact?8.5:10,cellPadding:this.compact?(head.length===3?1:1.5):3,overflow:'linebreak',textColor:BLACK,lineColor:[225,225,225],lineWidth:.15},
       headStyles:{fillColor:RED,textColor:[255,255,255],fontStyle:'bold'},
       alternateRowStyles:{fillColor:[249,249,249]},
-      columnStyles:firstWidth?{0:{cellWidth:firstWidth,fontStyle:'bold'}}:{},
+      columnStyles,
       rowPageBreak:'avoid',showHead:'everyPage',
     })
-    this.y=(this.doc as jsPDF&{lastAutoTable:{finalY:number}}).lastAutoTable.finalY+9
+    this.y=(this.doc as jsPDF&{lastAutoTable:{finalY:number}}).lastAutoTable.finalY+(this.compact?3:9)
   }
   introduction(total: number) {
-    this.heading(this.options.title,18)
+    this.heading(this.options.title,this.compact?15:18)
     const {startDate,endDate,section,state}=this.options
+    if(this.compact){
+      const filters=[startDate&&endDate?`Registros del ${date(startDate)} al ${date(endDate)}`:'',section&&section!=='TODAS'?`Sección: ${section}`:'',state&&state!=='TODAS'?`Estado: ${state}`:'',`Total: ${total} ${total===1?'registro':'registros'}`].filter(Boolean)
+      this.text(filters.join(' · '),8.5,false,false,GREY)
+      return
+    }
     if(startDate&&endDate)this.text(`Registros del ${date(startDate)} al ${date(endDate)}`,9,false,false,GREY)
     if(section&&section!=='TODAS')this.text(`Sección: ${section}`,9,false,false,GREY)
     if(state&&state!=='TODAS')this.text(`Estado: ${state}`,9,false,false,GREY)
     this.text(`Total: ${total} ${total===1?'registro':'registros'}`,9,true,false)
   }
   authorship(record: AuthorStamp&{creada_por?:string|null}) {
+    if(this.compact){
+      const author=[creationAuthor(record)]
+      if(record.updated_by_name&&record.updated_at)author.push(`Último cambio: ${record.updated_by_name} - ${new Date(record.updated_at).toLocaleString('es-ES')}`)
+      this.text(author.join(' · '),8,false,false,GREY)
+      return
+    }
     this.text(creationAuthor(record),9,false,false,GREY)
     if(record.updated_by_name&&record.updated_at)this.text(`Último cambio: ${record.updated_by_name} - ${new Date(record.updated_at).toLocaleString('es-ES')}`,9,false,false,GREY)
   }
@@ -91,15 +110,15 @@ class InternalReport {
     for(let page=1;page<=pages;page++){
       this.doc.setPage(page)
       // Use the exact official transparent image, at its natural aspect ratio.
-      const width=34,height=width*this.brand.height/this.brand.width
-      this.doc.addImage(this.brand.data,'PNG',MARGIN,12,width,height)
+      const width=this.compact?24:34,height=width*this.brand.height/this.brand.width
+      this.doc.addImage(this.brand.data,'PNG',MARGIN,this.compact?9:12,width,height)
       this.doc.setFont('helvetica','bold');this.doc.setFontSize(10);this.doc.setTextColor(...BLACK)
       this.doc.text('Sección Sindical de CCOO en Frigolouro',190,18,{align:'right'})
       this.doc.setFontSize(9);this.doc.setTextColor(...RED)
-      this.doc.text('INFORME INTERNO',190,25,{align:'right'})
+      this.doc.text('INFORME INTERNO',190,this.compact?23:25,{align:'right'})
       this.doc.setFont('helvetica','normal');this.doc.setTextColor(...BLACK)
-      this.doc.text(generated.toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'}),190,32,{align:'right'})
-      this.doc.setDrawColor(...RED);this.doc.setLineWidth(.5);this.doc.line(MARGIN,43,190,43)
+      this.doc.text(generated.toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'}),190,this.compact?28:32,{align:'right'})
+      this.doc.setDrawColor(...RED);this.doc.setLineWidth(.5);this.doc.line(MARGIN,this.compact?33:43,190,this.compact?33:43)
       this.doc.setDrawColor(210,210,210);this.doc.setLineWidth(.2);this.doc.line(MARGIN,278,190,278)
       this.doc.setFontSize(8);this.doc.setTextColor(...GREY)
       this.doc.text('CCOO Frigolouro · Documento interno',MARGIN,284)
@@ -110,24 +129,22 @@ class InternalReport {
 }
 
 export function managementReport(records: ReportRecord[],options: ReportOptions,brand: ReportBrand) {
-  const report=new InternalReport(options,brand)
+  const report=new InternalReport(options,brand,true)
   report.introduction(records.length)
   const counts=new Map<string,number>()
   records.forEach(record=>counts.set(record.seccion,(counts.get(record.seccion)||0)+1))
-  report.heading('Resumen por sección')
-  report.table(['Sección','Registros'],[...counts.entries()],130)
-  report.heading('Detalle y seguimiento')
+  report.text(`Resumen por sección: ${[...counts].map(([section,count])=>`${section} (${count})`).join('; ')}`,8.5,false,false,GREY)
   for(const [index,record] of records.entries()) {
-    report.heading(`${index+1}. ${record.titulo}`,12)
+    report.heading(`${index+1}. ${record.titulo}`,11,25)
     report.text(`${date(record.created_at)} · ${record.seccion} · Estado: ${record.estado}`,9,true,false)
     report.authorship(record)
-    report.heading('Descripción',10.5);report.text(record.descripcion||'Sin descripción registrada.')
-    report.heading('Contestación de la empresa',10.5);report.text(record.contestacion||'Sin contestación registrada.')
+    report.heading('Descripción',9.5);report.text(record.descripcion||'Sin descripción registrada.')
+    report.heading('Contestación de la empresa',9.5);report.text(record.contestacion||'Sin contestación registrada.')
     if(record.history?.length){
-      report.heading('Historial de cambios',10.5)
+      report.heading('Historial de cambios',9.5)
       report.table(['Fecha','Cambio','Autoría'],record.history.map(h=>[new Date(h.created_at).toLocaleString('es-ES'),h.label,h.created_by_name||'No registrada']),35)
     }
-    report.y+=5
+    report.y+=1
   }
   return report.finish()
 }
@@ -147,9 +164,18 @@ function personDetails(report: InternalReport,person: Afiliado) {
   }else report.text('No hay gestiones registradas.',9,false,false,GREY)
 }
 export function affiliationReport(people: Afiliado[],options: ReportOptions,brand: ReportBrand) {
-  const report=new InternalReport(options,brand)
+  const compact=people.length>1
+  const report=new InternalReport(options,brand,compact)
   report.introduction(people.length)
   const counts=new Map<string,number>();people.forEach(p=>counts.set(p.seccion,(counts.get(p.seccion)||0)+1))
+  if(compact){
+    report.text(`Resumen por sección: ${[...counts].map(([section,count])=>`${section} (${count})`).join('; ')}`,8.5,false,false,GREY)
+    report.table(['Nº','Nombre y apellidos','Sección','Teléfono'],people.map((person,index)=>[
+      index+1,person.nombre_completo,person.seccion,
+      person.telefono_movil?.trim()||person.telefono_fijo?.trim()||person.telefono?.trim()||'Sin dato',
+    ]),undefined,[10,83,42,35])
+    return report.finish()
+  }
   report.heading('Resumen por sección');report.table(['Sección','Personas'],[...counts.entries()],130)
   for(const [index,person] of people.entries()){
     report.heading(`${index+1}. ${person.nombre_completo}`,12);personDetails(report,person)

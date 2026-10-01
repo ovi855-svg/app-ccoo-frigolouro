@@ -56,8 +56,15 @@ Los cuatro informes y la ficha individual comparten `lib/pdf-report.ts`:
 cabecera oficial, fecha completa, títulos negros, texto justificado,
 tablas rojas y pie de documento interno con número de página. El diseño
 se ha contrastado con las plantillas internas del proyecto. Los informes
-mantienen filtros, campos, contestaciones e historiales; añaden la autoría
-verificada cuando existe. La carga del logo es obligatoria antes de exportar.
+mantienen los filtros y la autoría verificada cuando existe. La carga del logo
+es obligatoria antes de exportar.
+
+Incidencias, métodos y salud utilizan maquetación compacta, conservando todos
+sus datos, contestaciones e historiales. Si el informe de afiliación contiene
+más de una persona, exporta una tabla breve con nombre y apellidos, sección y
+teléfono (móvil, fijo o teléfono anterior, por ese orden), con cabecera repetida
+en cada página. Un único resultado y la ficha individual conservan el formato
+completo, todos los campos y las gestiones.
 
 ## Ejecutar en local
 
