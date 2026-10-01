@@ -4,6 +4,9 @@ import {useId} from 'react'
 import {SECCIONES} from '@/lib/constants'
 import AppIcon from './AppIcon'
 import EditableText from './EditableText'
+import AuthorCredit from './AuthorCredit'
+import ActivityTrail from './ActivityTrail'
+import type {AuthorStamp} from '@/lib/types'
 
 export function ManagementToolbar({createHref, createLabel, reportHref}: {createHref: string; createLabel: string; reportHref: string}) {
  return <div className="management-toolbar"><Link className="button button-primary" href={createHref}><AppIcon name="plus" size={19}/>{createLabel}</Link><Link className="button button-secondary" href={reportHref}><AppIcon name="document" size={19}/>Informe PDF</Link></div>
@@ -18,7 +21,7 @@ export function ManagementFilters({section, state, search, states, onSection, on
   {filtered&&<button type="button" className="filter-reset" onClick={reset}>Limpiar filtros</button>}
  </section>
 }
-export function RecordCard({title, section, description, reply, created, author, state, states, history, onState, onEdit, onDelete}: {title: string; section: string; description: string; reply: string; created: string; author?: string | null; state: string; states: readonly string[]; history: {id: number|string; label: string; date: string}[]; onState: (v:string)=>void; onEdit:(field:'titulo'|'descripcion'|'contestacion',v:string)=>Promise<void>; onDelete:()=>void}) {
+export function RecordCard({title, section, description, reply, created, authorship, resource, recordId, state, states, history, onState, onEdit, onDelete}: {title: string; section: string; description: string; reply: string; created: string; authorship: AuthorStamp & {creada_por?: string|null}; resource: string; recordId: string; state: string; states: readonly string[]; history: {id: number|string; label: string; date: string}[]; onState: (v:string)=>void; onEdit:(field:'titulo'|'descripcion'|'contestacion',v:string)=>Promise<void>; onDelete:()=>void}) {
  const id=useId()
  const tone=/solucionad/i.test(state)?'resolved':/pendiente/i.test(state)?'pending':/nuev/i.test(state)?'new':'progress'
  return <article className="record-card">
@@ -30,7 +33,7 @@ export function RecordCard({title, section, description, reply, created, author,
    <div className="record-detail-content"><section><h3>Descripción</h3><EditableText initialValue={description} label="descripción" isTextArea onSave={v=>onEdit('descripcion',v)} placeholder="Añadir descripción…"/></section>
     <section className="company-reply"><h3>Contestación de la empresa</h3><EditableText initialValue={reply} label="contestación de la empresa" isTextArea onSave={v=>onEdit('contestacion',v)} placeholder="Añadir contestación…"/></section>
     <section className="record-history"><h3>Historial</h3><ol>{history.map((h,i)=><li key={`${h.id}-${i}`}><span>{h.label}</span><time dateTime={h.date}>{new Date(h.date).toLocaleString('es-ES')}</time></li>)}<li><span>Creación del registro</span><time dateTime={created}>{new Date(created).toLocaleString('es-ES')}</time></li></ol></section>
-    <footer className="record-footer"><span>{author?`Registrado por ${author}`:'Registro de la sección sindical'}</span><button type="button" className="button button-danger" onClick={onDelete}>Eliminar</button></footer>
+    <ActivityTrail resource={resource} id={recordId} revision={authorship.updated_at || undefined}/><footer className="record-footer"><AuthorCredit record={authorship}/><button type="button" className="button button-danger" onClick={onDelete}>Eliminar</button></footer>
    </div>
   </details>
  </article>

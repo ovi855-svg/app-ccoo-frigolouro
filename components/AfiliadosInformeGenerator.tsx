@@ -4,8 +4,6 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import { SECCIONES } from '@/lib/constants'
 import { Afiliado } from '@/lib/types'
-import jsPDF from 'jspdf'
-import autoTable from 'jspdf-autotable'
 
 export default function AfiliadosInformeGenerator() {
     const [loading, setLoading] = useState(false)
@@ -52,112 +50,12 @@ export default function AfiliadosInformeGenerator() {
             }))
 
             if (!afiliados || afiliados.length === 0) {
-                alert('No hay afiliados registrados en este rango de fechas y sección.')
+                alert('No hay fichas de afiliación registradas en este rango de fechas y sección.')
                 return
             }
 
-            // Generar PDF
-            const doc = new jsPDF()
-
-            // Intentar cargar logo
-            try {
-                const logoUrl = '/logo.png'
-                const img = new Image()
-                img.src = logoUrl
-                await new Promise((resolve, reject) => {
-                    img.onload = resolve
-                    img.onerror = reject
-                })
-                doc.addImage(img, 'PNG', 14, 10, 30, 30)
-            } catch (e) {
-                console.warn('No se pudo cargar el logo', e)
-            }
-
-            // Título y Cabecera
-            doc.setFontSize(20)
-            doc.setTextColor(220, 38, 38) // Rojo CCOO
-            doc.text('Informe de Afiliados', 50, 22)
-
-            doc.setFontSize(12)
-            doc.setTextColor(0) // Negro
-            doc.text('Sección Sindical CCOO Frigolouro', 50, 30)
-
-            // Separador
-            doc.setLineWidth(0.5)
-            doc.setDrawColor(200, 200, 200)
-            doc.line(14, 45, 196, 45)
-
-            // Info fecha
-            doc.setFontSize(10)
-            doc.text(`Generado el: ${new Date().toLocaleDateString('es-ES')}`, 14, 55)
-            doc.text(`Registro entre: ${new Date(startDate).toLocaleDateString('es-ES')} a ${new Date(endDate).toLocaleDateString('es-ES')}`, 14, 61)
-
-            let yPos = 71
-            doc.text(`Afiliación: ${filterEstado === 'baja' ? 'Bajas' : 'Activa'}`, 14, yPos)
-            yPos += 6
-            if (filterSeccion !== 'TODAS') {
-                doc.text(`Sección filtrada: ${filterSeccion}`, 14, yPos)
-                yPos += 6
-            }
-            // Resumen total
-            doc.text(`Total Afiliados encontrados: ${afiliados.length}`, 14, yPos)
-            yPos += 6
-
-            // Resumen por sección
-            const stats = afiliados.reduce((acc: any, curr: any) => {
-                acc[curr.seccion] = (acc[curr.seccion] || 0) + 1
-                return acc
-            }, {})
-
-            const statsBody = Object.entries(stats).map(([sec, count]) => [sec, count])
-
-            doc.setFontSize(14)
-            doc.text('Distribución por Sección:', 14, yPos + 6)
-
-                // Tabla de Resumen
-                ; (autoTable as any)(doc, {
-                    startY: yPos + 10,
-                    head: [['Sección', 'Cantidad']],
-                    body: statsBody,
-                    theme: 'striped',
-                    styles: { fontSize: 10 },
-                    headStyles: { fillColor: [60, 60, 60], textColor: 255 },
-                    margin: { left: 14 },
-                    tableWidth: 80
-                })
-
-            const finalY = (doc as any).lastAutoTable?.finalY || yPos + 30
-
-            // Lista de Detalles
-            let currentY = finalY + 15
-            doc.setFontSize(14)
-            doc.setTextColor(0)
-            doc.text('Listado de Afiliados:', 14, currentY)
-            currentY += 10
-
-            doc.setFontSize(10)
-
-            const tableBody = afiliados.map(af => [
-                af.nombre_completo || 'Sin nombre',
-                af.seccion || '-',
-                af.telefono_movil || af.telefono_fijo || af.telefono || '-'
-            ])
-
-                ; (autoTable as any)(doc, {
-                    startY: currentY,
-                    head: [['Nombre Completo', 'Sección', 'Teléfono']],
-                    body: tableBody,
-                    theme: 'striped',
-                    styles: { fontSize: 9, cellPadding: 3 },
-                    headStyles: { fillColor: [60, 60, 60], textColor: 255 },
-                    columnStyles: {
-                        0: { cellWidth: 90 }, // Nombre
-                        1: { cellWidth: 50 }, // Sección
-                        2: { cellWidth: 40 }  // Teléfono
-                    },
-                    margin: { left: 14, right: 14 }
-                })
-
+            const {affiliationReport,loadReportBrand} = await import('@/lib/pdf-report')
+            const doc = affiliationReport(afiliados, {title:'Informe de afiliación',startDate,endDate,section:filterSeccion,state:filterEstado==='baja'?'Bajas':'Activa'}, await loadReportBrand())
             doc.save(`informe_afiliados_${new Date().toISOString().split('T')[0]}.pdf`)
 
         } catch (err) {
@@ -177,7 +75,7 @@ export default function AfiliadosInformeGenerator() {
                 color: '#1e293b',
                 fontWeight: 700
             }}>
-                Generar Informe de Afiliados
+                Generar informe de afiliación
             </h2>
 
             <div className="grid-two-columns">

@@ -110,12 +110,13 @@ export default function SaludManager() {
                 item.id === id ? { ...item, [field]: value } : item
             ))
 
-            const { error } = await supabase
+            const { data, error } = await supabase
                 .from('salud_laboral')
                 .update({ [field]: value })
-                .eq('id', id)
+                .eq('id', id).select('created_by,created_by_name,updated_by,updated_by_name,updated_at,creada_por').single()
 
             if (error) throw error
+            setItems(previous => previous.map(record => record.id === id ? { ...record, ...data } : record))
 
             if (field === 'contestacion') {
                 const { error: historyError } = await supabase
@@ -133,8 +134,8 @@ export default function SaludManager() {
             }
         } catch (err) {
             console.error(`Error actualizando ${field}:`, err)
-            alert(`Error al actualizar ${field}`)
             fetchItems()
+            throw err
         }
     }
 
@@ -177,7 +178,7 @@ export default function SaludManager() {
       <ManagementToolbar createHref="/salud-laboral/nueva" createLabel="Nueva incidencia" reportHref="/salud-laboral/informe"/>
       <ManagementFilters section={filterSeccion} state={filterEstado} search={filterTexto} states={ESTADOS_SALUD} onSection={setFilterSeccion} onState={setFilterEstado} onSearch={setFilterTexto} reset={resetFilters}/>
       <p className="results-count" role="status">{filteredItems.length} {filteredItems.length===1?'registro encontrado':'registros encontrados'}</p>
-      {filteredItems.length===0 ? <EmptyRecords reset={resetFilters}/> : <div className="records-list">{filteredItems.map(item=><RecordCard key={item.id} title={item.titulo} section={item.seccion} description={item.descripcion || ''} reply={item.contestacion || ''} created={item.created_at} author={item.creada_por} state={item.estado} states={ESTADOS_SALUD}
+      {filteredItems.length===0 ? <EmptyRecords reset={resetFilters}/> : <div className="records-list">{filteredItems.map(item=><RecordCard key={item.id} title={item.titulo} section={item.seccion} description={item.descripcion || ''} reply={item.contestacion || ''} created={item.created_at} authorship={item} resource="salud_laboral" recordId={String(item.id)} state={item.estado} states={ESTADOS_SALUD}
         history={(item.historial_salud || []).map(h=>({id:h.id, label:['Contestación Actualizada','Contestación de la Empresa'].includes(h.cambio)?'Contestación de la empresa actualizada':`Estado: ${h.cambio}`, date:h.created_at}))}
         onState={v=>void handleEstadoChange(item.id,v)} onEdit={(field,v)=>handleUpdateField(item.id,field,v)} onDelete={()=>void handleDelete(item.id)}
       />)}</div>}

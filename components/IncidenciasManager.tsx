@@ -112,12 +112,13 @@ export default function IncidenciasManager() {
                 inc.id === id ? { ...inc, [field]: value } : inc
             ))
 
-            const { error } = await supabase
+            const { data, error } = await supabase
                 .from('incidencias')
                 .update({ [field]: value })
-                .eq('id', id)
+                .eq('id', id).select('created_by,created_by_name,updated_by,updated_by_name,updated_at,creada_por').single()
 
             if (error) throw error
+            setIncidencias(previous => previous.map(record => record.id === id ? { ...record, ...data } : record))
 
             // Si se actualiza la contestación, guardar en historial
             if (field === 'contestacion') {
@@ -137,8 +138,8 @@ export default function IncidenciasManager() {
             }
         } catch (err) {
             console.error(`Error actualizando ${field}:`, err)
-            alert(`Error al actualizar ${field}`)
             fetchIncidencias() // Revertir cambios
+            throw err
         }
     }
 
@@ -183,7 +184,7 @@ export default function IncidenciasManager() {
       <ManagementToolbar createHref="/incidencias/nueva" createLabel="Nueva incidencia" reportHref="/orden-del-dia/informe"/>
       <ManagementFilters section={filterSeccion} state={filterEstado} search={filterTexto} states={ESTADOS_INCIDENCIAS} onSection={setFilterSeccion} onState={setFilterEstado} onSearch={setFilterTexto} reset={resetFilters}/>
       <p className="results-count" role="status">{filteredIncidencias.length} {filteredIncidencias.length===1?'registro encontrado':'registros encontrados'}</p>
-      {filteredIncidencias.length===0 ? <EmptyRecords reset={resetFilters}/> : <div className="records-list">{filteredIncidencias.map(item=><RecordCard key={item.id} title={item.titulo} section={item.seccion} description={item.descripcion || ''} reply={item.contestacion || ''} created={item.created_at} author={item.creada_por} state={item.estado} states={ESTADOS_INCIDENCIAS}
+      {filteredIncidencias.length===0 ? <EmptyRecords reset={resetFilters}/> : <div className="records-list">{filteredIncidencias.map(item=><RecordCard key={item.id} title={item.titulo} section={item.seccion} description={item.descripcion || ''} reply={item.contestacion || ''} created={item.created_at} authorship={item} resource="incidencias" recordId={String(item.id)} state={item.estado} states={ESTADOS_INCIDENCIAS}
         history={(item.historial_cambios || []).map(h=>({id:h.id, label:['Contestación Actualizada','Contestación de la Empresa'].includes(h.nuevo_estado)?'Contestación de la empresa actualizada':`Estado: ${h.nuevo_estado}`, date:h.created_at}))}
         onState={v=>void handleEstadoChange(item.id,v)} onEdit={(field,v)=>handleUpdateField(item.id,field,v)} onDelete={()=>void handleDelete(item.id)}
       />)}</div>}

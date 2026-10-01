@@ -17,7 +17,7 @@ export default function NuevaSaludForm() {
         titulo: '',
         seccion: SECCIONES[0],
         estado: 'Nueva',
-        creada_por: '',
+
         descripcion: ''
     })
 
@@ -42,7 +42,7 @@ export default function NuevaSaludForm() {
                         titulo: formData.titulo,
                         seccion: formData.seccion,
                         estado: formData.estado,
-                        creada_por: formData.creada_por,
+
                         descripcion: formData.descripcion
                     }
                 ])
@@ -69,12 +69,12 @@ export default function NuevaSaludForm() {
 
     return <section className="form-container entry-form">
       <Link href="/salud-laboral" className="back-link"><AppIcon name="back" size={18}/>Volver al listado</Link>
-      <h1>Nueva incidencia de salud laboral</h1><p className="form-intro">Los campos con * son obligatorios. Podrás editar el registro después.</p>
+      <h1>Nueva incidencia de salud laboral</h1><p className="form-intro">Los campos con * son obligatorios. La cuenta de acceso registra la autoría automáticamente.</p>
       <form onSubmit={handleSubmit}>
         <label htmlFor="titulo">Título *<input id="titulo" type="text" name="titulo" required placeholder="Un título breve y claro" value={formData.titulo} onChange={handleChange}/></label>
         <div className="grid-two-columns"><label htmlFor="seccion">Sección *<select id="seccion" name="seccion" value={formData.seccion} onChange={handleChange}>{SECCIONES.map(s=><option key={s}>{s}</option>)}</select></label><label htmlFor="estado">Estado inicial<select id="estado" name="estado" value={formData.estado} onChange={handleChange}>{ESTADOS_SALUD.map(s=><option key={s}>{s}</option>)}</select></label></div>
         <div><div className="field-heading"><label htmlFor="descripcion">Descripción *</label><VoiceInput onTranscript={handleVoiceTranscript}/></div><textarea id="descripcion" name="descripcion" required value={formData.descripcion} onChange={handleChange} rows={6} placeholder="Describe la deficiencia o el riesgo y dónde ocurre…"/></div>
-        <label htmlFor="creada_por">Registrado por <span className="optional-label">(opcional)</span><input id="creada_por" type="text" name="creada_por" value={formData.creada_por} onChange={handleChange} placeholder="Tu nombre" autoComplete="name"/></label>
+
         <div className="form-actions"><button className="button button-primary" type="submit" disabled={loading}>{loading?'Guardando…':'Guardar registro'}</button><button className="button button-secondary" type="button" disabled={loading} onClick={()=>router.push('/salud-laboral')}>Cancelar</button></div>
       </form>
     </section>

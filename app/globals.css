@@ -299,3 +299,39 @@ main { width:100%; }
  .aff-gestion .editable-text-preview { flex-direction:column; }
  .aff-gestion .edit-trigger { margin-top:0; }
 }
+
+/* CCOO Frigolouro: exact official logo; red, black, white and cyan references. */
+:root { --ccoo-red:#da291c; --ccoo-red-hover:#b31d13; --text-main:#202020; --text-secondary:#626262; --brand-cyan:#00add4; }
+body { font-family:Arial,'Segoe UI',system-ui,sans-serif; }
+.app-header { border-bottom:2px solid var(--ccoo-red); }
+.brand-logo { width:56px; height:auto; max-height:none; }
+.brand strong { font-weight:800; color:#202020; }
+.brand small { color:#626262; }
+.home-welcome { background:white; color:#202020; border:1px solid #e0e0e0; border-top:5px solid var(--ccoo-red); box-shadow:0 3px 15px #20202006; }
+.home-welcome::after { border-color:#00add40d; }
+.home-welcome h1 { color:#202020; font-weight:800; }
+.home-welcome h1 span { color:var(--ccoo-red); }
+.home-welcome p,.welcome-eyebrow { color:#626262; }
+.welcome-eyebrow>span { background:var(--brand-cyan); border-radius:2px; }
+.private-tag { color:#555; border-color:#e5e5e5; background:#f7f7f7; }
+.tone-agenda { color:var(--ccoo-red); background:#fff0ee; }
+.tone-clock { color:#2e2e2e; background:#f0f0f0; }
+.tone-people { color:#08687d; background:#e8f6f9; }
+.auth-brand-logo { width:100px; height:auto; }
+.auth-card { border-top:5px solid var(--ccoo-red); }
+.author-credit { display:flex; flex-direction:column; gap:5px; font-size:.75rem; line-height:1.5; color:#626262; overflow-wrap:anywhere; }
+.activity-trail { border-top:1px solid var(--border); padding-top:8px; margin:18px 0; }
+.activity-trail>summary { min-height:44px; display:flex; align-items:center; font-size:.85rem; font-weight:600; color:#343434; cursor:pointer; }
+.activity-trail>summary::before { content:'+'; margin-right:9px; color:var(--ccoo-red); font-size:1.1rem; }
+.activity-trail[open]>summary::before { content:'−'; }
+.activity-trail summary::-webkit-details-marker { display:none; }
+.activity-trail ol { list-style:none; padding:0; margin:12px 0; border-left:2px solid #e0e0e0; }
+.activity-trail li { display:flex; flex-direction:column; gap:4px; padding:0 0 16px 13px; font-size:.8rem; overflow-wrap:anywhere; }
+.activity-trail li time { color:#626262; font-size:.74rem; }
+.gestion-credit { grid-column:1/-1; display:flex; flex-direction:column; gap:7px; }
+.aff-person>.author-credit,.aff-person>.activity-trail { margin:18px; }
+@media(max-width:600px) {
+ .brand-logo { width:48px; }
+ .home-welcome { padding:20px; }
+ .aff-person>.author-credit,.aff-person>.activity-trail { margin:16px; }
+}

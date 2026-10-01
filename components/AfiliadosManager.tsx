@@ -8,6 +8,8 @@ import { SECCIONES } from '@/lib/constants'
 import { AFFILIATION_FIELDS, displayField, normalizeText, parseAffiliationRows, paymentLabel, type AffiliationField, type ImportRow, type ImportPreview } from '@/lib/affiliation'
 import EditableText from './EditableText'
 import AppIcon from './AppIcon'
+import AuthorCredit from './AuthorCredit'
+import ActivityTrail from './ActivityTrail'
 
 const fieldGroups: {title: string; keys: AffiliationField[]}[] = [
   {title:'Identificación', keys:['nombre','apellidos','dni','fecha_nacimiento','pais']},
@@ -110,7 +112,8 @@ export default function AfiliadosManager() {
   async function download(person: Afiliado) {
     try {
       const { affiliationPDF } = await import('@/lib/affiliation-pdf')
-      affiliationPDF(person).save(`ficha_${person.nombre_completo.replace(/[^a-zA-Z0-9áéíóúüñÁÉÍÓÚÜÑ]+/g,'_')}.pdf`)
+      const doc = await affiliationPDF(person)
+      doc.save(`ficha_${person.nombre_completo.replace(/[^a-zA-Z0-9áéíóúüñÁÉÍÓÚÜÑ]+/g,'_')}.pdf`)
     } catch(e) { setError(messageOf(e)) }
   }
   async function review(importRows: ImportRow[], choices: Record<string,string>) {
@@ -230,9 +233,9 @@ export default function AfiliadosManager() {
         {person.correo_electronico && <a href={`mailto:${person.correo_electronico}`}>Escribir correo</a>}
       </div>}
       {person.estado_afiliacion==='baja' && <p className="aff-note">{person.motivo_baja || 'Baja registrada'}.{person.ausencia_detectada_en && ` Última ausencia detectada: ${new Date(person.ausencia_detectada_en).toLocaleDateString('es-ES')}. No indica la fecha efectiva de baja.`}</p>}
-      <h3>Historial de gestiones</h3>
+      <AuthorCredit record={person}/><ActivityTrail resource="afiliados" id={person.id} revision={person.updated_at || undefined}/><h3>Historial de gestiones</h3>
       {person.gestiones_afiliados?.length ? [...person.gestiones_afiliados].sort((a,b)=>b.created_at.localeCompare(a.created_at)).map(g=><div className="aff-gestion" key={g.id}>
-        <time dateTime={g.created_at}>{new Date(g.created_at).toLocaleDateString('es-ES')}</time>
+        <div className="gestion-credit"><time dateTime={g.created_at}>{new Date(g.created_at).toLocaleDateString('es-ES')}</time><AuthorCredit record={g}/></div>
         <EditableText initialValue={g.gestion} label="gestión" isTextArea onSave={async text=>{if(!await gestion(person.id,text,g.id)) throw new Error('No se pudo guardar la gestión')}}/>
         <button disabled={busy} aria-label="Borrar gestión" onClick={()=>void gestion(person.id,'',g.id,true)}>×</button>
       </div>) : <p className="aff-note">No hay gestiones registradas.</p>}

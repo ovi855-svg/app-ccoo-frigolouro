@@ -23,6 +23,42 @@ local separado de la aplicación publicada, sin introducir datos de prueba en
 Supabase. La compilación de producción comprueba TypeScript; la protección de
 las rutas se comprueba también mediante peticiones sin sesión.
 
+## Autoría automática y actividad
+
+Las altas y modificaciones se atribuyen a la cuenta autenticada y al nombre
+autorizado de `app_members`. Los formularios no solicitan el nombre de quien
+registra. Supabase fija creador, última persona que modifica y fecha mediante
+triggers; rechaza la suplantación aunque el cliente envíe otro nombre o UUID.
+Esto incluye incidencias, métodos, salud, afiliación, gestiones, historiales
+e importaciones del Excel.
+
+Las fichas muestran la creación y el último cambio, y el desplegable «Quién
+hizo cada cambio» permite consultar actividad paginada. `registro_actividad`
+guarda actor, fecha, operación y nombres de los campos, sin duplicar su
+contenido. Solo miembros activos pueden leerla; el cliente no puede insertar,
+editar ni borrar este registro. Las funciones de trigger están en el esquema
+privado y las escrituras originales siguen sujetas a RLS.
+
+La migración aplicada se documenta en `database/automatic-authorship.sql`.
+No volver a ejecutarla. No se atribuyen retroactivamente cambios antiguos:
+conservan su autoría anterior, diferenciada de la autoría verificada.
+`database/test-automatic-authorship.sql` comprueba las nueve tablas, rechazo
+de suplantación, preservación del creador y permisos; revierte sus escrituras.
+Las pruebas de sincronización comprueban también la autoría en el RPC.
+
+## Identidad visual e informes
+
+La aplicación utiliza el logo oficial transparente de CCOO Frigolouro,
+sin modificarlo, y los colores rojo, negro, blanco y el acento cian del logo.
+Se conservan la navegación móvil y todas las opciones de gestión.
+
+Los cuatro informes y la ficha individual comparten `lib/pdf-report.ts`:
+cabecera oficial, fecha completa, títulos negros, texto justificado,
+tablas rojas y pie de documento interno con número de página. El diseño
+se ha contrastado con las plantillas internas del proyecto. Los informes
+mantienen filtros, campos, contestaciones e historiales; añaden la autoría
+verificada cuando existe. La carga del logo es obligatoria antes de exportar.
+
 ## Ejecutar en local
 
 1. Ejecutar `npm ci`.

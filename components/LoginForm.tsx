@@ -64,7 +64,7 @@ export default function LoginForm() {
     }
 
     return <main className="auth-container"><section className="auth-card">
-        <Image src="/logo.png" alt="CCOO Frigolouro" width={80} height={80} style={{ objectFit: 'contain' }} priority />
+        <Image src="/brand/ccoo-frigolouro-rojo.png" alt="CCOO Frigolouro" width={130} height={90} className="auth-brand-logo" priority />
         <h1>CCOO Frigolouro</h1>
         <p className="auth-intro">Acceso privado a la gestión sindical</p>
         <form onSubmit={login}>

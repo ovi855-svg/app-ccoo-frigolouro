@@ -17,7 +17,7 @@ export default function NuevaMetodosForm() {
         titulo: '',
         seccion: SECCIONES[0],
         descripcion: '',
-        creada_por: '',
+
         estado: 'Nueva'
     })
 
@@ -42,7 +42,7 @@ export default function NuevaMetodosForm() {
                         titulo: formData.titulo,
                         seccion: formData.seccion,
                         descripcion: formData.descripcion || null,
-                        creada_por: formData.creada_por || null,
+
                         estado: formData.estado
                     }
                 ])
@@ -69,12 +69,12 @@ export default function NuevaMetodosForm() {
 
     return <section className="form-container entry-form">
       <Link href="/metodos-tiempos" className="back-link"><AppIcon name="back" size={18}/>Volver al listado</Link>
-      <h1>Nueva solicitud de revisión</h1><p className="form-intro">Los campos con * son obligatorios. Podrás editar el registro después.</p>
+      <h1>Nueva solicitud de revisión</h1><p className="form-intro">Los campos con * son obligatorios. La cuenta de acceso registra la autoría automáticamente.</p>
       <form onSubmit={handleSubmit}>
         <label htmlFor="titulo">Título *<input id="titulo" type="text" name="titulo" required placeholder="Un título breve y claro" value={formData.titulo} onChange={handleChange}/></label>
         <div className="grid-two-columns"><label htmlFor="seccion">Sección *<select id="seccion" name="seccion" value={formData.seccion} onChange={handleChange}>{SECCIONES.map(s=><option key={s}>{s}</option>)}</select></label><label htmlFor="estado">Estado inicial<select id="estado" name="estado" value={formData.estado} onChange={handleChange}>{ESTADOS_SOLICITUDES.map(s=><option key={s}>{s}</option>)}</select></label></div>
         <div><div className="field-heading"><label htmlFor="descripcion">Descripción</label><VoiceInput onTranscript={handleVoiceTranscript}/></div><textarea id="descripcion" name="descripcion"  value={formData.descripcion} onChange={handleChange} rows={6} placeholder="Describe la tarea, el ritmo o el método que necesita revisión…"/></div>
-        <label htmlFor="creada_por">Registrado por <span className="optional-label">(opcional)</span><input id="creada_por" type="text" name="creada_por" value={formData.creada_por} onChange={handleChange} placeholder="Tu nombre" autoComplete="name"/></label>
+
         <div className="form-actions"><button className="button button-primary" type="submit" disabled={loading}>{loading?'Guardando…':'Guardar registro'}</button><button className="button button-secondary" type="button" disabled={loading} onClick={()=>router.push('/metodos-tiempos')}>Cancelar</button></div>
       </form>
     </section>

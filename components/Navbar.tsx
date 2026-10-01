@@ -18,7 +18,7 @@ export default function Navbar() {
  return <>
   <a href="#main-content" className="skip-link">Ir al contenido</a>
   <header className="app-header"><div className="header-inner">
-   <Link href="/" className="brand" aria-label="CCOO Frigolouro, inicio"><Image src="/logo.png" alt="CCOO" width={42} height={42} className="brand-logo" priority/><span><strong>CCOO Frigolouro</strong><small>Sección sindical</small></span></Link>
+   <Link href="/" className="brand" aria-label="CCOO Frigolouro, inicio"><Image src="/brand/ccoo-frigolouro-rojo.png" alt="CCOO" width={42} height={42} className="brand-logo" priority/><span><strong>CCOO Frigolouro</strong><small>Sección sindical</small></span></Link>
    <nav className="desktop-navigation" aria-label="Navegación principal">{links.map(link=><Link key={link.href} href={link.href} className="nav-link" aria-current={active(link.href)?'page':undefined}>{link.label}</Link>)}</nav>
    <AccountMenu/>
   </div></header>

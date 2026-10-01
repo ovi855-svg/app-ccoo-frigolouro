@@ -1,11 +1,24 @@
-export interface HistorialCambio {
+export interface AuthorStamp {
+    created_by?: string | null;
+    created_by_name?: string | null;
+    updated_by?: string | null;
+    updated_by_name?: string | null;
+    updated_at?: string | null;
+}
+export interface ActivityEntry {
+    id: string; created_at: string; actor_id: string | null; actor_name: string;
+    table_name: string; record_id: string; resource_table: string; resource_id: string;
+    operation: 'INSERT' | 'UPDATE' | 'DELETE'; changed_fields: string[];
+}
+
+export interface HistorialCambio extends AuthorStamp {
     id: number;
     incidencia_id: number;
     nuevo_estado: string;
     created_at: string;
 }
 
-export interface Incidencia {
+export interface Incidencia extends AuthorStamp {
     id: number;
     created_at: string;
     seccion: string;
@@ -17,7 +30,7 @@ export interface Incidencia {
     historial_cambios?: HistorialCambio[];
 }
 
-export interface SaludLaboral {
+export interface SaludLaboral extends AuthorStamp {
     id: string; // UUID
     created_at: string;
     seccion: string;
@@ -27,22 +40,22 @@ export interface SaludLaboral {
     estado: string;
     creada_por?: string;
     imagen_url?: string | null;
-    historial_salud?: {
+    historial_salud?: (AuthorStamp & {
         id: string; // UUID
         salud_id: string; // UUID
         cambio: string;
         created_at: string;
-    }[];
+    })[];
 }
 
-export interface GestionAfiliado {
+export interface GestionAfiliado extends AuthorStamp {
     id: string;
     created_at: string;
     afiliado_id: string;
     gestion: string;
 }
 
-export interface Afiliado {
+export interface Afiliado extends AuthorStamp {
     id: string; // UUID
     created_at: string;
     nombre_completo: string;
@@ -67,6 +80,5 @@ export interface Afiliado {
     estado_afiliacion: 'activa' | 'baja';
     ausencia_detectada_en?: string | null;
     motivo_baja?: string | null;
-    updated_at?: string;
     gestiones_afiliados?: GestionAfiliado[];
 }

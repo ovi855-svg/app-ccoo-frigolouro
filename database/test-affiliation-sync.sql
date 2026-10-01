@@ -7,13 +7,15 @@ declare
  rows jsonb; second jsonb; preview jsonb; result jsonb; original_count integer; original_gestiones integer;
  first_id uuid; count_now integer; first_gestion uuid; failed boolean;
 begin
- select count(*) into original_count from public.afiliados;
+ select count(*) into original_count from public.afiliados where estado_afiliacion='activa';
  select count(*) into original_gestiones from public.gestiones_afiliados;
  rows:=jsonb_build_array(jsonb_build_object('dni','FICTICIO0001','nombre','PERSONA','apellidos','PRUEBA NO REAL','via',null,'direccion',null,'numero',null,'piso',null,'codigo_postal',null,'localidad',null,'fecha_nacimiento','2000-02-29','pais',null,'categoria',null,'estado_pago','AC','telefono_fijo',null,'telefono_movil',null,'correo_electronico',null));
  preview:=public.sincronizar_afiliacion(rows);
  if (preview->>'altas')::int<>1 or (preview->>'bajas')::int<>original_count then raise exception 'Wrong initial preview'; end if;
  result:=public.sincronizar_afiliacion(rows,true,'{}',preview->>'revision');
  select id into first_id from public.afiliados where dni='FICTICIO0001';
+ if not exists(select 1 from public.afiliados where id=first_id and created_by=auth.uid() and created_by_name=(select display_name from public.app_members where user_id=auth.uid())) then raise exception 'Sync author missing'; end if;
+ if not exists(select 1 from public.importaciones_afiliacion where created_by=auth.uid() and user_id=auth.uid() and altas=1) or not exists(select 1 from public.registro_actividad where resource_id=first_id::text and operation='INSERT' and actor_id=auth.uid()) then raise exception 'Sync audit missing'; end if;
  select count(*) into count_now from public.afiliados where estado_afiliacion='activa';
  if count_now<>1 then raise exception 'Absent records not archived'; end if;
  select count(*) into count_now from public.gestiones_afiliados;
