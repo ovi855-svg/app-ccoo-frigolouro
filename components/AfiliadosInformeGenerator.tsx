@@ -16,6 +16,7 @@ export default function AfiliadosInformeGenerator() {
     })
     const [endDate, setEndDate] = useState(() => new Date().toISOString().split('T')[0])
     const [filterSeccion, setFilterSeccion] = useState('TODAS')
+    const [filterEstado, setFilterEstado] = useState('activa')
     const supabase = createClient()
 
     const generatePDF = async () => {
@@ -26,6 +27,7 @@ export default function AfiliadosInformeGenerator() {
             let query = supabase
                 .from('afiliados')
                 .select('*, gestiones_afiliados(*)')
+                .eq('estado_afiliacion', filterEstado)
                 .gte('created_at', `${startDate}T00:00:00`)
                 .lte('created_at', `${endDate}T23:59:59`)
                 .order('seccion', { ascending: true })
@@ -91,6 +93,8 @@ export default function AfiliadosInformeGenerator() {
             doc.text(`Registro entre: ${new Date(startDate).toLocaleDateString('es-ES')} a ${new Date(endDate).toLocaleDateString('es-ES')}`, 14, 61)
 
             let yPos = 71
+            doc.text(`Afiliación: ${filterEstado === 'baja' ? 'Bajas' : 'Activa'}`, 14, yPos)
+            yPos += 6
             if (filterSeccion !== 'TODAS') {
                 doc.text(`Sección filtrada: ${filterSeccion}`, 14, yPos)
                 yPos += 6
@@ -136,7 +140,7 @@ export default function AfiliadosInformeGenerator() {
             const tableBody = afiliados.map(af => [
                 af.nombre_completo || 'Sin nombre',
                 af.seccion || '-',
-                af.telefono || '-'
+                af.telefono_movil || af.telefono_fijo || af.telefono || '-'
             ])
 
                 ; (autoTable as any)(doc, {
@@ -210,6 +214,11 @@ export default function AfiliadosInformeGenerator() {
             </div>
 
             <div style={{ marginBottom: '20px' }}>
+                <label htmlFor="informe-estado" style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>Estado de afiliación</label>
+                <select id="informe-estado" value={filterEstado} onChange={e=>setFilterEstado(e.target.value)} style={{ width: '100%', padding: '10px 12px', marginBottom: '20px', border: '1px solid #cbd5e1', borderRadius: '8px' }}>
+                    <option value="activa">Afiliación activa</option>
+                    <option value="baja">Bajas de afiliación</option>
+                </select>
                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Filtrar por Sección</label>
                 <select
                     value={filterSeccion}

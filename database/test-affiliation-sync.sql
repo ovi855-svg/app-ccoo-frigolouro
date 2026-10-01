@@ -1,0 +1,55 @@
+-- Integration checks with fictional records, always rolled back.
+begin;
+select set_config('request.jwt.claim.sub',(select user_id::text from public.app_members where active limit 1),true);
+set local role authenticated;
+do $$
+declare
+ rows jsonb; second jsonb; preview jsonb; result jsonb; original_count integer; original_gestiones integer;
+ first_id uuid; count_now integer; first_gestion uuid; failed boolean;
+begin
+ select count(*) into original_count from public.afiliados;
+ select count(*) into original_gestiones from public.gestiones_afiliados;
+ rows:=jsonb_build_array(jsonb_build_object('dni','FICTICIO0001','nombre','PERSONA','apellidos','PRUEBA NO REAL','via',null,'direccion',null,'numero',null,'piso',null,'codigo_postal',null,'localidad',null,'fecha_nacimiento','2000-02-29','pais',null,'categoria',null,'estado_pago','AC','telefono_fijo',null,'telefono_movil',null,'correo_electronico',null));
+ preview:=public.sincronizar_afiliacion(rows);
+ if (preview->>'altas')::int<>1 or (preview->>'bajas')::int<>original_count then raise exception 'Wrong initial preview'; end if;
+ result:=public.sincronizar_afiliacion(rows,true,'{}',preview->>'revision');
+ select id into first_id from public.afiliados where dni='FICTICIO0001';
+ select count(*) into count_now from public.afiliados where estado_afiliacion='activa';
+ if count_now<>1 then raise exception 'Absent records not archived'; end if;
+ select count(*) into count_now from public.gestiones_afiliados;
+ if count_now<>original_gestiones then raise exception 'Existing management history changed'; end if;
+ update public.afiliados set seccion='SACRIFICIO' where id=first_id;
+ insert into public.gestiones_afiliados(afiliado_id,gestion) values(first_id,'GESTION FICTICIA DE PRUEBA') returning id into first_gestion;
+ preview:=public.sincronizar_afiliacion(rows);
+ result:=public.sincronizar_afiliacion(rows,true,'{}',preview->>'revision');
+ if (result->>'altas')::int<>0 or (result->>'bajas')::int<>0 then raise exception 'Repeated import is not idempotent'; end if;
+ if not exists(select 1 from public.afiliados where id=first_id and seccion='SACRIFICIO') then raise exception 'Section not preserved'; end if;
+ second:=jsonb_build_array((rows->0)||jsonb_build_object('dni','FICTICIO0002','nombre','SEGUNDA'));
+ preview:=public.sincronizar_afiliacion(second);
+ perform public.sincronizar_afiliacion(second,true,'{}',preview->>'revision');
+ if not exists(select 1 from public.afiliados where id=first_id and estado_afiliacion='baja' and ausencia_detectada_en is not null) then raise exception 'Absence detection missing'; end if;
+ preview:=public.sincronizar_afiliacion(rows||second);
+ result:=public.sincronizar_afiliacion(rows||second,true,'{}',preview->>'revision');
+ if (result->>'reactivadas')::int<>1 or not exists(select 1 from public.afiliados where id=first_id and estado_afiliacion='activa' and seccion='SACRIFICIO') or not exists(select 1 from public.gestiones_afiliados where id=first_gestion and afiliado_id=first_id) then raise exception 'Reactivation did not preserve identity/history'; end if;
+ failed:=false;
+ begin perform public.sincronizar_afiliacion(rows||rows); exception when others then failed:=true; end;
+ if not failed then raise exception 'Duplicates accepted'; end if;
+ failed:=false;
+ begin perform public.sincronizar_afiliacion(jsonb_build_array((rows->0)-'estado_pago')); exception when others then failed:=true; end;
+ if not failed then raise exception 'Partial columns accepted'; end if;
+ failed:=false;
+ begin perform public.sincronizar_afiliacion(jsonb_build_array((rows->0)||'{"fecha_nacimiento":"2001-02-29"}'::jsonb)); exception when others then failed:=true; end;
+ if not failed then raise exception 'Invalid date accepted'; end if;
+ preview:=public.sincronizar_afiliacion(rows);
+ update public.afiliados set seccion='DESPIECE' where id=first_id;
+ failed:=false;
+ begin perform public.sincronizar_afiliacion(rows,true,'{}',preview->>'revision'); exception when others then failed:=true; end;
+ if not failed then raise exception 'Stale preview accepted'; end if;
+ perform set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000001',true);
+ failed:=false;
+ begin perform public.sincronizar_afiliacion(rows); exception when insufficient_privilege then failed:=true; end;
+ if not failed then raise exception 'Unauthorized sync accepted'; end if;
+ if (select count(*) from public.afiliados)<>0 or (select count(*) from public.importaciones_afiliacion)<>0 then raise exception 'Unauthorized data visible'; end if;
+end $$;
+select 'PASS: preview, atomic sync, repeat import, archival, reactivation, UUID/section/history preservation, invalid inputs, stale revision and authorization' as checks;
+rollback;

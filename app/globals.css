@@ -343,5 +343,31 @@ button:active {
 .auth-error { background: #fff1f2; color: #9f1239; border-radius: 8px; padding: 12px; }
 .auth-message { background: #f0fdf4; color: #166534; border-radius: 8px; padding: 12px; }
 .account-menu { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: .9rem; }
+.affiliation-manager { color: #1e293b; }
+.aff-toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 16px 0; }
+.aff-toolbar button, .aff-panel button { padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; color: #334155; font: inherit; cursor: pointer; }
+.aff-toolbar button.aff-primary, .aff-panel button.aff-primary { background: var(--ccoo-red); color: white; border-color: var(--ccoo-red); font-weight: 600; }
+.aff-toolbar button[aria-pressed="true"] { background: #fff1f2; border-color: #b91c1c; color: #9f1239; font-weight: 700; }
+.affiliation-manager button:disabled { opacity: .55; cursor: default; }
+.affiliation-manager input, .affiliation-manager select { font: inherit; padding: 10px; border: 1px solid #94a3b8; border-radius: 8px; background: white; color: #1e293b; width: 100%; min-width: 0; }
+.affiliation-manager input:focus-visible, .affiliation-manager select:focus-visible, .affiliation-manager button:focus-visible, .aff-person summary:focus-visible { outline: 3px solid #fecaca; outline-offset: 2px; }
+.aff-fields { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,230px),1fr)); gap: 18px; }
+.aff-fields label, .aff-filters label, .aff-conflict { display: flex; flex-direction: column; gap: 6px; font-weight: 600; }
+.aff-filters { display: grid; grid-template-columns: minmax(0,2fr) minmax(0,1fr); gap: 16px; }
+.aff-panel { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin: 16px 0; box-shadow: 0 2px 4px rgba(0,0,0,.03); }
+.aff-panel h2 { margin-top: 0; font-size: 1.25rem; }
+.aff-person summary { cursor: pointer; padding: 2px; }
+.aff-person summary strong { font-size: 1.15rem; overflow-wrap: anywhere; }
+.aff-person summary span { display: block; color: #64748b; font-size: .9rem; margin: 6px 0 0 18px; }
+.aff-fields dt { font-size: .85rem; font-weight: 600; color: #64748b; }
+.aff-fields dd { margin: 5px 0 0; overflow-wrap: anywhere; }
+.aff-note { color: #64748b; font-size: .9rem; line-height: 1.5; }
+.aff-check { display: flex; align-items: flex-start; gap: 10px; margin: 16px 0; }
+.aff-check input { width: auto; margin-top: 4px; flex-shrink: 0; }
+.aff-conflict { margin: 16px 0; font-weight: 400; }
+.aff-gestion { display: grid; grid-template-columns: 90px minmax(0,1fr) auto; gap: 10px; align-items: start; background: #f8fafc; padding: 10px; margin-bottom: 8px; border-radius: 8px; }
+.aff-gestion time { font-size: .8rem; color: #64748b; }
+.aff-toolbar input { flex: 1; min-width: min(100%,200px); }
+@media(max-width:600px) { .aff-filters { grid-template-columns: 1fr; } .aff-panel { padding: 16px; } .aff-gestion { grid-template-columns: minmax(0,1fr) auto; } .aff-gestion time { grid-column: 1/-1; } }
 .account-menu button { border: 1px solid #cbd5e1; background: white; border-radius: 8px; padding: 8px 12px; cursor: pointer; }
 @media (max-width: 480px) { .auth-container { padding: 16px; } .auth-card { padding: 24px; } }

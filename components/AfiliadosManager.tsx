@@ -1,811 +1,240 @@
-'use client'
+"use client"
 
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useState, useRef } from 'react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
-import { Afiliado } from '@/lib/types'
+import type { Afiliado } from '@/lib/types'
 import { SECCIONES } from '@/lib/constants'
+import { AFFILIATION_FIELDS, displayField, normalizeText, parseAffiliationRows, paymentLabel, type ImportRow, type ImportPreview } from '@/lib/affiliation'
 import EditableText from './EditableText'
-import Papa from 'papaparse'
-import jsPDF from 'jspdf'
-import autoTable from 'jspdf-autotable'
+
+const sections = ['Sin asignar', ...SECCIONES]
+const countLabel = (count: number, one: string, many: string) => `${count} ${count===1?one:many}`
+function messageOf(error: unknown): string {
+  const e = error as { code?: string; message?: string }
+  if (e.code === '23505') return 'Ya existe una ficha con ese DNI/NIE. Busca la ficha y edítala o reactívala.'
+  if (e.code === 'PGRST116') return 'La ficha ha cambiado o ya no está disponible. Recarga la página y revisa los datos antes de guardar.'
+  return e.message || 'No se pudo completar la operación. Inténtalo de nuevo.'
+}
 
 export default function AfiliadosManager() {
-    const [afiliados, setAfiliados] = useState<Afiliado[]>([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
-    const [filterSeccion, setFilterSeccion] = useState('TODAS')
-    const [searchTerm, setSearchTerm] = useState('')
-    const [showNewForm, setShowNewForm] = useState(false)
-    const [newAfiliado, setNewAfiliado] = useState<Partial<Afiliado>>({
-        seccion: 'General',
-        nombre_completo: ''
-    })
-    const fileInputRef = useRef<HTMLInputElement>(null)
-    const [importing, setImporting] = useState(false)
-
-    const supabase = createClient()
-
-    const fetchAfiliados = async () => {
-        try {
-            setLoading(true)
-            const { data, error } = await supabase
-                .from('afiliados')
-                .select('*, gestiones_afiliados(*)')
-                .order('nombre_completo', { ascending: true })
-
-            if (error) throw error
-            setAfiliados(data as Afiliado[])
-        } catch (err) {
-            console.error('Error cargando afiliados:', err)
-            setError('Error al cargar afiliados')
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    useEffect(() => {
-        fetchAfiliados()
-    }, [])
-
-    const handleCreate = async (e: React.FormEvent) => {
-        e.preventDefault()
-        try {
-            if (!newAfiliado.nombre_completo) {
-                alert('El Nombre Completo es obligatorio')
-                return
-            }
-
-            const { error } = await supabase
-                .from('afiliados')
-                .insert([newAfiliado])
-
-            if (error) throw error
-
-            setShowNewForm(false)
-            setNewAfiliado({ seccion: 'General', nombre_completo: '' })
-            fetchAfiliados()
-        } catch (err) {
-            console.error('Error creando afiliado:', err)
-            alert('Error al crear afiliado')
-        }
-    }
-
-    const handleUpdateField = async (id: string, field: keyof Afiliado, value: any) => {
-        try {
-            const { error } = await supabase
-                .from('afiliados')
-                .update({ [field]: value })
-                .eq('id', id)
-
-            if (error) throw error
-
-            // Actualización optimista
-            setAfiliados(prev => prev.map(a =>
-                a.id === id ? { ...a, [field]: value } : a
-            ))
-        } catch (err) {
-            console.error(`Error actualizando ${field}:`, err)
-            alert(`Error al actualizar ${field}`)
-            fetchAfiliados()
-        }
-    }
-
-    const handleDelete = async (id: string) => {
-        if (!confirm('¿Estás seguro de eliminar este afiliado?')) return
-
-        try {
-            const { error } = await supabase
-                .from('afiliados')
-                .delete()
-                .eq('id', id)
-
-            if (error) throw error
-            setAfiliados(prev => prev.filter(a => a.id !== id))
-        } catch (err) {
-            console.error('Error eliminando afiliado:', err)
-            alert('Error al eliminar afiliado')
-        }
-    }
-
-    const handleAddGestion = async (afiliadoId: string, gestion: string) => {
-        if (!gestion.trim()) return
-
-        try {
-            const { error } = await supabase
-                .from('gestiones_afiliados')
-                .insert([{ afiliado_id: afiliadoId, gestion: gestion.trim() }])
-
-            if (error) throw error
-
-            // Recargar para obtener la nueva gestión con su fecha
-            fetchAfiliados()
-        } catch (err) {
-            console.error('Error añadiendo gestión:', err)
-            alert('Error al añadir gestión')
-        }
-    }
-
-    const handleUpdateGestion = async (gestionId: string, newValue: string) => {
-        try {
-            const { error } = await supabase
-                .from('gestiones_afiliados')
-                .update({ gestion: newValue })
-                .eq('id', gestionId)
-
-            if (error) throw error
-
-            // Actualización optimista
-            setAfiliados(prev => prev.map(a => ({
-                ...a,
-                gestiones_afiliados: a.gestiones_afiliados?.map(g =>
-                    g.id === gestionId ? { ...g, gestion: newValue } : g
-                )
-            })))
-        } catch (err) {
-            console.error('Error actualizando gestión:', err)
-            alert('Error al actualizar gestión')
-            fetchAfiliados()
-        }
-    }
-
-    const handleDeleteGestion = async (gestionId: string) => {
-        if (!confirm('¿Seguro que quieres borrar esta gestión?')) return
-
-        try {
-            const { error } = await supabase
-                .from('gestiones_afiliados')
-                .delete()
-                .eq('id', gestionId)
-
-            if (error) throw error
-
-            // Actualización optimista
-            setAfiliados(prev => prev.map(a => ({
-                ...a,
-                gestiones_afiliados: a.gestiones_afiliados?.filter(g => g.id !== gestionId)
-            })))
-        } catch (err) {
-            console.error('Error borrando gestión:', err)
-            alert('Error al borrar gestión')
-            fetchAfiliados()
-        }
-    }
-
-    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
-        if (!file) return
-
-        setImporting(true)
-
-        Papa.parse(file, {
-            header: true,
-            skipEmptyLines: true,
-            complete: async (results) => {
-                try {
-                    console.log('CSV Parsed:', results.data)
-
-                    const filas = results.data as any[]
-                    // Normalización de claves para búsqueda insensible a mayúsculas/acentos
-                    const normalizeKey = (key: string) => key.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim()
-
-                    const nuevosAfiliados: Partial<Afiliado>[] = filas.map(fila => {
-                        // Crear un mapa de claves normalizadas a valores
-                        const rowMap: Record<string, any> = {}
-                        Object.keys(fila).forEach(key => {
-                            rowMap[normalizeKey(key)] = fila[key]
-                        })
-
-                        // Búsqueda más robusta de columnas
-                        const nombre = rowMap['nombre'] ||
-                            rowMap['nombre completo'] ||
-                            rowMap['apellidos y nombre'] ||
-                            rowMap['trabajador'] ||
-                            rowMap['afiliado'] ||
-                            Object.values(fila)[0] // Último recurso: primera columna
-
-                        const seccion = rowMap['seccion'] || rowMap['departamento'] || 'General'
-                        const dni = rowMap['dni'] || rowMap['nif'] || rowMap['documento']
-                        const telefono = rowMap['telefono'] || rowMap['movil'] || rowMap['celular']
-                        const direccion = rowMap['direccion'] || rowMap['domicilio']
-                        const cp = rowMap['cp'] || rowMap['codigo postal'] || rowMap['cod postal']
-                        const localidad = rowMap['localidad'] || rowMap['poblacion'] || rowMap['municipio']
-
-                        // Validación básica: Si el nombre es muy corto (<3 chars), lo ignoramos
-                        if (!nombre || typeof nombre !== 'string' || nombre.length < 3) return null
-
-                        return {
-                            nombre_completo: nombre.trim(),
-                            seccion: seccion.trim(),
-                            dni: dni ? String(dni).trim() : null,
-                            telefono: telefono ? String(telefono).trim() : null,
-                            direccion: direccion ? String(direccion).trim() : null,
-                            codigo_postal: cp ? String(cp).trim() : null,
-                            localidad: localidad ? String(localidad).trim() : null
-                        }
-                    }).filter(Boolean) as Partial<Afiliado>[]
-
-                    if (nuevosAfiliados.length === 0) {
-                        const columnasDetectadas = results.meta.fields?.join(', ') || 'Ninguna'
-                        alert(`No se encontraron datos válidos. \nColumnas detectadas: ${columnasDetectadas}.\nPor favor, asegura que el archivo tenga una columna con el nombre del afiliado (ej: 'Nombre', 'Apellidos y Nombre').`)
-                        return
-                    }
-
-                    const { error } = await supabase
-                        .from('afiliados')
-                        .insert(nuevosAfiliados)
-
-                    if (error) throw error
-
-                    alert(`Importados ${nuevosAfiliados.length} afiliados correctamente.`)
-                    fetchAfiliados()
-                    // Limpiar input
-                    if (fileInputRef.current) fileInputRef.current.value = ''
-
-                } catch (err) {
-                    console.error('Error importando CSV:', err)
-                    alert('Error al importar los datos.')
-                } finally {
-                    setImporting(false)
-                }
-            },
-            error: (error) => {
-                console.error('Error parsing CSV:', error)
-                alert('Error al leer el archivo CSV')
-                setImporting(false)
-            }
-        })
-    }
-
-    const generateAfiliadoPDF = (afiliado: Afiliado) => {
-        try {
-            const doc = new jsPDF()
-
-            // Header
-            doc.setFontSize(18)
-            doc.setTextColor(220, 38, 38)
-            doc.text('Ficha de Afiliado', 14, 20)
-            doc.setFontSize(12)
-            doc.setTextColor(0)
-            doc.text('Sección Sindical CCOO Frigolouro', 14, 28)
-
-            doc.setLineWidth(0.5)
-            doc.setDrawColor(200, 200, 200)
-            doc.line(14, 32, 196, 32)
-
-            let yPos = 45
-
-            // Datos Personales
-            doc.setFontSize(14)
-            doc.setFont('helvetica', 'bold')
-            doc.text('Datos Personales', 14, yPos)
-            yPos += 10
-
-            doc.setFontSize(10)
-
-            const data = [
-                ['Nombre Completo:', afiliado.nombre_completo || '-'],
-                ['Sección:', afiliado.seccion || '-'],
-                ['DNI:', afiliado.dni || '-'],
-                ['Teléfono:', afiliado.telefono || '-'],
-                ['Dirección:', afiliado.direccion || '-'],
-                ['Código Postal:', afiliado.codigo_postal || '-'],
-                ['Localidad:', afiliado.localidad || '-'],
-                ['Fecha Registro:', new Date(afiliado.created_at).toLocaleDateString('es-ES')]
-            ]
-
-            data.forEach(([label, value]) => {
-                doc.setFont('helvetica', 'bold')
-                doc.text(label, 14, yPos)
-                doc.setFont('helvetica', 'normal')
-                doc.text(String(value), 60, yPos)
-                yPos += 7
-            })
-
-            yPos += 10
-
-            // Historial Gestiones
-            if (afiliado.gestiones_afiliados && afiliado.gestiones_afiliados.length > 0) {
-                doc.setFontSize(14)
-                doc.setFont('helvetica', 'bold')
-                doc.text('Historial de Gestiones', 14, yPos)
-                yPos += 5
-
-                const gestionesBody = [...afiliado.gestiones_afiliados]
-                    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-                    .map(g => [
-                        new Date(g.created_at).toLocaleDateString('es-ES'),
-                        g.gestion
-                    ])
-
-                    ; (autoTable as any)(doc, {
-                        startY: yPos,
-                        head: [['Fecha', 'Gestión']],
-                        body: gestionesBody,
-                        theme: 'striped',
-                        styles: { fontSize: 10, cellPadding: 3 },
-                        headStyles: { fillColor: [60, 60, 60], textColor: 255 },
-                        columnStyles: { 0: { cellWidth: 30 } }, // Fecha width
-                    })
-            } else {
-                doc.setFontSize(10)
-                doc.setTextColor(100)
-                doc.text('No hay gestiones registradas.', 14, yPos)
-            }
-
-            doc.save(`ficha_${afiliado.nombre_completo.replace(/\s+/g, '_')}.pdf`)
-
-        } catch (err) {
-            console.error('Error generando PDF individual:', err)
-            alert('Error al generar el PDF del afiliado')
-        }
-    }
-
-    const filteredAfiliados = afiliados.filter(a => {
-        const matchesSeccion = filterSeccion === 'TODAS' || a.seccion === filterSeccion
-        const searchLower = searchTerm.toLowerCase()
-        const matchesSearch =
-            a.nombre_completo.toLowerCase().includes(searchLower) ||
-            (a.dni && a.dni.toLowerCase().includes(searchLower)) ||
-            (a.localidad && a.localidad.toLowerCase().includes(searchLower))
-
-        return matchesSeccion && matchesSearch
-    })
-
-    if (loading && afiliados.length === 0) return <div>Cargando afiliados...</div>
-    if (error) return <div style={{ color: 'red' }}>{error}</div>
-
-    return (
-        <div>
-            {/* Controles y Filtros */}
-            <div style={{
-                display: 'flex',
-                gap: '15px',
-                marginBottom: '20px',
-                flexWrap: 'wrap',
-                alignItems: 'center',
-                backgroundColor: '#f8fafc',
-                padding: '15px',
-                borderRadius: '8px',
-                border: '1px solid #e2e8f0'
-            }}>
-                <button
-                    onClick={() => setShowNewForm(!showNewForm)}
-                    style={{
-                        backgroundColor: '#dc2626',
-                        color: 'white',
-                        border: 'none',
-                        padding: '10px 20px',
-                        borderRadius: '6px',
-                        cursor: 'pointer',
-                        fontWeight: 600
-                    }}
-                >
-                    {showNewForm ? 'Cancelar' : '+ Nuevo Afiliado'}
-                </button>
-
-                <div style={{ position: 'relative' }}>
-                    <input
-                        type="file"
-                        accept=".csv"
-                        ref={fileInputRef}
-                        onChange={handleFileUpload}
-                        style={{ display: 'none' }}
-                    />
-                    <button
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={importing}
-                        style={{
-                            backgroundColor: '#0ea5e9',
-                            color: 'white',
-                            border: 'none',
-                            padding: '10px 20px',
-                            borderRadius: '6px',
-                            cursor: 'pointer',
-                            fontWeight: 600,
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            opacity: importing ? 0.7 : 1
-                        }}
-                    >
-                        {importing ? 'Importando...' : (
-                            <>
-                                <span style={{ fontSize: '1.2rem', lineHeight: 0.5 }}>⫯</span>
-                                Añadir mediante CSV
-                            </>
-                        )}
-                    </button>
-                </div>
-
-                <a href="/afiliados/informe" style={{
-                    backgroundColor: 'white',
-                    color: '#64748b',
-                    border: '1px solid #cbd5e1',
-                    padding: '10px 20px',
-                    borderRadius: '6px',
-                    fontWeight: 600,
-                    textDecoration: 'none',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    cursor: 'pointer'
-                }}>
-                    📄 Informe PDF
-                </a>
-
-                <div style={{ flex: 1, minWidth: '200px' }}>
-                    <input
-                        type="text"
-                        placeholder="Buscar por nombre, DNI o localidad..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        style={{
-                            width: '100%',
-                            padding: '10px',
-                            borderRadius: '6px',
-                            border: '1px solid #cbd5e1'
-                        }}
-                    />
-                </div>
-
-                <select
-                    value={filterSeccion}
-                    onChange={(e) => setFilterSeccion(e.target.value)}
-                    style={{
-                        padding: '10px',
-                        borderRadius: '6px',
-                        border: '1px solid #cbd5e1',
-                        minWidth: '200px'
-                    }}
-                >
-                    <option value="TODAS">Todas las secciones</option>
-                    {SECCIONES.map(sec => (
-                        <option key={sec} value={sec}>{sec}</option>
-                    ))}
-                </select>
-
-                <div style={{ fontWeight: 600, color: '#64748b' }}>
-                    Total: {filteredAfiliados.length}
-                </div>
-            </div>
-
-            {/* Formulario Nuevo Afiliado */}
-            {showNewForm && (
-                <div style={{
-                    backgroundColor: 'white',
-                    padding: '25px',
-                    borderRadius: '12px',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                    marginBottom: '30px',
-                    border: '1px solid #e2e8f0'
-                }}>
-                    <h3 style={{ marginTop: 0, color: '#1e293b' }}>Registrar Nuevo Afiliado</h3>
-                    <form onSubmit={handleCreate} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
-                        <div style={{ gridColumn: '1 / -1' }}>
-                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, marginBottom: '5px' }}>Nombre Completo *</label>
-                            <input
-                                type="text"
-                                required
-                                value={newAfiliado.nombre_completo}
-                                onChange={e => setNewAfiliado({ ...newAfiliado, nombre_completo: e.target.value })}
-                                style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
-                            />
-                        </div>
-
-                        <div>
-                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, marginBottom: '5px' }}>Sección</label>
-                            <select
-                                value={newAfiliado.seccion}
-                                onChange={e => setNewAfiliado({ ...newAfiliado, seccion: e.target.value })}
-                                style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
-                            >
-                                {SECCIONES.map(sec => (
-                                    <option key={sec} value={sec}>{sec}</option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div>
-                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, marginBottom: '5px' }}>DNI</label>
-                            <input
-                                type="text"
-                                value={newAfiliado.dni || ''}
-                                onChange={e => setNewAfiliado({ ...newAfiliado, dni: e.target.value })}
-                                style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
-                            />
-                        </div>
-
-                        <div>
-                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, marginBottom: '5px' }}>Teléfono</label>
-                            <input
-                                type="text"
-                                value={newAfiliado.telefono || ''}
-                                onChange={e => setNewAfiliado({ ...newAfiliado, telefono: e.target.value })}
-                                style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
-                            />
-                        </div>
-
-                        <div style={{ gridColumn: '1 / -1' }}>
-                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, marginBottom: '5px' }}>Dirección</label>
-                            <input
-                                type="text"
-                                value={newAfiliado.direccion || ''}
-                                onChange={e => setNewAfiliado({ ...newAfiliado, direccion: e.target.value })}
-                                style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
-                            />
-                        </div>
-
-                        <div>
-                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, marginBottom: '5px' }}>Código Postal</label>
-                            <input
-                                type="text"
-                                value={newAfiliado.codigo_postal || ''}
-                                onChange={e => setNewAfiliado({ ...newAfiliado, codigo_postal: e.target.value })}
-                                style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
-                            />
-                        </div>
-
-                        <div>
-                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, marginBottom: '5px' }}>Localidad</label>
-                            <input
-                                type="text"
-                                value={newAfiliado.localidad || ''}
-                                onChange={e => setNewAfiliado({ ...newAfiliado, localidad: e.target.value })}
-                                style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
-                            />
-                        </div>
-
-                        <div style={{ gridColumn: '1 / -1', marginTop: '10px' }}>
-                            <button
-                                type="submit"
-                                style={{
-                                    backgroundColor: '#16a34a',
-                                    color: 'white',
-                                    border: 'none',
-                                    padding: '10px 20px',
-                                    borderRadius: '6px',
-                                    fontWeight: 600,
-                                    cursor: 'pointer',
-                                    width: '100%'
-                                }}
-                            >
-                                Registrar Afiliado
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            )}
-
-            {/* Lista de Afiliados */}
-            <div style={{ display: 'grid', gap: '15px' }}>
-                {filteredAfiliados.map(afiliado => (
-                    <div key={afiliado.id} style={{
-                        backgroundColor: 'white',
-                        padding: '20px',
-                        borderRadius: '12px',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-                        border: '1px solid #f1f5f9',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '10px'
-                    }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #f1f5f9', paddingBottom: '10px' }}>
-                            <div style={{ flex: 1 }}>
-                                <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
-                                    <EditableText
-                                        initialValue={afiliado.seccion}
-                                        onSave={(val) => handleUpdateField(afiliado.id, 'seccion', val)}
-                                        options={SECCIONES}
-                                        style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b' }}
-                                    />
-                                </div>
-                                <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1e293b' }}>
-                                    <EditableText
-                                        initialValue={afiliado.nombre_completo}
-                                        onSave={(val) => handleUpdateField(afiliado.id, 'nombre_completo', val)}
-                                    />
-                                </div>
-                            </div>
-                            <div style={{ display: 'flex', gap: '8px' }}>
-                                <button
-                                    onClick={() => generateAfiliadoPDF(afiliado)}
-                                    style={{
-                                        color: '#3b82f6',
-                                        backgroundColor: '#eff6ff',
-                                        border: '1px solid #bfdbfe',
-                                        borderRadius: '4px',
-                                        cursor: 'pointer',
-                                        fontSize: '0.9rem',
-                                        padding: '4px 8px',
-                                        fontWeight: 600
-                                    }}
-                                    title="Descargar Ficha PDF"
-                                >
-                                    📄 PDF
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(afiliado.id)}
-                                    style={{ color: '#ef4444', backgroundColor: 'transparent', border: 'none', cursor: 'pointer', fontSize: '1.2rem' }}
-                                    title="Eliminar"
-                                >
-                                    ×
-                                </button>
-                            </div>
-
-                        </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', fontSize: '0.95rem' }}>
-                            <div>
-                                <span style={{ fontWeight: 600, color: '#64748b', fontSize: '0.8rem', display: 'block' }}>DNI:</span>
-                                <EditableText
-                                    initialValue={afiliado.dni || ''}
-                                    onSave={(val) => handleUpdateField(afiliado.id, 'dni', val)}
-                                    placeholder="-"
-                                />
-                            </div>
-                            <div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
-                                    <span style={{ fontWeight: 600, color: '#64748b', fontSize: '0.8rem' }}>Teléfono:</span>
-                                    {afiliado.telefono && (
-                                        <a
-                                            href={`tel:${afiliado.telefono}`}
-                                            style={{
-                                                backgroundColor: '#dcfce7',
-                                                color: '#16a34a',
-                                                padding: '2px 8px',
-                                                borderRadius: '12px',
-                                                fontSize: '0.75rem',
-                                                textDecoration: 'none',
-                                                fontWeight: 600,
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '4px',
-                                                border: '1px solid #86efac'
-                                            }}
-                                        >
-                                            📞 Llamar
-                                        </a>
-                                    )}
-                                </div>
-                                <EditableText
-                                    initialValue={afiliado.telefono || ''}
-                                    onSave={(val) => handleUpdateField(afiliado.id, 'telefono', val)}
-                                    placeholder="-"
-                                />
-                            </div>
-                            <div style={{ gridColumn: '1 / -1' }}>
-                                <span style={{ fontWeight: 600, color: '#64748b', fontSize: '0.8rem', display: 'block' }}>Dirección:</span>
-                                <EditableText
-                                    initialValue={afiliado.direccion || ''}
-                                    onSave={(val) => handleUpdateField(afiliado.id, 'direccion', val)}
-                                    placeholder="-"
-                                />
-                            </div>
-                            <div>
-                                <span style={{ fontWeight: 600, color: '#64748b', fontSize: '0.8rem', display: 'block' }}>CP:</span>
-                                <EditableText
-                                    initialValue={afiliado.codigo_postal || ''}
-                                    onSave={(val) => handleUpdateField(afiliado.id, 'codigo_postal', val)}
-                                    placeholder="-"
-                                />
-                            </div>
-                            <div>
-                                <span style={{ fontWeight: 600, color: '#64748b', fontSize: '0.8rem', display: 'block' }}>Localidad:</span>
-                                <EditableText
-                                    initialValue={afiliado.localidad || ''}
-                                    onSave={(val) => handleUpdateField(afiliado.id, 'localidad', val)}
-                                    placeholder="-"
-                                />
-                            </div>
-                        </div>
-
-                        {/* Sección de Gestiones */}
-                        <div style={{ marginTop: '15px', borderTop: '1px solid #f1f5f9', paddingTop: '15px' }}>
-                            <h4 style={{ margin: '0 0 10px 0', fontSize: '0.9rem', color: '#334155', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                Historial de Gestiones
-                            </h4>
-
-                            {/* Lista de Gestiones */}
-                            {afiliado.gestiones_afiliados && afiliado.gestiones_afiliados.length > 0 ? (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '15px' }}>
-                                    {[...afiliado.gestiones_afiliados]
-                                        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-                                        .map(gestion => (
-                                            <div key={gestion.id} style={{
-                                                display: 'flex',
-                                                justifyContent: 'space-between',
-                                                alignItems: 'flex-start',
-                                                gap: '10px',
-                                                fontSize: '0.9rem',
-                                                backgroundColor: '#f8fafc',
-                                                padding: '8px',
-                                                borderRadius: '6px'
-                                            }}>
-                                                <div style={{ display: 'flex', gap: '10px', flex: 1 }}>
-                                                    <span style={{
-                                                        fontWeight: 600,
-                                                        color: '#64748b',
-                                                        minWidth: '85px',
-                                                        fontSize: '0.8rem',
-                                                        paddingTop: '3px'
-                                                    }}>
-                                                        {new Date(gestion.created_at).toLocaleDateString('es-ES')}
-                                                    </span>
-                                                    <div style={{ flex: 1, color: '#334155' }}>
-                                                        <EditableText
-                                                            initialValue={gestion.gestion}
-                                                            onSave={(val) => handleUpdateGestion(gestion.id, val)}
-                                                            isTextArea={true}
-                                                            style={{ backgroundColor: 'transparent', padding: 0, border: 'none' }}
-                                                        />
-                                                    </div>
-                                                </div>
-                                                <button
-                                                    onClick={() => handleDeleteGestion(gestion.id)}
-                                                    style={{
-                                                        color: '#94a3b8',
-                                                        backgroundColor: 'transparent',
-                                                        border: 'none',
-                                                        cursor: 'pointer',
-                                                        fontSize: '1rem',
-                                                        padding: '0 4px',
-                                                        lineHeight: 1
-                                                    }}
-                                                    title="Borrar gestión"
-                                                >
-                                                    ×
-                                                </button>
-                                            </div>
-                                        ))}
-                                </div>
-                            ) : (
-                                <p style={{ fontSize: '0.85rem', color: '#94a3b8', fontStyle: 'italic', marginBottom: '15px' }}>
-                                    No hay gestiones registradas.
-                                </p>
-                            )}
-
-                            {/* Formulario para añadir gestión */}
-                            <form
-                                onSubmit={(e) => {
-                                    e.preventDefault()
-                                    const input = e.currentTarget.elements.namedItem('nuevaGestion') as HTMLInputElement
-                                    handleAddGestion(afiliado.id, input.value)
-                                    input.value = ''
-                                }}
-                                style={{ display: 'flex', gap: '10px' }}
-                            >
-                                <input
-                                    name="nuevaGestion"
-                                    type="text"
-                                    placeholder="Añadir nueva gestión..."
-                                    style={{
-                                        flex: 1,
-                                        padding: '8px',
-                                        borderRadius: '4px',
-                                        border: '1px solid #cbd5e1',
-                                        fontSize: '0.9rem'
-                                    }}
-                                />
-                                <button
-                                    type="submit"
-                                    style={{
-                                        backgroundColor: '#3b82f6',
-                                        color: 'white',
-                                        border: 'none',
-                                        padding: '8px 15px',
-                                        borderRadius: '4px',
-                                        fontWeight: 600,
-                                        fontSize: '0.9rem',
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    Añadir
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                ))}
-            </div>
+  const [people, setPeople] = useState<Afiliado[]>([])
+  const [loading, setLoading] = useState(true)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
+  const [status, setStatus] = useState<'activa' | 'baja'>('activa')
+  const [section, setSection] = useState('TODAS')
+  const [search, setSearch] = useState('')
+  const [page, setPage] = useState(0)
+  const [editing, setEditing] = useState<string | null>(null)
+  const [draft, setDraft] = useState<Partial<Afiliado>>({})
+  const [fileName, setFileName] = useState('')
+  const [rows, setRows] = useState<ImportRow[] | null>(null)
+  const [preview, setPreview] = useState<ImportPreview | null>(null)
+  const [resolutions, setResolutions] = useState<Record<string,string>>({})
+  const [completeList, setCompleteList] = useState(false)
+  const input = useRef<HTMLInputElement>(null)
+  const supabase = createClient()
+
+  async function load() {
+    setLoading(true)
+    try {
+      // Paginate the API so a future list larger than its default row limit is complete.
+      const all: Afiliado[] = []
+      for (let start = 0; ; start += 500) {
+        const { data, error } = await supabase.from('afiliados').select('*, gestiones_afiliados(*)').order('nombre_completo').order('id').range(start,start+499)
+        if (error) throw error
+        all.push(...(data as Afiliado[]))
+        if (data.length < 500) break
+      }
+      setPeople(all)
+    } catch (e) { setError(messageOf(e)) }
+    finally { setLoading(false) }
+  }
+  useEffect(() => { void load() }, [])
+  useEffect(() => { setPage(0) }, [status,section,search])
+
+  function edit(person?: Afiliado) {
+    setEditing(person?.id || 'new')
+    setDraft(person ? { ...person } : { nombre: '', apellidos: '', seccion: 'Sin asignar', estado_afiliacion: 'activa' })
+    setError('')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+  async function save(event: React.FormEvent) {
+    event.preventDefault()
+    setBusy(true); setError(''); setNotice('')
+    try {
+      const values: Record<string, string | null> = {}
+      AFFILIATION_FIELDS.forEach(([key]) => { values[key] = String(draft[key] || '').trim() || null })
+      values.nombre_completo = values.nombre && values.apellidos ? `${values.apellidos}, ${values.nombre}` : draft.nombre_completo || ''
+      values.seccion = draft.seccion || 'Sin asignar'
+      let query = editing === 'new' ? supabase.from('afiliados').insert(values) : supabase.from('afiliados').update(values).eq('id',editing!)
+      if (editing !== 'new' && draft.updated_at) query = query.eq('updated_at',draft.updated_at)
+      const { error } = await query.select('id').single()
+      if (error) throw error
+      setEditing(null); setNotice('Ficha guardada.'); await load()
+    } catch (e) { setError(messageOf(e)) }
+    finally { setBusy(false) }
+  }
+  async function changeStatus(person: Afiliado) {
+    const archive = person.estado_afiliacion === 'activa'
+    if (!confirm(archive ? '¿Pasar esta ficha a Bajas de afiliación? Se conservarán todos sus datos y gestiones.' : '¿Reactivar esta misma ficha?')) return
+    setBusy(true); setError('')
+    try {
+      const { error } = await supabase.from('afiliados').update({ estado_afiliacion: archive ? 'baja' : 'activa', motivo_baja: archive ? 'Baja registrada manualmente' : null }).eq('id',person.id).select('id').single()
+      if (error) throw error
+      setNotice(archive ? 'Ficha archivada en Bajas de afiliación.' : 'Ficha reactivada.'); await load()
+    } catch(e) { setError(messageOf(e)) }
+    finally { setBusy(false) }
+  }
+  async function gestion(personId: string, text: string, gestionId?: string, remove = false): Promise<boolean> {
+    if (!remove && !text.trim()) return false
+    if (remove && !confirm('¿Borrar esta gestión?')) return false
+    setBusy(true); setError('')
+    try {
+      const query = remove ? supabase.from('gestiones_afiliados').delete().eq('id',gestionId!) : gestionId ? supabase.from('gestiones_afiliados').update({ gestion: text.trim() }).eq('id',gestionId) : supabase.from('gestiones_afiliados').insert({ afiliado_id: personId, gestion: text.trim() })
+      const { error } = await query.select('id').single()
+      if(error) throw error
+      await load(); return true
+    } catch(e) { setError(messageOf(e)); return false }
+    finally { setBusy(false) }
+  }
+  async function download(person: Afiliado) {
+    try {
+      const { affiliationPDF } = await import('@/lib/affiliation-pdf')
+      affiliationPDF(person).save(`ficha_${person.nombre_completo.replace(/[^a-zA-Z0-9áéíóúüñÁÉÍÓÚÜÑ]+/g,'_')}.pdf`)
+    } catch(e) { setError(messageOf(e)) }
+  }
+  async function review(importRows: ImportRow[], choices: Record<string,string>) {
+    const { data, error } = await supabase.rpc('sincronizar_afiliacion', { p_filas: importRows, p_resoluciones: choices })
+    if (error) throw error
+    setPreview(data as ImportPreview)
+  }
+  async function upload(file?: File) {
+    if (!file) return
+    setBusy(true); setError(''); setNotice(''); setPreview(null); setRows(null); setResolutions({}); setCompleteList(false)
+    try {
+      if (file.size > 10 * 1024 * 1024) throw new Error('El archivo supera 10 MB.')
+      let table: unknown[][]
+      if (/\.csv$/i.test(file.name)) {
+        const Papa = (await import('papaparse')).default
+        const parsed = Papa.parse<unknown[]>(await file.text(), { skipEmptyLines: 'greedy' })
+        if (parsed.errors.length) throw new Error('El CSV contiene errores. Revisa el archivo completo.')
+        table = parsed.data
+      } else if (/\.(xlsx|xlsm)$/i.test(file.name)) {
+        const { readSheet } = await import('read-excel-file/browser')
+        table = await readSheet(file)
+      } else throw new Error('Selecciona un archivo XLSX, XLSM o CSV con las 16 columnas del listado completo.')
+      const parsedRows = parseAffiliationRows(table)
+      setRows(parsedRows); setFileName(file.name)
+      await review(parsedRows,{})
+    } catch(e) { setError(messageOf(e)); setRows(null) }
+    finally { setBusy(false); if(input.current) input.current.value='' }
+  }
+  async function resolve() {
+    if (!rows) return
+    setBusy(true); setError('')
+    try { await review(rows,resolutions) } catch(e) { setError(messageOf(e)) }
+    finally { setBusy(false) }
+  }
+  async function applyImport() {
+    if (!rows || !preview || !completeList || preview.conflictos.length) return
+    setBusy(true); setError('')
+    try {
+      const { data, error } = await supabase.rpc('sincronizar_afiliacion', { p_filas: rows, p_aplicar: true, p_resoluciones: resolutions, p_revision: preview.revision })
+      if(error) throw error
+      setNotice(`Actualización completada: ${data.total} personas activas, ${data.altas} altas, ${data.actualizadas} fichas actualizadas (${data.reactivadas} reactivadas) y ${data.bajas} bajas archivadas.`)
+      setPreview(null); setRows(null); setStatus('activa'); setPage(0); await load()
+    } catch(e) { setError(messageOf(e)) }
+    finally { setBusy(false) }
+  }
+
+  const filtered = people.filter(p => p.estado_afiliacion===status && (section==='TODAS' || p.seccion===section) && normalizeText([p.nombre_completo,p.dni,p.correo_electronico,p.telefono_movil,p.telefono_fijo,p.localidad].join(' ')).includes(normalizeText(search)))
+  const pages = Math.max(1,Math.ceil(filtered.length/20))
+  const currentPage = Math.min(page,pages-1)
+  const visible = filtered.slice(currentPage*20,(currentPage+1)*20)
+  const legacy = editing !== 'new' && !draft.nombre && !draft.apellidos
+
+  return <div className="affiliation-manager" aria-busy={busy}>
+    {error && <p role="alert" className="auth-error">{error}</p>}
+    {notice && <p role="status" className="auth-message">{notice}</p>}
+    <div className="aff-toolbar">
+      <button type="button" className="aff-primary" disabled={busy} onClick={()=>edit()}>Añadir persona</button>
+      <button type="button" disabled={busy} onClick={()=>input.current?.click()}>{busy?'Procesando…':'Actualizar desde Excel'}</button>
+      <input ref={input} type="file" accept=".xlsx,.xlsm,.csv" hidden onChange={e=>void upload(e.target.files?.[0])}/>
+      <Link href="/afiliados/informe">Informe PDF</Link>
+    </div>
+
+    {editing && <section className="aff-panel">
+      <h2>{editing==='new'?'Nueva ficha de afiliación':'Editar ficha de afiliación'}</h2>
+      <form onSubmit={save}>
+        <div className="aff-fields">
+          {legacy && <label>Nombre completo<input value={draft.nombre_completo || ''} required onChange={e=>setDraft({...draft,nombre_completo:e.target.value})}/></label>}
+          {AFFILIATION_FIELDS.map(([key,label,type])=><label key={key}>{label}<input type={type} value={draft[key] || ''} required={!legacy && (key==='nombre' || key==='apellidos')} maxLength={key==='fecha_nacimiento'?undefined:500} onChange={e=>setDraft({...draft,[key]:e.target.value})}/></label>)}
+          <label>Sección<select value={draft.seccion || 'Sin asignar'} onChange={e=>setDraft({...draft,seccion:e.target.value})}>{Array.from(new Set([...sections,draft.seccion || 'Sin asignar'])).map(s=><option key={s}>{s}</option>)}</select></label>
         </div>
-    )
+        <p className="aff-note">AC significa al corriente de pago. Puedes escribir otro estado de pago. La baja de afiliación se gestiona por separado.</p>
+        <div className="aff-toolbar"><button className="aff-primary" disabled={busy}>Guardar ficha</button><button type="button" disabled={busy} onClick={()=>setEditing(null)}>Cancelar</button></div>
+      </form>
+    </section>}
+
+    {preview && <section className="aff-panel" aria-label="Vista previa de importación">
+      <h2>Vista previa del listado completo</h2>
+      <p>{fileName}: <strong>{countLabel(preview.total,'persona','personas')}</strong>. {countLabel(preview.altas,'alta','altas')}, {countLabel(preview.actualizadas,'actualización','actualizaciones')} ({countLabel(preview.reactivadas,'reactivación','reactivaciones')}) y {countLabel(preview.bajas,'baja','bajas')}.</p>
+      <p className="aff-note">Se conservarán las secciones conocidas y las gestiones. Las altas tendrán la sección «Sin asignar». Las celdas vacías del Excel dejarán vacíos esos campos en las fichas actualizadas.</p>
+      {preview.conflictos.length>0 && <div>
+        <h3>Coincidencias que debes resolver</h3>
+        <p>Hay nombres coincidentes con documentos distintos. Elige cómo tratarlos antes de continuar.</p>
+        {preview.conflictos.map(c=><label className="aff-conflict" key={c.documento}>
+          {c.nombre}. Excel: {c.documento}. {c.documento_anterior && `Ficha actual: ${c.documento_anterior} (${c.seccion}).`}
+          <select value={resolutions[c.documento] || ''} onChange={e=>setResolutions({...resolutions,[c.documento]:e.target.value})}>
+            <option value="">Selecciona una opción</option>
+            {c.candidato_id && <option value={c.candidato_id}>Es la misma persona: corregir DNI y conservar ficha</option>}
+            <option value="nueva">Es otra persona: crear ficha nueva</option>
+          </select>
+        </label>)}
+        <button type="button" disabled={busy || preview.conflictos.some(c=>!resolutions[c.documento])} onClick={()=>void resolve()}>Revisar coincidencias</button>
+      </div>}
+      <details><summary>Ver altas y reactivaciones</summary><ul>{preview.entradas.filter(e=>e.accion!=='actualizacion').map(e=><li key={e.documento}>{e.nombre} · {e.accion==='alta'?'Alta':'Reactivación'}</li>)}</ul></details>
+      <details><summary>Ver personas que pasarán a bajas ({preview.bajas})</summary><ul>{preview.ausentes.map(p=><li key={p.id}>{p.nombre} · {p.seccion}</li>)}</ul></details>
+      <p className="aff-note">La ausencia se registra en la fecha de importación. No equivale a conocer la fecha efectiva de baja.</p>
+      <label className="aff-check"><input type="checkbox" checked={completeList} onChange={e=>setCompleteList(e.target.checked)}/>Confirmo que este archivo es el listado completo y actualizado de afiliación, y he revisado las bajas.</label>
+      <div className="aff-toolbar"><button className="aff-primary" disabled={busy || !completeList || preview.conflictos.length>0} onClick={()=>void applyImport()}>Aplicar actualización</button><button disabled={busy} onClick={()=>{setPreview(null);setRows(null)}}>Cancelar importación</button></div>
+    </section>}
+
+    <div className="aff-toolbar" role="group" aria-label="Estado de afiliación">
+      <button aria-pressed={status==='activa'} onClick={()=>setStatus('activa')}>Afiliación activa ({people.filter(p=>p.estado_afiliacion==='activa').length})</button>
+      <button aria-pressed={status==='baja'} onClick={()=>setStatus('baja')}>Bajas de afiliación ({people.filter(p=>p.estado_afiliacion==='baja').length})</button>
+    </div>
+    <div className="aff-filters">
+      <label>Buscar<input type="search" value={search} placeholder="Nombre, DNI/NIE, teléfono, correo o localidad" onChange={e=>setSearch(e.target.value)}/></label>
+      <label>Sección<select value={section} onChange={e=>setSection(e.target.value)}><option value="TODAS">Todas las secciones</option>{Array.from(new Set([...sections,...people.map(p=>p.seccion)])).map(s=><option key={s}>{s}</option>)}</select></label>
+    </div>
+    <p className="aff-note">{loading?'Cargando fichas…':`${countLabel(filtered.length,'ficha encontrada','fichas encontradas')}. Abre una ficha para consultar todos sus datos y gestiones.`}</p>
+    {visible.map(person=><details className="aff-panel aff-person" key={person.id}>
+      <summary><strong>{person.nombre_completo}</strong><span>{person.seccion} · {paymentLabel(person.estado_pago)}{person.estado_afiliacion==='baja'?' · Baja':''}</span></summary>
+      <div className="aff-toolbar"><button disabled={busy} onClick={()=>edit(person)}>Editar ficha</button><button onClick={()=>void download(person)}>Ficha PDF</button><button disabled={busy} onClick={()=>void changeStatus(person)}>{person.estado_afiliacion==='baja'?'Reactivar afiliación':'Pasar a bajas'}</button></div>
+      <dl className="aff-fields">{AFFILIATION_FIELDS.map(([key,label])=><div key={key}><dt>{label}</dt><dd>{displayField(person,key)}</dd></div>)}</dl>
+      {!person.telefono_movil && !person.telefono_fijo && person.telefono && <p>Teléfono de la ficha anterior: <a href={`tel:${person.telefono}`}>{person.telefono}</a></p>}
+      {(person.telefono_movil || person.telefono_fijo || person.correo_electronico) && <div className="aff-toolbar">
+        {person.telefono_movil && <a href={`tel:${person.telefono_movil}`}>Llamar al móvil</a>}
+        {person.telefono_fijo && <a href={`tel:${person.telefono_fijo}`}>Llamar al fijo</a>}
+        {person.correo_electronico && <a href={`mailto:${person.correo_electronico}`}>Escribir correo</a>}
+      </div>}
+      {person.estado_afiliacion==='baja' && <p className="aff-note">{person.motivo_baja || 'Baja registrada'}.{person.ausencia_detectada_en && ` Última ausencia detectada: ${new Date(person.ausencia_detectada_en).toLocaleDateString('es-ES')}. No indica la fecha efectiva de baja.`}</p>}
+      <h3>Historial de gestiones</h3>
+      {person.gestiones_afiliados?.length ? [...person.gestiones_afiliados].sort((a,b)=>b.created_at.localeCompare(a.created_at)).map(g=><div className="aff-gestion" key={g.id}>
+        <time dateTime={g.created_at}>{new Date(g.created_at).toLocaleDateString('es-ES')}</time>
+        <EditableText initialValue={g.gestion} isTextArea onSave={async text=>{if(!await gestion(person.id,text,g.id)) throw new Error('No se pudo guardar la gestión')}}/>
+        <button disabled={busy} aria-label="Borrar gestión" onClick={()=>void gestion(person.id,'',g.id,true)}>×</button>
+      </div>) : <p className="aff-note">No hay gestiones registradas.</p>}
+      <form className="aff-toolbar" onSubmit={async e=>{
+        e.preventDefault(); const form=e.currentTarget; const value=form.elements.namedItem('gestion') as HTMLInputElement;
+        if(await gestion(person.id,value.value)) form.reset()
+      }}><input name="gestion" aria-label="Nueva gestión" required placeholder="Añadir nueva gestión…"/><button disabled={busy}>Añadir gestión</button></form>
+    </details>)}
+    {!loading && !filtered.length && <p>No hay fichas con estos filtros.</p>}
+    <div className="aff-toolbar"><button disabled={currentPage===0} onClick={()=>setPage(currentPage-1)}>Anterior</button><span>Página {currentPage+1} de {pages}</span><button disabled={currentPage+1>=pages} onClick={()=>setPage(currentPage+1)}>Siguiente</button></div>
+  </div>
 }

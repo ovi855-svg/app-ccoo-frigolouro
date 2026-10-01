@@ -33,3 +33,10 @@ ts-debug.log*
 next-env.d.ts
 desktop.ini
 .npm-cache/
+
+# Internal affiliation files and private import backups never belong in Git.
+*.xls
+*.xlsx
+*.xlsm
+*.csv
+private-*
