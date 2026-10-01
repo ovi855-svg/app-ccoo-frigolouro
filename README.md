@@ -4,7 +4,26 @@ Aplicación Next.js con Supabase Auth. Cada persona debe iniciar sesión y tener
 una entrada activa en `public.app_members`. El nombre visible procede de esta
 tabla, administrada fuera del cliente. No hay registro público en la aplicación.
 
-## Desarrollo
+## Interfaz móvil
+
+- Navegación inferior con Inicio, Orden del día, Métodos, Salud y Afiliación;
+  las pantallas de creación e informes mantienen señalada su área.
+- Inicio con las cuatro áreas y accesos directos para registrar incidencias
+  y solicitudes. En ordenador, navegación superior y listas en dos columnas.
+- Búsqueda, filtros y botones de creación/PDF visibles. Las tarjetas muestran
+  el estado y permiten desplegar descripción, contestación e historial.
+- Edición con botones explícitos y teclado (Enter para guardar un título,
+  Escape para cancelar). Los formularios móviles usan una columna y controles
+  de 16px; las fichas de afiliación agrupan sus 16 campos sin eliminarlos.
+- El diseño respeta movimiento reducido, área segura inferior y foco visible.
+  No modifica el esquema, RLS, las membresías ni los datos existentes.
+
+La revisión visual e interactiva se hace con registros ficticios en un entorno
+local separado de la aplicación publicada, sin introducir datos de prueba en
+Supabase. La compilación de producción comprueba TypeScript; la protección de
+las rutas se comprueba también mediante peticiones sin sesión.
+
+## Ejecutar en local
 
 1. Ejecutar `npm ci`.
 2. Crear `.env.local` con `NEXT_PUBLIC_SUPABASE_URL` y

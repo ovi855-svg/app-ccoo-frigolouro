@@ -5,9 +5,16 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 import type { Afiliado } from '@/lib/types'
 import { SECCIONES } from '@/lib/constants'
-import { AFFILIATION_FIELDS, displayField, normalizeText, parseAffiliationRows, paymentLabel, type ImportRow, type ImportPreview } from '@/lib/affiliation'
+import { AFFILIATION_FIELDS, displayField, normalizeText, parseAffiliationRows, paymentLabel, type AffiliationField, type ImportRow, type ImportPreview } from '@/lib/affiliation'
 import EditableText from './EditableText'
+import AppIcon from './AppIcon'
 
+const fieldGroups: {title: string; keys: AffiliationField[]}[] = [
+  {title:'Identificación', keys:['nombre','apellidos','dni','fecha_nacimiento','pais']},
+  {title:'Contacto', keys:['telefono_movil','telefono_fijo','correo_electronico']},
+  {title:'Domicilio', keys:['via','direccion','numero','piso','codigo_postal','localidad']},
+  {title:'Datos de afiliación', keys:['categoria','estado_pago']},
+]
 const sections = ['Sin asignar', ...SECCIONES]
 const countLabel = (count: number, one: string, many: string) => `${count} ${count===1?one:many}`
 function messageOf(error: unknown): string {
@@ -160,20 +167,20 @@ export default function AfiliadosManager() {
     {error && <p role="alert" className="auth-error">{error}</p>}
     {notice && <p role="status" className="auth-message">{notice}</p>}
     <div className="aff-toolbar">
-      <button type="button" className="aff-primary" disabled={busy} onClick={()=>edit()}>Añadir persona</button>
-      <button type="button" disabled={busy} onClick={()=>input.current?.click()}>{busy?'Procesando…':'Actualizar desde Excel'}</button>
+      <button type="button" className="aff-primary" disabled={busy} onClick={()=>edit()}><AppIcon name="plus" size={18}/>Añadir persona</button>
+      <button type="button" disabled={busy} onClick={()=>input.current?.click()}><AppIcon name="document" size={18}/>{busy?'Procesando…':'Actualizar desde Excel'}</button>
       <input ref={input} type="file" accept=".xlsx,.xlsm,.csv" hidden onChange={e=>void upload(e.target.files?.[0])}/>
-      <Link href="/afiliados/informe">Informe PDF</Link>
+      <Link href="/afiliados/informe"><AppIcon name="document" size={18}/>Informe PDF</Link>
     </div>
 
     {editing && <section className="aff-panel">
       <h2>{editing==='new'?'Nueva ficha de afiliación':'Editar ficha de afiliación'}</h2>
       <form onSubmit={save}>
-        <div className="aff-fields">
-          {legacy && <label>Nombre completo<input value={draft.nombre_completo || ''} required onChange={e=>setDraft({...draft,nombre_completo:e.target.value})}/></label>}
-          {AFFILIATION_FIELDS.map(([key,label,type])=><label key={key}>{label}<input type={type} value={draft[key] || ''} required={!legacy && (key==='nombre' || key==='apellidos')} maxLength={key==='fecha_nacimiento'?undefined:500} onChange={e=>setDraft({...draft,[key]:e.target.value})}/></label>)}
-          <label>Sección<select value={draft.seccion || 'Sin asignar'} onChange={e=>setDraft({...draft,seccion:e.target.value})}>{Array.from(new Set([...sections,draft.seccion || 'Sin asignar'])).map(s=><option key={s}>{s}</option>)}</select></label>
-        </div>
+        {legacy && <label className="legacy-name">Nombre completo<input value={draft.nombre_completo || ''} required onChange={e=>setDraft({...draft,nombre_completo:e.target.value})}/></label>}
+        {fieldGroups.map(group=><fieldset className="aff-field-group" key={group.title}><legend>{group.title}</legend><div className="aff-fields">
+          {group.keys.map(key=>AFFILIATION_FIELDS.find(([k])=>k===key)!).map(([key,label,type])=><label key={key}>{label}{!legacy && (key==='nombre'||key==='apellidos')?' *':''}<input type={type} value={draft[key] || ''} required={!legacy && (key==='nombre' || key==='apellidos')} maxLength={key==='fecha_nacimiento'?undefined:500} onChange={e=>setDraft({...draft,[key]:e.target.value})}/></label>)}
+          {group.title==='Datos de afiliación' && <label>Sección<select value={draft.seccion || 'Sin asignar'} onChange={e=>setDraft({...draft,seccion:e.target.value})}>{Array.from(new Set([...sections,draft.seccion || 'Sin asignar'])).map(s=><option key={s}>{s}</option>)}</select></label>}
+        </div></fieldset>)}
         <p className="aff-note">AC significa al corriente de pago. Puedes escribir otro estado de pago. La baja de afiliación se gestiona por separado.</p>
         <div className="aff-toolbar"><button className="aff-primary" disabled={busy}>Guardar ficha</button><button type="button" disabled={busy} onClick={()=>setEditing(null)}>Cancelar</button></div>
       </form>
@@ -203,9 +210,9 @@ export default function AfiliadosManager() {
       <div className="aff-toolbar"><button className="aff-primary" disabled={busy || !completeList || preview.conflictos.length>0} onClick={()=>void applyImport()}>Aplicar actualización</button><button disabled={busy} onClick={()=>{setPreview(null);setRows(null)}}>Cancelar importación</button></div>
     </section>}
 
-    <div className="aff-toolbar" role="group" aria-label="Estado de afiliación">
-      <button aria-pressed={status==='activa'} onClick={()=>setStatus('activa')}>Afiliación activa ({people.filter(p=>p.estado_afiliacion==='activa').length})</button>
-      <button aria-pressed={status==='baja'} onClick={()=>setStatus('baja')}>Bajas de afiliación ({people.filter(p=>p.estado_afiliacion==='baja').length})</button>
+    <div className="aff-toolbar aff-status-tabs" role="group" aria-label="Estado de afiliación">
+      <button aria-pressed={status==='activa'} onClick={()=>setStatus('activa')}>Activas ({people.filter(p=>p.estado_afiliacion==='activa').length})</button>
+      <button aria-pressed={status==='baja'} onClick={()=>setStatus('baja')}>Bajas ({people.filter(p=>p.estado_afiliacion==='baja').length})</button>
     </div>
     <div className="aff-filters">
       <label>Buscar<input type="search" value={search} placeholder="Nombre, DNI/NIE, teléfono, correo o localidad" onChange={e=>setSearch(e.target.value)}/></label>
@@ -213,9 +220,9 @@ export default function AfiliadosManager() {
     </div>
     <p className="aff-note">{loading?'Cargando fichas…':`${countLabel(filtered.length,'ficha encontrada','fichas encontradas')}. Abre una ficha para consultar todos sus datos y gestiones.`}</p>
     {visible.map(person=><details className="aff-panel aff-person" key={person.id}>
-      <summary><strong>{person.nombre_completo}</strong><span>{person.seccion} · {paymentLabel(person.estado_pago)}{person.estado_afiliacion==='baja'?' · Baja':''}</span></summary>
+      <summary><span className="person-avatar" aria-hidden="true">{(person.nombre || person.nombre_completo).charAt(0).toUpperCase()}</span><span className="person-summary"><strong>{person.nombre_completo}</strong><span>{person.seccion} · {paymentLabel(person.estado_pago)}{person.estado_afiliacion==='baja'?' · Baja':''}</span><small>Ver ficha y gestiones</small></span><AppIcon name="arrow" size={19}/></summary>
       <div className="aff-toolbar"><button disabled={busy} onClick={()=>edit(person)}>Editar ficha</button><button onClick={()=>void download(person)}>Ficha PDF</button><button disabled={busy} onClick={()=>void changeStatus(person)}>{person.estado_afiliacion==='baja'?'Reactivar afiliación':'Pasar a bajas'}</button></div>
-      <dl className="aff-fields">{AFFILIATION_FIELDS.map(([key,label])=><div key={key}><dt>{label}</dt><dd>{displayField(person,key)}</dd></div>)}</dl>
+      {fieldGroups.map(group=><section className="aff-data-group" key={group.title}><h3>{group.title}</h3><dl className="aff-fields">{group.keys.map(key=>AFFILIATION_FIELDS.find(([k])=>k===key)!).map(([key,label])=><div className={`aff-data-${key}`} key={key}><dt>{label}</dt><dd>{displayField(person,key)}</dd></div>)}</dl></section>)}
       {!person.telefono_movil && !person.telefono_fijo && person.telefono && <p>Teléfono de la ficha anterior: <a href={`tel:${person.telefono}`}>{person.telefono}</a></p>}
       {(person.telefono_movil || person.telefono_fijo || person.correo_electronico) && <div className="aff-toolbar">
         {person.telefono_movil && <a href={`tel:${person.telefono_movil}`}>Llamar al móvil</a>}
@@ -226,7 +233,7 @@ export default function AfiliadosManager() {
       <h3>Historial de gestiones</h3>
       {person.gestiones_afiliados?.length ? [...person.gestiones_afiliados].sort((a,b)=>b.created_at.localeCompare(a.created_at)).map(g=><div className="aff-gestion" key={g.id}>
         <time dateTime={g.created_at}>{new Date(g.created_at).toLocaleDateString('es-ES')}</time>
-        <EditableText initialValue={g.gestion} isTextArea onSave={async text=>{if(!await gestion(person.id,text,g.id)) throw new Error('No se pudo guardar la gestión')}}/>
+        <EditableText initialValue={g.gestion} label="gestión" isTextArea onSave={async text=>{if(!await gestion(person.id,text,g.id)) throw new Error('No se pudo guardar la gestión')}}/>
         <button disabled={busy} aria-label="Borrar gestión" onClick={()=>void gestion(person.id,'',g.id,true)}>×</button>
       </div>) : <p className="aff-note">No hay gestiones registradas.</p>}
       <form className="aff-toolbar" onSubmit={async e=>{

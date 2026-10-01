@@ -1,29 +1,8 @@
-import { requireMember } from '@/lib/require-member'
+import {requireMember} from '@/lib/require-member'
 import SaludManager from '@/components/SaludManager'
-
-
+import PageHeader from '@/components/PageHeader'
 export const dynamic = 'force-dynamic'
-
-export default async function SaludLaboralPage() {
-    await requireMember()
-    return (
-        <main style={{ minHeight: '100vh', backgroundColor: '#f8fafc' }}>
-            {/* Navbar global en layout */}
-            <div className="page-container" style={{ paddingTop: '100px', paddingBottom: '40px' }}>
-                <h1 style={{
-                    fontSize: '2rem',
-                    fontWeight: 800,
-                    color: '#1e293b',
-                    marginBottom: '10px'
-                }}>
-                    Salud Laboral
-                </h1>
-                <p style={{ color: '#64748b', marginBottom: '30px', fontSize: '1.1rem' }}>
-                    Gestión de incidencias y deficiencias en prevención
-                </p>
-
-                <SaludManager />
-            </div>
-        </main>
-    )
+export default async function SaludPage() {
+ await requireMember()
+ return <main id="main-content" className="page-container"><PageHeader title="Salud laboral" description="Prevención y condiciones de trabajo." icon="health"/><SaludManager/></main>
 }

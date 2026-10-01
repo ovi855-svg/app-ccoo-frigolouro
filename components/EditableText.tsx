@@ -1,215 +1,26 @@
 'use client'
-
-import { useState, useEffect, useRef } from 'react'
-
+import {useState, useEffect, useRef, useId} from 'react'
+import AppIcon from './AppIcon'
 interface EditableTextProps {
-    initialValue: string
-    onSave: (newValue: string) => Promise<void>
-    isTextArea?: boolean
-    className?: string
-    style?: React.CSSProperties
-    placeholder?: string
-    label?: string
-    options?: readonly string[]
+ initialValue: string; onSave: (value: string)=>Promise<void>; isTextArea?: boolean; className?: string; style?: React.CSSProperties; placeholder?: string; label?: string; options?: readonly string[]
 }
-
-export default function EditableText({
-    initialValue,
-    onSave,
-    isTextArea = false,
-    className = '',
-    style = {},
-    placeholder = 'Haga clic para editar',
-    label,
-    options
-}: EditableTextProps) {
-    const [isEditing, setIsEditing] = useState(false)
-    const [value, setValue] = useState(initialValue)
-    const [saving, setSaving] = useState(false)
-    const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null)
-
-    useEffect(() => {
-        setValue(initialValue)
-    }, [initialValue])
-
-    useEffect(() => {
-        if (isEditing && inputRef.current) {
-            inputRef.current.focus()
-        }
-    }, [isEditing])
-
-    const handleSave = async () => {
-        if (value.trim() === initialValue) {
-            setIsEditing(false)
-            return
-        }
-
-        try {
-            setSaving(true)
-            await onSave(value)
-            setIsEditing(false)
-        } catch (error) {
-            console.error('Error saving:', error)
-            alert('Error al guardar. Por favor intente de nuevo.')
-        } finally {
-            setSaving(false)
-        }
-    }
-
-    const handleCancel = () => {
-        setValue(initialValue)
-        setIsEditing(false)
-    }
-
-    const handleKeyDown = (e: React.KeyboardEvent) => {
-        if (e.key === 'Escape') {
-            handleCancel()
-        }
-        // Save on Enter only for single inputs, not textareas
-        if (e.key === 'Enter' && !isTextArea && !e.shiftKey) {
-            e.preventDefault()
-            handleSave()
-        }
-    }
-
-    if (isEditing) {
-        return (
-            <div className="editable-text-container" style={{ width: '100%' }}>
-                {options ? (
-                    <select
-                        ref={inputRef as any}
-                        value={value}
-                        onChange={(e) => {
-                            setValue(e.target.value)
-                            // Auto save for select
-                            // But we need to update state first, so maybe better keep manual save
-                            // or utilize the fact that change is instant.
-                            // Let's keep manual save consistent with other inputs for now 
-                            // OR user explicitly requested "editable select", usually implies picking and it's done. 
-                            // However, base component has Save/Cancel buttons. 
-                            // Let's keep consistency: User selects, then clicks Save.
-                        }}
-                        onKeyDown={handleKeyDown}
-                        className={className}
-                        style={{
-                            width: '100%',
-                            padding: '8px',
-                            borderRadius: '4px',
-                            border: '1px solid #3b82f6',
-                            outline: 'none',
-                            fontFamily: 'inherit',
-                            fontSize: 'inherit',
-                            backgroundColor: 'white',
-                            cursor: 'pointer',
-                            ...style
-                        }}
-                    >
-                        {options.map(opt => (
-                            <option key={opt} value={opt}>{opt}</option>
-                        ))}
-                    </select>
-                ) : isTextArea ? (
-                    <textarea
-                        ref={inputRef as React.RefObject<HTMLTextAreaElement>}
-                        value={value}
-                        onChange={(e) => setValue(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        className={className}
-                        style={{
-                            width: '100%',
-                            minHeight: '100px',
-                            padding: '8px',
-                            borderRadius: '6px',
-                            border: '1px solid #3b82f6',
-                            outline: 'none',
-                            fontFamily: 'inherit',
-                            fontSize: 'inherit',
-                            resize: 'vertical',
-                            ...style
-                        }}
-                        placeholder={placeholder}
-                    />
-                ) : (
-                    <input
-                        ref={inputRef as React.RefObject<HTMLInputElement>}
-                        type="text"
-                        value={value}
-                        onChange={(e) => setValue(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        className={className}
-                        style={{
-                            width: '100%',
-                            padding: '4px 8px',
-                            borderRadius: '4px',
-                            border: '1px solid #3b82f6',
-                            outline: 'none',
-                            fontFamily: 'inherit',
-                            fontSize: 'inherit',
-                            ...style
-                        }}
-                        placeholder={placeholder}
-                    />
-                )}
-                <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
-                    <button
-                        onClick={handleSave}
-                        disabled={saving}
-                        style={{
-                            padding: '4px 12px',
-                            backgroundColor: '#3b82f6',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            fontSize: '0.75rem',
-                            cursor: 'pointer',
-                            opacity: saving ? 0.7 : 1
-                        }}
-                    >
-                        {saving ? 'Guardando...' : 'Guardar'}
-                    </button>
-                    <button
-                        onClick={handleCancel}
-                        disabled={saving}
-                        style={{
-                            padding: '4px 12px',
-                            backgroundColor: 'white',
-                            color: '#64748b',
-                            border: '1px solid #e2e8f0',
-                            borderRadius: '4px',
-                            fontSize: '0.75rem',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        Cancelar
-                    </button>
-                </div>
-            </div>
-        )
-    }
-
-    return (
-        <div
-            onClick={() => setIsEditing(true)}
-            className={`editable-text-preview ${className}`}
-            style={{
-                cursor: 'pointer',
-                border: '1px solid transparent',
-                borderRadius: '4px',
-                transition: 'all 0.2s',
-                position: 'relative',
-                ...style
-            }}
-            title="Haga clic para editar"
-            onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.02)'
-                e.currentTarget.style.borderColor = '#e2e8f0'
-            }}
-            onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent'
-                e.currentTarget.style.borderColor = 'transparent'
-            }}
-        >
-            {value || <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>{placeholder}</span>}
-        </div>
-    )
+export default function EditableText({initialValue,onSave,isTextArea=false,className='',style={},placeholder='Añadir texto…',label='texto',options}: EditableTextProps) {
+ const [editing,setEditing]=useState(false), [value,setValue]=useState(initialValue), [saving,setSaving]=useState(false), [error,setError]=useState('')
+ const input=useRef<HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement>(null)
+ const id=useId()
+ useEffect(()=>{setValue(initialValue)},[initialValue])
+ useEffect(()=>{if(editing)input.current?.focus()},[editing])
+ function cancel(){setValue(initialValue);setEditing(false);setError('')}
+ async function save(){
+  if(value.trim()===initialValue){setEditing(false);return}
+  setSaving(true);setError('')
+  try{await onSave(value);setEditing(false)}catch{setError('No se pudo guardar. Revisa el texto e inténtalo de nuevo.')}finally{setSaving(false)}
+ }
+ function keyDown(e: React.KeyboardEvent){if(saving)return;if(e.key==='Escape')cancel();if(e.key==='Enter'&&!isTextArea&&!e.shiftKey){e.preventDefault();void save()}}
+ if(editing)return <div className={`editable-text-container ${className}`}>
+  {options?<select ref={input as React.RefObject<HTMLSelectElement>} aria-label={`Editar ${label}`} value={value} disabled={saving} onChange={e=>setValue(e.target.value)} onKeyDown={keyDown}>{options.map(s=><option key={s}>{s}</option>)}</select>:isTextArea?<textarea ref={input as React.RefObject<HTMLTextAreaElement>} aria-label={`Editar ${label}`} value={value} disabled={saving} onChange={e=>setValue(e.target.value)} onKeyDown={keyDown} rows={4} placeholder={placeholder}/>:<input ref={input as React.RefObject<HTMLInputElement>} aria-label={`Editar ${label}`} value={value} disabled={saving} onChange={e=>setValue(e.target.value)} onKeyDown={keyDown} placeholder={placeholder}/>}
+  {error&&<p id={`${id}-error`} role="alert" className="auth-error">{error}</p>}
+  <div className="edit-actions"><button type="button" className="button button-primary" onClick={()=>void save()} disabled={saving}>{saving?'Guardando…':'Guardar'}</button><button type="button" className="button button-secondary" onClick={cancel} disabled={saving}>Cancelar</button></div>
+ </div>
+ return <div className={`editable-text-preview ${className}`} style={style}><span className={value?'editable-value':'editable-placeholder'}>{value||placeholder}</span><button type="button" className="edit-trigger" onClick={()=>setEditing(true)} aria-label={`Editar ${label}`}><AppIcon name="edit" size={16}/><span>Editar</span></button></div>
 }

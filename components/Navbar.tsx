@@ -1,89 +1,27 @@
 'use client'
-
 import Link from 'next/link'
 import Image from 'next/image'
-import { usePathname } from 'next/navigation'
+import {usePathname} from 'next/navigation'
 import AccountMenu from './AccountMenu'
-
+import AppIcon, {type IconName} from './AppIcon'
+const links: {href: string; label: string; mobile: string; icon: IconName}[] = [
+ {href: '/', label: 'Inicio', mobile: 'Inicio', icon: 'home'},
+ {href: '/orden-del-dia', label: 'Orden del día', mobile: 'Orden', icon: 'agenda'},
+ {href: '/metodos-tiempos', label: 'Métodos y tiempos', mobile: 'Métodos', icon: 'clock'},
+ {href: '/salud-laboral', label: 'Salud laboral', mobile: 'Salud', icon: 'health'},
+ {href: '/afiliados', label: 'Afiliación', mobile: 'Afiliación', icon: 'people'},
+]
 export default function Navbar() {
-    const pathname = usePathname()
-    if (pathname === '/login' || pathname.startsWith('/auth/')) return null
-
-    const isActive = (path: string) => {
-        return pathname === path || pathname.startsWith(path + '/')
-    }
-
-    const getLinkStyle = (path: string) => ({
-        color: isActive(path) ? '#dc2626' : '#333',
-        backgroundColor: isActive(path) ? '#fef2f2' : 'transparent',
-        border: isActive(path) ? '1px solid #fee2e2' : '1px solid transparent',
-    })
-
-    return (
-        <nav className="navbar-responsive">
-            <Link href="/" style={{ textDecoration: 'none' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                    {/* Logo con efecto hover */}
-                    <div style={{
-                        height: '50px',
-                        width: '50px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: 'white',
-                        borderRadius: '12px',
-                        padding: '5px',
-                        boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)'
-                    }}>
-                        {/* @ts-ignore */}
-                        <Image
-                            src="/logo.png"
-                            alt="Logo CCOO"
-                            width={40}
-                            height={40}
-                            style={{ width: 'auto', height: '100%', objectFit: 'contain' }}
-                            priority
-                        />
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span style={{
-                            fontWeight: '800',
-                            fontSize: '1.2rem',
-                            color: '#1e293b',
-                            lineHeight: 1.1
-                        }}>
-                            Sección Sindical
-                        </span>
-                        <span style={{
-                            fontWeight: '600',
-                            fontSize: '1rem',
-                            color: 'var(--ccoo-red)',
-                            letterSpacing: '-0.5px'
-                        }}>
-                            CCOO Frigolouro
-                        </span>
-                    </div>
-                </div>
-            </Link>
-
-            <div className="navbar-links">
-                <Link href="/" className="navbar-link" style={getLinkStyle('/')}>
-                    Inicio
-                </Link>
-                <Link href="/orden-del-dia" className="navbar-link" style={getLinkStyle('/orden-del-dia')}>
-                    Orden del Día
-                </Link>
-                <Link href="/metodos-tiempos" className="navbar-link" style={getLinkStyle('/metodos-tiempos')}>
-                    Métodos y Tiempos
-                </Link>
-                <Link href="/salud-laboral" className="navbar-link" style={getLinkStyle('/salud-laboral')}>
-                    Salud Laboral
-                </Link>
-                <Link href="/afiliados" className="navbar-link" style={getLinkStyle('/afiliados')}>
-                    Afiliados
-                </Link>
-            </div>
-            <AccountMenu />
-        </nav>
-    )
+ const pathname = usePathname()
+ if (pathname === '/login' || pathname.startsWith('/auth/')) return null
+ const active = (href: string) => pathname === href || (href !== '/' && pathname.startsWith(href+'/')) || (href === '/orden-del-dia' && pathname.startsWith('/incidencias/'))
+ return <>
+  <a href="#main-content" className="skip-link">Ir al contenido</a>
+  <header className="app-header"><div className="header-inner">
+   <Link href="/" className="brand" aria-label="CCOO Frigolouro, inicio"><Image src="/logo.png" alt="CCOO" width={42} height={42} className="brand-logo" priority/><span><strong>CCOO Frigolouro</strong><small>Sección sindical</small></span></Link>
+   <nav className="desktop-navigation" aria-label="Navegación principal">{links.map(link=><Link key={link.href} href={link.href} className="nav-link" aria-current={active(link.href)?'page':undefined}>{link.label}</Link>)}</nav>
+   <AccountMenu/>
+  </div></header>
+  <nav className="mobile-navigation" aria-label="Navegación principal móvil">{links.map(link=><Link key={link.href} href={link.href} className="mobile-nav-link" aria-label={link.label} aria-current={active(link.href)?'page':undefined}><AppIcon name={link.icon}/><span>{link.mobile}</span></Link>)}</nav>
+ </>
 }

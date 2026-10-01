@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { SECCIONES, ESTADOS_SOLICITUDES } from '@/lib/constants'
 import VoiceInput from '@/components/VoiceInput'
+import Link from 'next/link'
+import AppIcon from './AppIcon'
 
 export default function NuevaMetodosForm() {
     const router = useRouter()
@@ -64,162 +66,16 @@ export default function NuevaMetodosForm() {
         })
     }
 
-    return (
-        <div className="form-container">
-            <h1 style={{
-                marginTop: 0,
-                marginBottom: '25px',
-                fontSize: '1.8rem',
-                color: '#1e293b',
-                fontWeight: 700
-            }}>
-                Nueva Solicitud
-            </h1>
 
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                <div>
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Título / Identificador *</label>
-                    <input
-                        type="text"
-                        name="titulo"
-                        required
-                        placeholder="Ej: Análisis línea 1"
-                        value={formData.titulo}
-                        onChange={handleChange}
-                        style={{
-                            width: '100%',
-                            padding: '12px',
-                            borderRadius: '8px',
-                            border: '1px solid #cbd5e1',
-                            fontSize: '1rem',
-                            outline: 'none',
-                            transition: 'all 0.2s',
-                        }}
-                    />
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Sección *</label>
-                        <select
-                            name="seccion"
-                            value={formData.seccion}
-                            onChange={handleChange}
-                            style={{
-                                width: '100%',
-                                padding: '12px',
-                                borderRadius: '8px',
-                                border: '1px solid #cbd5e1',
-                                fontSize: '1rem',
-                                backgroundColor: 'white'
-                            }}
-                        >
-                            {SECCIONES.map(sec => (
-                                <option key={sec} value={sec}>{sec}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Estado Inicial</label>
-                        <select
-                            name="estado"
-                            value={formData.estado}
-                            onChange={handleChange}
-                            style={{
-                                width: '100%',
-                                padding: '12px',
-                                borderRadius: '8px',
-                                border: '1px solid #cbd5e1',
-                                fontSize: '1rem',
-                                backgroundColor: 'white'
-                            }}
-                        >
-                            {ESTADOS_SOLICITUDES.map(est => (
-                                <option key={est} value={est}>{est}</option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
-
-                <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                        <label style={{ fontWeight: 600, color: '#475569' }}>Descripción detallada</label>
-                        <VoiceInput onTranscript={handleVoiceTranscript} />
-                    </div>
-                    <textarea
-                        name="descripcion"
-                        value={formData.descripcion}
-                        onChange={handleChange}
-                        rows={5}
-                        placeholder="Detalles sobre el estudio o método..."
-                        style={{
-                            width: '100%',
-                            padding: '12px',
-                            borderRadius: '8px',
-                            border: '1px solid #cbd5e1',
-                            fontSize: '1rem',
-                            fontFamily: 'inherit',
-                            resize: 'vertical'
-                        }}
-                    />
-                </div>
-
-                <div>
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Creada por (Opcional)</label>
-                    <input
-                        type="text"
-                        name="creada_por"
-                        value={formData.creada_por}
-                        onChange={handleChange}
-                        placeholder="Tu nombre"
-                        style={{
-                            width: '100%',
-                            padding: '12px',
-                            borderRadius: '8px',
-                            border: '1px solid #cbd5e1',
-                            fontSize: '1rem'
-                        }}
-                    />
-                </div>
-
-                <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
-                    <button
-                        type="button"
-                        onClick={() => router.push('/metodos-tiempos')}
-                        style={{
-                            padding: '12px 24px',
-                            backgroundColor: 'white',
-                            color: '#64748b',
-                            border: '1px solid #cbd5e1',
-                            borderRadius: '8px',
-                            cursor: 'pointer',
-                            fontWeight: 600,
-                            fontSize: '1rem'
-                        }}
-                    >
-                        Cancelar
-                    </button>
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        style={{
-                            flex: 1,
-                            padding: '12px 24px',
-                            backgroundColor: 'var(--ccoo-red)',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '8px',
-                            cursor: loading ? 'not-allowed' : 'pointer',
-                            fontWeight: 600,
-                            fontSize: '1rem',
-                            boxShadow: '0 4px 6px -1px rgba(220, 38, 38, 0.2)'
-                        }}
-                    >
-                        {loading ? 'Guardando...' : 'Guardar Solicitud'}
-                    </button>
-                </div>
-            </form>
-        </div>
-    )
+    return <section className="form-container entry-form">
+      <Link href="/metodos-tiempos" className="back-link"><AppIcon name="back" size={18}/>Volver al listado</Link>
+      <h1>Nueva solicitud de revisión</h1><p className="form-intro">Los campos con * son obligatorios. Podrás editar el registro después.</p>
+      <form onSubmit={handleSubmit}>
+        <label htmlFor="titulo">Título *<input id="titulo" type="text" name="titulo" required placeholder="Un título breve y claro" value={formData.titulo} onChange={handleChange}/></label>
+        <div className="grid-two-columns"><label htmlFor="seccion">Sección *<select id="seccion" name="seccion" value={formData.seccion} onChange={handleChange}>{SECCIONES.map(s=><option key={s}>{s}</option>)}</select></label><label htmlFor="estado">Estado inicial<select id="estado" name="estado" value={formData.estado} onChange={handleChange}>{ESTADOS_SOLICITUDES.map(s=><option key={s}>{s}</option>)}</select></label></div>
+        <div><div className="field-heading"><label htmlFor="descripcion">Descripción</label><VoiceInput onTranscript={handleVoiceTranscript}/></div><textarea id="descripcion" name="descripcion"  value={formData.descripcion} onChange={handleChange} rows={6} placeholder="Describe la tarea, el ritmo o el método que necesita revisión…"/></div>
+        <label htmlFor="creada_por">Registrado por <span className="optional-label">(opcional)</span><input id="creada_por" type="text" name="creada_por" value={formData.creada_por} onChange={handleChange} placeholder="Tu nombre" autoComplete="name"/></label>
+        <div className="form-actions"><button className="button button-primary" type="submit" disabled={loading}>{loading?'Guardando…':'Guardar registro'}</button><button className="button button-secondary" type="button" disabled={loading} onClick={()=>router.push('/metodos-tiempos')}>Cancelar</button></div>
+      </form>
+    </section>
 }

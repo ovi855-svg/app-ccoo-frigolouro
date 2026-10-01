@@ -182,8 +182,8 @@ export default function AfiliadosInformeGenerator() {
 
             <div className="grid-two-columns">
                 <div>
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Fecha Registro Inicio</label>
-                    <input
+                    <label htmlFor="fecha-inicio" style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Fecha Registro Inicio</label>
+                    <input id="fecha-inicio"
                         type="date"
                         value={startDate}
                         onChange={(e) => setStartDate(e.target.value)}
@@ -197,8 +197,8 @@ export default function AfiliadosInformeGenerator() {
                     />
                 </div>
                 <div>
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Fecha Registro Fin</label>
-                    <input
+                    <label htmlFor="fecha-fin" style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Fecha Registro Fin</label>
+                    <input id="fecha-fin"
                         type="date"
                         value={endDate}
                         onChange={(e) => setEndDate(e.target.value)}
@@ -219,8 +219,8 @@ export default function AfiliadosInformeGenerator() {
                     <option value="activa">Afiliación activa</option>
                     <option value="baja">Bajas de afiliación</option>
                 </select>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Filtrar por Sección</label>
-                <select
+                <label htmlFor="seccion-informe" style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Filtrar por Sección</label>
+                <select id="seccion-informe"
                     value={filterSeccion}
                     onChange={(e) => setFilterSeccion(e.target.value)}
                     style={{

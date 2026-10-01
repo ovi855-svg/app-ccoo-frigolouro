@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
+import AppIcon from './AppIcon'
 
 export default function AccountMenu() {
     const [name, setName] = useState('')
@@ -27,9 +28,11 @@ export default function AccountMenu() {
         } catch { setError('No se ha podido cerrar la sesión. Inténtalo de nuevo.') }
         finally { setBusy(false) }
     }
-    return <div className="account-menu">
-        {name && <span>{name}</span>}
-        <button type="button" onClick={logout} disabled={busy}>{busy ? 'Saliendo…' : 'Cerrar sesión'}</button>
-        {error && <span role="alert">{error}</span>}
-    </div>
+    return <details className="account-menu">
+        <summary aria-label={name ? `Cuenta de ${name}` : 'Mi cuenta'}><AppIcon name="user" size={19}/><span>{name || 'Mi cuenta'}</span></summary>
+        <div className="account-popover"><strong>{name || 'Mi cuenta'}</strong><p>Sesión privada</p>
+            <button type="button" onClick={logout} disabled={busy}>{busy ? 'Saliendo…' : 'Cerrar sesión'}</button>
+            {error && <p role="alert">{error}</p>}
+        </div>
+    </details>
 }

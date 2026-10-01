@@ -66,6 +66,9 @@ export default function VoiceInput({ onTranscript, onListeningChange }: VoiceInp
         <button
             type="button"
             onClick={toggleListening}
+            className="voice-button"
+            aria-label={isListening ? 'Detener dictado' : 'Dictar descripción'}
+            aria-pressed={isListening}
             title={isListening ? "Detener grabación" : "Dictar descripción"}
             style={{
                 background: 'none',
@@ -97,6 +100,7 @@ export default function VoiceInput({ onTranscript, onListeningChange }: VoiceInp
                 <line x1="12" y1="19" x2="12" y2="23"></line>
                 <line x1="8" y1="23" x2="16" y2="23"></line>
             </svg>
+            <span>{isListening ? 'Detener' : 'Dictar'}</span>
         </button>
     )
 }

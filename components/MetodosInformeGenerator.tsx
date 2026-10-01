@@ -258,8 +258,8 @@ export default function MetodosInformeGenerator() {
 
             <div className="grid-two-columns">
                 <div>
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Fecha Inicio</label>
-                    <input
+                    <label htmlFor="fecha-inicio" style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Fecha Inicio</label>
+                    <input id="fecha-inicio"
                         type="date"
                         value={startDate}
                         onChange={(e) => setStartDate(e.target.value)}
@@ -273,8 +273,8 @@ export default function MetodosInformeGenerator() {
                     />
                 </div>
                 <div>
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Fecha Fin</label>
-                    <input
+                    <label htmlFor="fecha-fin" style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Fecha Fin</label>
+                    <input id="fecha-fin"
                         type="date"
                         value={endDate}
                         onChange={(e) => setEndDate(e.target.value)}
@@ -291,8 +291,8 @@ export default function MetodosInformeGenerator() {
 
             <div className="grid-two-columns">
                 <div>
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Filtrar por Sección</label>
-                    <select
+                    <label htmlFor="seccion-informe" style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Filtrar por Sección</label>
+                    <select id="seccion-informe"
                         value={filterSeccion}
                         onChange={(e) => setFilterSeccion(e.target.value)}
                         style={{
@@ -311,8 +311,8 @@ export default function MetodosInformeGenerator() {
                     </select>
                 </div>
                 <div>
-                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Filtrar por Estado</label>
-                    <select
+                    <label htmlFor="estado-informe" style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: '#475569' }}>Filtrar por Estado</label>
+                    <select id="estado-informe"
                         value={filterEstado}
                         onChange={(e) => setFilterEstado(e.target.value)}
                         style={{

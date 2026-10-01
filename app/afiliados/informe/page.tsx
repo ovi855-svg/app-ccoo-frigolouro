@@ -1,22 +1,8 @@
-import { requireMember } from '@/lib/require-member'
+import {requireMember} from '@/lib/require-member'
 import AfiliadosInformeGenerator from '@/components/AfiliadosInformeGenerator'
-
+import PageHeader from '@/components/PageHeader'
 export const dynamic = 'force-dynamic'
-
 export default async function InformeAfiliadosPage() {
-    await requireMember()
-    return (
-        <main style={{ minHeight: '100vh', backgroundColor: '#f8fafc' }}>
-            {/* Navbar global */}
-            <div className="page-container" style={{ paddingTop: '100px', paddingBottom: '40px' }}>
-                <div style={{ marginBottom: '30px' }}>
-                    <a href="/afiliados" style={{ textDecoration: 'none', color: '#64748b', fontSize: '0.9rem', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                        ← Volver a Gestión de Afiliados
-                    </a>
-                </div>
-
-                <AfiliadosInformeGenerator />
-            </div>
-        </main>
-    )
+ await requireMember()
+ return <main id="main-content" className="page-container"><PageHeader title="Informe de afiliación" description="Prepara un PDF con las fichas y las gestiones." icon="people" back={{href: "/afiliados", label: "Volver al listado"}}/><AfiliadosInformeGenerator/></main>
 }

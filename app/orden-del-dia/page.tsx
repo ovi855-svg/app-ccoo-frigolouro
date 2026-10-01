@@ -1,29 +1,8 @@
-import { requireMember } from '@/lib/require-member'
+import {requireMember} from '@/lib/require-member'
 import IncidenciasManager from '@/components/IncidenciasManager'
-
+import PageHeader from '@/components/PageHeader'
 export const dynamic = 'force-dynamic'
-
 export default async function OrdenDiaPage() {
-    await requireMember()
-    return (
-        <main style={{ minHeight: '100vh', backgroundColor: '#f8fafc' }}>
-            <div className="page-container" style={{ paddingTop: '100px', paddingBottom: '40px' }}>
-                <h1 style={{
-                    fontSize: '2rem',
-                    fontWeight: 800,
-                    color: '#1e293b',
-                    marginBottom: '10px'
-                }}>
-                    Orden del Día
-                </h1>
-                <p style={{ color: '#64748b', marginBottom: '30px', fontSize: '1.1rem' }}>
-                    Gestión de incidencias y tareas pendientes
-                </p>
-
-                <div className="animate-fade-in">
-                    <IncidenciasManager />
-                </div>
-            </div>
-        </main>
-    )
+ await requireMember()
+ return <main id="main-content" className="page-container"><PageHeader title="Orden del día" description="Incidencias y temas para las reuniones." icon="agenda"/><IncidenciasManager/></main>
 }
