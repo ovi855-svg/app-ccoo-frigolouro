@@ -184,7 +184,8 @@ export function affiliationReport(people: Afiliado[],options: ReportOptions,bran
   report.introduction(people.length)
   const counts=new Map<string,number>();people.forEach(p=>counts.set(p.seccion,(counts.get(p.seccion)||0)+1))
   if(compact){
-    report.text(`Resumen por sección: ${[...counts].map(([section,count])=>`${section} (${count})`).join('; ')}`,8.5,false,false,GREY)
+    report.heading('Resumen por sección',11,12)
+    report.table(['Sección','Personas'],[...counts.entries()],130)
     report.table(['Nº','Nombre y apellidos','Sección','Teléfono'],people.map((person,index)=>[
       index+1,person.nombre_completo,person.seccion,
       person.telefono_movil?.trim()||person.telefono_fijo?.trim()||person.telefono?.trim()||'Sin dato',

@@ -67,8 +67,9 @@ Las secciones adicionales se sitúan al final por orden alfabético.
 Si el informe de afiliación contiene
 más de una persona, exporta una tabla breve con nombre y apellidos, sección y
 teléfono (móvil, fijo o teléfono anterior, por ese orden), con cabecera repetida
-en cada página. Un único resultado y la ficha individual conservan el formato
-completo, todos los campos y las gestiones.
+en cada página. Antes del listado, el resumen por sección utiliza una tabla
+con la sección y el número de personas. Un único resultado y la ficha individual
+conservan el formato completo, todos los campos y las gestiones.
 
 ## Ejecutar en local
 
