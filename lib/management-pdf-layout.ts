@@ -91,9 +91,14 @@ export class ManagementReportLayout {
     this.block('Descripción',record.descripcion||'Sin descripción registrada.')
     this.block('Contestación de la empresa',record.contestacion||'Sin contestación registrada.')
     if(record.history?.length){
-      this.label('Historial de cambios',14)
+      const history=record.history.map(h=>[new Date(h.created_at).toLocaleString('es-ES'),clean(h.label),clean(h.created_by_name||'No registrada')])
+      const widths=[34,106,34],lineHeight=8.8*.352778*1.15,headHeight=lineHeight+2.5
+      const heights=history.map(row=>Math.max(...row.map((value,column)=>this.lines(value,8.8,false,widths[column]-2.5).length))*lineHeight+2.5)
+      const tableHeight=headHeight+heights.reduce((sum,height)=>sum+height,0)
+      // Keep short histories together; long ones retain their heading and first row.
+      this.label('Historial de cambios',tableHeight<=50?tableHeight:headHeight+Math.min(heights[0],35))
       autoTable(this.doc,{
-        startY:this.y,head:[['Fecha','Cambio','Autoría']],body:record.history.map(h=>[new Date(h.created_at).toLocaleString('es-ES'),clean(h.label),clean(h.created_by_name||'No registrada')]),
+        startY:this.y,head:[['Fecha','Cambio','Autoría']],body:history,
         theme:'plain',margin:{left:LEFT,right:LEFT,top:TOP,bottom:297-BOTTOM},
         styles:{font:'helvetica',fontSize:8.8,cellPadding:1.25,overflow:'linebreak',textColor:INK,valign:'top'},
         headStyles:{fillColor:[235,235,235],textColor:INK,fontStyle:'bold'},alternateRowStyles:{fillColor:LIGHT},

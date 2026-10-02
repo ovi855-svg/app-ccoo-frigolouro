@@ -101,7 +101,8 @@ Orden del día, métodos y salud utilizan `lib/management-pdf-layout.ts`:
 títulos más grandes, franjas rojas por sección, fecha y estado sobre fondo
 gris y bloques separados para descripción, contestación e historial.
 El texto se alinea a la izquierda, con más espacio entre líneas, y el historial
-utiliza una tabla con filas alternas y cabecera repetida. Las continuaciones
+utiliza una tabla con filas alternas y cabecera repetida. Los historiales
+cortos se mantienen juntos para evitar una última fila aislada. Las continuaciones
 identifican la sección y el punto, y los subtítulos se mantienen junto al
 contenido. Esta maquetación prioriza la lectura conservando todos
 los datos, contestaciones e historiales. Agrupan los registros por sección,
