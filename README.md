@@ -90,15 +90,21 @@ La aplicación utiliza el logo oficial transparente de CCOO Frigolouro,
 sin modificarlo, y los colores rojo, negro, blanco y el acento cian del logo.
 Se conservan la navegación móvil y todas las opciones de gestión.
 
-Los cuatro informes y la ficha individual comparten `lib/pdf-report.ts`:
-cabecera oficial, fecha completa, títulos negros, texto justificado,
-tablas rojas y pie de documento interno con número de página. El diseño
-se ha contrastado con las plantillas internas del proyecto. Los informes
+Los cuatro informes y la ficha individual se exportan desde `lib/pdf-report.ts`,
+con cabecera oficial, fecha completa, títulos negros y pie de documento interno
+con número de página. El diseño se ha contrastado con las plantillas internas
+del proyecto. Los informes
 mantienen los filtros y la autoría verificada cuando existe. La carga del logo
 es obligatoria antes de exportar.
 
-Incidencias, métodos y salud utilizan maquetación compacta, conservando todos
-sus datos, contestaciones e historiales. Agrupan los registros por sección,
+Orden del día, métodos y salud utilizan `lib/management-pdf-layout.ts`:
+títulos más grandes, franjas rojas por sección, fecha y estado sobre fondo
+gris y bloques separados para descripción, contestación e historial.
+El texto se alinea a la izquierda, con más espacio entre líneas, y el historial
+utiliza una tabla con filas alternas y cabecera repetida. Las continuaciones
+identifican la sección y el punto, y los subtítulos se mantienen junto al
+contenido. Esta maquetación prioriza la lectura conservando todos
+los datos, contestaciones e historiales. Agrupan los registros por sección,
 con encabezado y total de cada grupo, siguiendo el orden de secciones de la
 aplicación y, dentro de cada sección, la fecha de creación de antigua a reciente.
 Las secciones adicionales se sitúan al final por orden alfabético.
