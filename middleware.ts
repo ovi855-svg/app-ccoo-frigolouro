@@ -39,5 +39,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/((?!_next/static|_next/image|favicon.ico|logo.png|brand/ccoo-frigolouro-rojo\\.png$).*)'],
+    matcher: ['/((?!_next/static|_next/image|favicon.ico|logo.png|brand/ccoo-frigolouro-rojo\\.png$|sw\\.js$|manifest\\.webmanifest$|pwa-icon/(?:192|512)$).*)'],
 }

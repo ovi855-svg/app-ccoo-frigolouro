@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase'
 import AppIcon from './AppIcon'
+import {unregisterPushDevice} from '@/lib/notifications'
 
 export default function AccountMenu() {
     const [name, setName] = useState('')
@@ -22,6 +23,7 @@ export default function AccountMenu() {
     async function logout() {
         setBusy(true); setError('')
         try {
+            await unregisterPushDevice().catch(() => {})
             const { error } = await createClient().auth.signOut()
             if (error) { setError('No se ha podido cerrar la sesión.'); return }
             window.location.replace('/login')

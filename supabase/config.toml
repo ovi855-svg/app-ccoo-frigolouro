@@ -1,0 +1,5 @@
+project_id = "app-ccoo-frigolouro"
+
+[functions.union-notifications]
+# Custom authentication: verified member JWT or Vault-backed job token.
+verify_jwt = false

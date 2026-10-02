@@ -5,6 +5,7 @@ import Navbar from '@/components/Navbar'
 export const metadata: Metadata = {
   title: 'Sección Sindical CCOO Frigolouro',
   description: 'Gestión de incidencias',
+  manifest: '/manifest.webmanifest',
 }
 
 export default function RootLayout({

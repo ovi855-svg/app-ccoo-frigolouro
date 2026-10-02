@@ -1,5 +1,6 @@
-export type IconName = 'home' | 'agenda' | 'clock' | 'health' | 'people' | 'plus' | 'document' | 'arrow' | 'back' | 'edit' | 'search' | 'user' | 'lock'
+export type IconName = 'home' | 'agenda' | 'clock' | 'health' | 'people' | 'plus' | 'document' | 'arrow' | 'back' | 'edit' | 'search' | 'user' | 'lock' | 'bell'
 const paths: Record<IconName, React.ReactNode> = {
+ bell: <><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M9 21h6" /></>,
  home: <path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z" />,
  agenda: <><rect x="4" y="5" width="16" height="16" rx="2" /><path d="M8 3v4m8-4v4M4 11h16m-12 5 2 2 5-5" /></>,
  clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,

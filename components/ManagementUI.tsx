@@ -1,6 +1,6 @@
 'use client'
 import Link from 'next/link'
-import {useId} from 'react'
+import {useId,useEffect} from 'react'
 import {SECCIONES} from '@/lib/constants'
 import AppIcon from './AppIcon'
 import EditableText from './EditableText'
@@ -24,7 +24,11 @@ export function ManagementFilters({section, state, search, states, onSection, on
 export function RecordCard({title, section, description, reply, created, authorship, resource, recordId, state, states, history, onState, onEdit, onDelete}: {title: string; section: string; description: string; reply: string; created: string; authorship: AuthorStamp & {creada_por?: string|null}; resource: string; recordId: string; state: string; states: readonly string[]; history: {id: number|string; label: string; date: string}[]; onState: (v:string)=>void; onEdit:(field:'titulo'|'descripcion'|'contestacion',v:string)=>Promise<void>; onDelete:()=>void}) {
  const id=useId()
  const tone=/solucionad/i.test(state)?'resolved':/pendiente/i.test(state)?'pending':/nuev/i.test(state)?'new':'progress'
- return <article className="record-card">
+ useEffect(()=>{
+  const reveal=()=>{if(window.location.hash===`#registro-${recordId}`){const card=document.getElementById(`registro-${recordId}`);const details=card?.querySelector('details');if(details)details.open=true;card?.scrollIntoView({block:'start'})}}
+  reveal();window.addEventListener('hashchange',reveal);return()=>window.removeEventListener('hashchange',reveal)
+ },[recordId])
+ return <article className="record-card" id={`registro-${recordId}`}>
   <div className="record-meta"><span className="section-tag">{section}</span><time dateTime={created}>{new Date(created).toLocaleDateString('es-ES')}</time></div>
   <h2 className="record-title"><EditableText initialValue={title} label="título" onSave={v=>onEdit('titulo',v)} placeholder="Sin título"/></h2>
   <label htmlFor={`${id}-status`} className={`record-status status-${tone}`}><span>Estado</span><select id={`${id}-status`} value={state} onChange={e=>onState(e.target.value)}>{states.map(s=><option key={s}>{s}</option>)}</select></label>

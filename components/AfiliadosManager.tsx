@@ -44,7 +44,21 @@ export default function AfiliadosManager() {
   const [resolutions, setResolutions] = useState<Record<string,string>>({})
   const [completeList, setCompleteList] = useState(false)
   const input = useRef<HTMLInputElement>(null)
+  const [notificationId,setNotificationId] = useState('')
   const supabase = createClient()
+  useEffect(()=>{
+    const focus=()=>setNotificationId(window.location.hash.replace(/^#registro-/,''))
+    focus();window.addEventListener('hashchange',focus);return()=>window.removeEventListener('hashchange',focus)
+  },[])
+  useEffect(()=>{
+    const person=people.find(p=>p.id===notificationId)
+    if(!person)return
+    if(status!==person.estado_afiliacion||section!=='TODAS'||search){setStatus(person.estado_afiliacion);setSection('TODAS');setSearch('');return}
+    const targetPage=Math.floor(people.filter(p=>p.estado_afiliacion===status).findIndex(p=>p.id===notificationId)/20)
+    if(page!==targetPage){setPage(targetPage);return}
+    const target=document.getElementById(`registro-${notificationId}`)
+    if(target instanceof HTMLDetailsElement){target.open=true;target.scrollIntoView({block:'start'});setNotificationId('')}
+  },[people,status,section,search,page,notificationId])
 
   async function load() {
     setLoading(true)
@@ -222,7 +236,7 @@ export default function AfiliadosManager() {
       <label>Sección<select value={section} onChange={e=>setSection(e.target.value)}><option value="TODAS">Todas las secciones</option>{Array.from(new Set([...sections,...people.map(p=>p.seccion)])).map(s=><option key={s}>{s}</option>)}</select></label>
     </div>
     <p className="aff-note">{loading?'Cargando fichas…':`${countLabel(filtered.length,'ficha encontrada','fichas encontradas')}. Abre una ficha para consultar todos sus datos y gestiones.`}</p>
-    {visible.map(person=><details className="aff-panel aff-person" key={person.id}>
+    {visible.map(person=><details className="aff-panel aff-person" key={person.id} id={`registro-${person.id}`}>
       <summary><span className="person-avatar" aria-hidden="true">{(person.nombre || person.nombre_completo).charAt(0).toUpperCase()}</span><span className="person-summary"><strong>{person.nombre_completo}</strong><span>{person.seccion} · {paymentLabel(person.estado_pago)}{person.estado_afiliacion==='baja'?' · Baja':''}</span><small>Ver ficha y gestiones</small></span><AppIcon name="arrow" size={19}/></summary>
       <div className="aff-toolbar"><button disabled={busy} onClick={()=>edit(person)}>Editar ficha</button><button onClick={()=>void download(person)}>Ficha PDF</button><button disabled={busy} onClick={()=>void changeStatus(person)}>{person.estado_afiliacion==='baja'?'Reactivar afiliación':'Pasar a bajas'}</button></div>
       {fieldGroups.map(group=><section className="aff-data-group" key={group.title}><h3>{group.title}</h3><dl className="aff-fields">{group.keys.map(key=>AFFILIATION_FIELDS.find(([k])=>k===key)!).map(([key,label])=><div className={`aff-data-${key}`} key={key}><dt>{label}</dt><dd>{displayField(person,key)}</dd></div>)}</dl></section>)}

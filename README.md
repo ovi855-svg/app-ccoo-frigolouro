@@ -46,6 +46,44 @@ conservan su autoría anterior, diferenciada de la autoría verificada.
 de suplantación, preservación del creador y permisos; revierte sus escrituras.
 Las pruebas de sincronización comprueban también la autoría en el RPC.
 
+## Avisos en Android y bandeja privada
+
+La campana abre `/avisos`, con los cambios de las demás cuentas activas,
+lectura individual o conjunta y paginación. La base de datos excluye al autor
+tanto de la bandeja como de las entregas push. No se envían correos. Una
+importación de afiliación genera un único aviso por destinatario, sin avisos
+separados por cada fila ni entradas duplicadas del historial.
+
+En Android, entrar con Chrome, pulsar «Activar en este móvil» y aceptar las
+notificaciones. «Enviar aviso de prueba» permite comprobar ese dispositivo;
+esta prueba explícita es la única entrega dirigida a la propia cuenta.
+Cada persona puede silenciar categorías, todos sus dispositivos o una hora.
+La bandeja conserva los avisos durante 90 días aunque se silencie el móvil.
+Cerrar sesión elimina la suscripción de ese navegador; hay que activarla
+de nuevo tras volver a entrar. Retirar una membresía elimina sus dispositivos.
+
+Supabase procesa la cola cada minuto con Cron y `pg_net`. La función
+`union-notifications` cifra las entregas Web Push y reintenta fallos temporales;
+el plazo de entrega depende también de Android y de la conexión. En la pantalla
+bloqueada solo aparece la categoría, sin nombres ni contenido de las fichas.
+Al pulsar el aviso, la app comprueba acceso y abre el registro correspondiente.
+El service worker no almacena páginas ni datos personales para uso sin conexión.
+
+Configuración aplicada: `supabase/migrations/20261002052700_mobile_notifications.sql`
+y `supabase/functions/union-notifications/`. No volver a ejecutar la migración
+sobre el mismo proyecto. Las claves VAPID y el token del trabajo están cifrados
+en Supabase Vault, fuera del repositorio. La función verifica membresía para
+configuración/pruebas, y exige el token privado para procesar la cola. Solo la
+clave pública llega al navegador. Las tablas públicas tienen RLS por cuenta;
+las colas privadas deniegan acceso directo, incluida lectura con `service_role`.
+La función permite el origen de producción; un dominio nuevo requiere actualizarlo.
+
+`database/test-notifications.sql` comprueba destinatarios, exclusión del autor,
+importaciones, RLS, rechazo de suplantación y endpoints internos, categorías,
+reintentos, bloqueo de trabajos y retirada de membresía. Todas las escrituras
+de prueba se revierten. El botón de prueba debe confirmar después la recepción
+real en cada teléfono; las pruebas automatizadas no sustituyen esa comprobación.
+
 ## Identidad visual e informes
 
 La aplicación utiliza el logo oficial transparente de CCOO Frigolouro,
