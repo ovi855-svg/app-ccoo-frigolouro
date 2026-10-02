@@ -167,12 +167,27 @@ al corriente. Las secciones de altas nuevas quedan como `Sin asignar`.
 - Las personas ausentes pasan a bajas conservando UUID, sección, datos y
   gestiones. La reaparición reactiva la misma ficha. Se registra la detección
   de la ausencia, sin inferir una fecha efectiva de baja.
-- El cliente no tiene permiso de borrado permanente de fichas. Permite
-  archivar, reactivar, añadir y editar personas. Los informes separan
-  afiliación activa y bajas.
+- Permite archivar, reactivar, añadir y editar personas. «Borrar afiliado»
+  abre una confirmación con el nombre y aviso de eliminación definitiva de
+  la ficha y todas sus gestiones. Cancelar recibe el foco inicial; Escape
+  cancela antes de comenzar la operación. Funciona en activas y bajas.
+  Los informes separan afiliación activa y bajas.
+- El cliente sigue sin permiso DELETE directo. El RPC `borrar_afiliado`
+  elimina una sola ficha tras comprobar identidad, membresía activa,
+  confirmación explícita y versión cargada. Rechaza fichas modificadas o
+  inexistentes, y conserva la autoría del borrado en el registro de actividad.
+  La implementación privilegiada está en el esquema privado; el punto de
+  entrada público usa permisos del invocador, sin conceder acceso al esquema
+  privado. Migración `confirmed_affiliate_deletion`; no volver a ejecutarla.
+- Pasar a bajas conserva la ficha y sus gestiones; borrar las elimina.
+  Si la persona continúa en un Excel importado después, la sincronización
+  podrá crear una ficha nueva, sin recuperar los datos borrados.
 
 Validación del lector: `node scripts/test-affiliation.mjs`. Opcionalmente recibe
 una ruta local al Excel y otra a una extracción independiente privada.
 `database/test-affiliation-sync.sql` contiene pruebas con datos ficticios,
 incluyendo archivado, reactivación, concurrencia y acceso; siempre revierte
 la transacción. No sustituir sus datos ficticios por registros personales.
+`database/test-affiliate-deletion.sql` valida borrado de activas/bajas,
+cascada de gestiones, aislamiento de otras fichas, confirmación, concurrencia,
+permisos y autoría. Utiliza solo registros ficticios y revierte la transacción.

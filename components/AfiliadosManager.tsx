@@ -10,6 +10,7 @@ import EditableText from './EditableText'
 import AppIcon from './AppIcon'
 import AuthorCredit from './AuthorCredit'
 import ActivityTrail from './ActivityTrail'
+import AffiliateDeleteDialog from './AffiliateDeleteDialog'
 
 const fieldGroups: {title: string; keys: AffiliationField[]}[] = [
   {title:'Identificación', keys:['nombre','apellidos','dni','fecha_nacimiento','pais']},
@@ -32,6 +33,8 @@ export default function AfiliadosManager() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+  const [deleting, setDeleting] = useState<Afiliado | null>(null)
+  const [deleteError, setDeleteError] = useState('')
   const [status, setStatus] = useState<'activa' | 'baja'>('activa')
   const [section, setSection] = useState('TODAS')
   const [search, setSearch] = useState('')
@@ -111,6 +114,20 @@ export default function AfiliadosManager() {
     } catch(e) { setError(messageOf(e)) }
     finally { setBusy(false) }
   }
+  async function deletePerson() {
+    if (!deleting || busy) return
+    const person=deleting
+    setBusy(true); setDeleteError(''); setError(''); setNotice('')
+    try {
+      const {data,error}=await supabase.rpc('borrar_afiliado',{p_id:person.id,p_updated_at:person.updated_at ?? null,p_confirmado:true})
+      if(error)throw error
+      if(data!==person.id)throw new Error('No se pudo confirmar el borrado. Recarga el listado antes de intentarlo de nuevo.')
+      setPeople(current=>current.filter(p=>p.id!==person.id))
+      if(editing===person.id)setEditing(null)
+      setDeleting(null);setNotice('Ficha y gestiones borradas definitivamente.');await load()
+    } catch(e) { setDeleteError(messageOf(e)) }
+    finally { setBusy(false) }
+  }
   async function gestion(personId: string, text: string, gestionId?: string, remove = false): Promise<boolean> {
     if (!remove && !text.trim()) return false
     if (remove && !confirm('¿Borrar esta gestión?')) return false
@@ -181,6 +198,7 @@ export default function AfiliadosManager() {
   const legacy = editing !== 'new' && !draft.nombre && !draft.apellidos
 
   return <div className="affiliation-manager" aria-busy={busy}>
+    {deleting&&<AffiliateDeleteDialog name={deleting.nombre_completo} busy={busy} error={deleteError} onCancel={()=>setDeleting(null)} onConfirm={()=>void deletePerson()}/>}
     {error && <p role="alert" className="auth-error">{error}</p>}
     {notice && <p role="status" className="auth-message">{notice}</p>}
     <div className="aff-toolbar">
@@ -238,7 +256,7 @@ export default function AfiliadosManager() {
     <p className="aff-note">{loading?'Cargando fichas…':`${countLabel(filtered.length,'ficha encontrada','fichas encontradas')}. Abre una ficha para consultar todos sus datos y gestiones.`}</p>
     {visible.map(person=><details className="aff-panel aff-person" key={person.id} id={`registro-${person.id}`}>
       <summary><span className="person-avatar" aria-hidden="true">{(person.nombre || person.nombre_completo).charAt(0).toUpperCase()}</span><span className="person-summary"><strong>{person.nombre_completo}</strong><span>{person.seccion} · {paymentLabel(person.estado_pago)}{person.estado_afiliacion==='baja'?' · Baja':''}</span><small>Ver ficha y gestiones</small></span><AppIcon name="arrow" size={19}/></summary>
-      <div className="aff-toolbar"><button disabled={busy} onClick={()=>edit(person)}>Editar ficha</button><button onClick={()=>void download(person)}>Ficha PDF</button><button disabled={busy} onClick={()=>void changeStatus(person)}>{person.estado_afiliacion==='baja'?'Reactivar afiliación':'Pasar a bajas'}</button></div>
+      <div className="aff-toolbar"><button disabled={busy} onClick={()=>edit(person)}>Editar ficha</button><button onClick={()=>void download(person)}>Ficha PDF</button><button disabled={busy} onClick={()=>void changeStatus(person)}>{person.estado_afiliacion==='baja'?'Reactivar afiliación':'Pasar a bajas'}</button><button type="button" className="aff-danger" disabled={busy} onClick={()=>{setDeleteError('');setDeleting(person)}}>Borrar afiliado</button></div>
       {fieldGroups.map(group=><section className="aff-data-group" key={group.title}><h3>{group.title}</h3><dl className="aff-fields">{group.keys.map(key=>AFFILIATION_FIELDS.find(([k])=>k===key)!).map(([key,label])=><div className={`aff-data-${key}`} key={key}><dt>{label}</dt><dd>{displayField(person,key)}</dd></div>)}</dl></section>)}
       {!person.telefono_movil && !person.telefono_fijo && person.telefono && <p>Teléfono de la ficha anterior: <a href={`tel:${person.telefono}`}>{person.telefono}</a></p>}
       {(person.telefono_movil || person.telefono_fijo || person.correo_electronico) && <div className="aff-toolbar">

@@ -1,0 +1,54 @@
+-- Fictional fixtures only. Every write, including audit/notification events, rolls back.
+begin;
+select set_config('request.jwt.claim.sub',(select user_id::text from public.app_members where active limit 1),true);
+set local role authenticated;
+do $$
+declare person public.afiliados; other public.afiliados; actor uuid:=auth.uid(); failed boolean; old_revision timestamptz; deleted uuid;
+begin
+  insert into public.afiliados(nombre,apellidos,seccion) values('PERSONA FICTICIA','PRUEBA BORRADO','Sin asignar') returning * into person;
+  insert into public.afiliados(nombre,apellidos,seccion,estado_afiliacion) values('OTRA FICTICIA','PRUEBA BORRADO','Sin asignar','baja') returning * into other;
+  insert into public.gestiones_afiliados(afiliado_id,gestion) values(person.id,'GESTION FICTICIA'),(other.id,'OTRA GESTION FICTICIA');
+  failed:=false;
+  begin delete from public.afiliados where id=person.id; exception when insufficient_privilege then failed:=true; end;
+  if not failed then raise exception 'Direct DELETE must remain forbidden'; end if;
+  failed:=false;
+  begin perform private.delete_confirmed_affiliate(person.id,person.updated_at,true); exception when insufficient_privilege then failed:=true; end;
+  if not failed then raise exception 'Private schema should not be exposed'; end if;
+  failed:=false;
+  begin perform public.borrar_afiliado(person.id,person.updated_at,false); exception when invalid_parameter_value then failed:=true; end;
+  if not failed then raise exception 'Unconfirmed deletion accepted'; end if;
+  failed:=false;
+  begin perform public.borrar_afiliado(person.id,person.updated_at,null); exception when invalid_parameter_value then failed:=true; end;
+  if not failed then raise exception 'Null confirmation accepted'; end if;
+  old_revision:=person.updated_at;
+  update public.afiliados set seccion='General' where id=person.id returning * into person;
+  failed:=false;
+  begin perform public.borrar_afiliado(person.id,old_revision,true); exception when serialization_failure then failed:=true; end;
+  if not failed then raise exception 'Stale deletion accepted'; end if;
+  perform set_config('request.jwt.claim.sub',gen_random_uuid()::text,true);
+  failed:=false;
+  begin perform public.borrar_afiliado(person.id,person.updated_at,true); exception when insufficient_privilege then failed:=true; end;
+  if not failed then raise exception 'Nonmember can delete'; end if;
+  perform set_config('request.jwt.claim.sub','',true);
+  failed:=false;
+  begin perform public.borrar_afiliado(person.id,person.updated_at,true); exception when insufficient_privilege then failed:=true; end;
+  if not failed then raise exception 'Missing identity can delete'; end if;
+  perform set_config('request.jwt.claim.sub',actor::text,true);
+  deleted:=public.borrar_afiliado(person.id,person.updated_at,true);
+  if deleted<>person.id or exists(select 1 from public.afiliados where id=person.id) or exists(select 1 from public.gestiones_afiliados where afiliado_id=person.id) then raise exception 'Confirmed deletion or cascade failed'; end if;
+  if not exists(select 1 from public.afiliados where id=other.id) or not exists(select 1 from public.gestiones_afiliados where afiliado_id=other.id) then raise exception 'Unrelated fixture changed'; end if;
+  if not exists(select 1 from public.registro_actividad where table_name='afiliados' and record_id=person.id::text and operation='DELETE' and actor_id=actor) then raise exception 'Deletion audit missing'; end if;
+  if not exists(select 1 from public.registro_actividad where table_name='gestiones_afiliados' and resource_id=person.id::text and operation='DELETE' and actor_id=actor) then raise exception 'Cascade audit missing'; end if;
+  failed:=false;
+  begin perform public.borrar_afiliado(person.id,person.updated_at,true); exception when no_data_found then failed:=true; end;
+  if not failed then raise exception 'Repeated deletion reported success'; end if;
+  deleted:=public.borrar_afiliado(other.id,other.updated_at,true);
+  if deleted<>other.id or exists(select 1 from public.afiliados where id=other.id) or exists(select 1 from public.gestiones_afiliados where afiliado_id=other.id) then raise exception 'Archived fixture deletion failed'; end if;
+end $$;
+reset role;
+do $$ begin
+  if has_function_privilege('anon','public.borrar_afiliado(uuid,timestamptz,boolean)','execute') or has_function_privilege('service_role','public.borrar_afiliado(uuid,timestamptz,boolean)','execute') then raise exception 'Unexpected public deletion privilege'; end if;
+  if has_schema_privilege('authenticated','private','usage') or has_table_privilege('authenticated','public.afiliados','delete') then raise exception 'Broad deletion privilege granted'; end if;
+end $$;
+rollback;
+select 'Confirmed active/archived deletion, cascade, unchanged unrelated record, stale/repeated requests, identity/member checks, private isolation and audit passed; writes rolled back.' result;
