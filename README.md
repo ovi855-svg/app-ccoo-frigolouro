@@ -113,8 +113,18 @@ Si el informe de afiliación contiene
 más de una persona, exporta una tabla breve con nombre y apellidos, sección y
 teléfono (móvil, fijo o teléfono anterior, por ese orden), con cabecera repetida
 en cada página. Antes del listado, el resumen por sección utiliza una tabla
-con la sección y el número de personas. Un único resultado y la ficha individual
-conservan el formato completo, todos los campos y las gestiones.
+con la sección y el número de personas. Un único resultado conserva el informe
+completo, todos los campos y las gestiones.
+
+La descarga «Ficha PDF» se titula «Ficha de afiliado»: el nombre completo,
+la autoría y todos los datos personales, incluido el correo y los datos de baja,
+quedan en la primera página. La tabla ajusta el espacio de las filas y, cuando
+es necesario, la letra entre 10 y 9 puntos, midiendo antes los saltos con el
+propio generador. El nombre completo se muestra una vez en el encabezado.
+Las gestiones comienzan siempre en la segunda página y continúan aparte si
+son extensas; si no existen, esa página lo indica. No se recortan valores:
+si unos campos excepcionalmente extensos no caben con letra legible, se
+informa del problema antes de descargar. Los demás informes mantienen su diseño.
 
 ## Ejecutar en local
 

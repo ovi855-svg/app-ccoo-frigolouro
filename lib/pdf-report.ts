@@ -42,6 +42,7 @@ class InternalReport {
     this.doc.setProperties({title:options.title,author:'Sección Sindical de CCOO en Frigolouro',subject:'Documento interno de gestión sindical'})
   }
   room(height: number) {if(this.y+height>this.bottom){this.doc.addPage();this.y=this.top}}
+  nextPage() {this.doc.addPage();this.y=this.top}
   heading(text: string,size=this.compact?11:13,followingContent=this.compact?8:13) {
     this.doc.setFont('helvetica','bold');this.doc.setFontSize(size)
     const lines=this.doc.splitTextToSize(clean(text),WIDTH) as string[]
@@ -67,7 +68,7 @@ class InternalReport {
     }
     this.y+=this.compact?1:3
   }
-  table(head: string[],body: (string|number)[][],firstWidth?: number,widths?: number[]) {
+  table(head: string[],body: (string|number)[][],firstWidth?: number,widths?: number[],layout?: {fontSize:number;cellPadding:number}) {
     this.room(this.compact?12:22)
     const columnStyles: Record<number,{cellWidth?:number; fontStyle?:'bold'}>={}
     if(firstWidth)columnStyles[0]={cellWidth:firstWidth,fontStyle:'bold'}
@@ -76,13 +77,29 @@ class InternalReport {
     autoTable(this.doc,{
       startY:this.y,head:head.length?[head]:undefined,body,theme:'grid',
       margin:{left:MARGIN,right:MARGIN,top:this.top,bottom:this.compact?24:28},
-      styles:{font:'helvetica',fontSize:this.compact?8.5:10,cellPadding:this.compact?(head.length===3?1:1.5):3,overflow:'linebreak',textColor:BLACK,lineColor:[225,225,225],lineWidth:.15},
+      styles:{font:'helvetica',fontSize:layout?.fontSize??(this.compact?8.5:10),cellPadding:layout?.cellPadding??(this.compact?(head.length===3?1:1.5):3),overflow:'linebreak',textColor:BLACK,lineColor:[225,225,225],lineWidth:.15},
       headStyles:{fillColor:RED,textColor:[255,255,255],fontStyle:'bold'},
       alternateRowStyles:{fillColor:[249,249,249]},
       columnStyles,
       rowPageBreak:'avoid',showHead:'everyPage',
     })
     this.y=(this.doc as jsPDF&{lastAutoTable:{finalY:number}}).lastAutoTable.finalY+(this.compact?3:9)
+  }
+  personalTable(rows: string[][]) {
+    // Measure with the actual table renderer, including wrapped values and labels.
+    for(const layout of [{fontSize:10,cellPadding:1.8},{fontSize:9.5,cellPadding:1.5},{fontSize:9,cellPadding:1.2}]) {
+      const trial=new jsPDF({format:'a4',unit:'mm'})
+      autoTable(trial,{
+        startY:this.y,body:rows,theme:'grid',margin:{left:MARGIN,right:MARGIN,top:this.top,bottom:297-this.bottom},
+        styles:{font:'helvetica',...layout,overflow:'linebreak',lineWidth:.15},
+        columnStyles:{0:{cellWidth:60,fontStyle:'bold'}},rowPageBreak:'avoid',
+      })
+      const finalY=(trial as jsPDF&{lastAutoTable:{finalY:number}}).lastAutoTable.finalY
+      if(trial.getNumberOfPages()===1&&finalY<=this.bottom) {
+        this.table([],rows,60,undefined,layout);return
+      }
+    }
+    throw new Error('Los datos de esta ficha son demasiado extensos para una sola página legible. Revisa los campos de texto antes de exportar.')
   }
   introduction(total: number) {
     this.heading(this.options.title,this.compact?15:18)
@@ -150,7 +167,7 @@ export function managementReport(records: ReportRecord[],options: ReportOptions,
   return report.finish()
 }
 
-function personDetails(report: InternalReport,person: Afiliado) {
+function personDetails(report: InternalReport,person: Afiliado,separatePages=false) {
   const rows: string[][]=[['Nombre completo',person.nombre_completo],['Sección',person.seccion],['Afiliación',person.estado_afiliacion==='baja'?'Baja':'Activa'],...AFFILIATION_FIELDS.map(([key,label])=>[label,clean(displayField(person,key))])]
   if(!person.telefono_movil&&!person.telefono_fijo&&person.telefono)rows.push(['Teléfono de la ficha anterior',person.telefono])
   if(person.estado_afiliacion==='baja'){
@@ -158,7 +175,9 @@ function personDetails(report: InternalReport,person: Afiliado) {
     if(person.ausencia_detectada_en)rows.push(['Ausencia detectada (no fecha efectiva de baja)',date(person.ausencia_detectada_en)])
   }
   report.authorship(person)
-  report.table([],rows,60)
+  // The individual sheet already displays the full name as its main heading.
+  if(separatePages){report.personalTable(rows.slice(1));report.nextPage()}
+  else report.table([],rows,60)
   report.heading('Historial de gestiones',11)
   if(person.gestiones_afiliados?.length){
     report.table(['Fecha','Gestión','Autoría'],[...person.gestiones_afiliados].sort((a,b)=>b.created_at.localeCompare(a.created_at)).map(g=>[date(g.created_at),g.gestion,[g.created_by_name?`Registró: ${g.created_by_name}`:'Autoría anterior no registrada',g.updated_by_name?`Último cambio: ${g.updated_by_name}`:''].filter(Boolean).join('\n')]),30)
@@ -185,8 +204,8 @@ export function affiliationReport(people: Afiliado[],options: ReportOptions,bran
   return report.finish()
 }
 export function affiliationRecord(person: Afiliado,brand: ReportBrand,generatedAt?: Date) {
-  const report=new InternalReport({title:'Ficha de afiliación',generatedAt},brand)
-  report.heading('Ficha de afiliación',18)
-  report.heading(person.nombre_completo,12);personDetails(report,person)
+  const report=new InternalReport({title:'Ficha de afiliado',generatedAt},brand)
+  report.heading('Ficha de afiliado',18)
+  report.heading(person.nombre_completo,12);personDetails(report,person,true)
   return report.finish()
 }
